@@ -1,0 +1,21 @@
+# Perlakukan file dokumen dan media sebagai biner murni (tidak ada perubahan line ending CRLF/LF)
+*.docx binary
+*.pptx binary
+*.xlsx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.svg text
+*.ico binary
+
+# Source code
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf

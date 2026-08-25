@@ -46,40 +46,40 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
   return (
     <div
       className="min-h-screen flex items-center justify-center relative overflow-hidden p-4"
-      style={{ background: 'linear-gradient(135deg, #f5f3ff, #ede9fe, #e0f2fe)' }}
+      style={{ background: '#EEF5FA' }}
     >
-      <div className="absolute inset-0 dots-bg opacity-40" />
+      <div className="absolute inset-0 dots-bg opacity-30" />
 
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-6">
           <button
             onClick={() => setCurrentPage('login')}
-            className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-800 transition-colors mb-4"
+            className="inline-flex items-center gap-2 text-sm text-[#2F4D7B] hover:text-[#1B3258] transition-colors mb-4 font-semibold cursor-pointer"
           >
             ← Kembali ke Login
           </button>
-          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.8rem', color: '#4c1d95' }}>
+          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.8rem', color: '#1B3258' }}>
             Daftar Akun Asisten
           </div>
-          <p style={{ color: '#64748b', marginTop: '6px', fontSize: '0.9rem' }}>
+          <p style={{ color: '#2F4D7B', marginTop: '6px', fontSize: '0.9rem' }}>
             Butuh kode akses asisten dari koordinator laboratorium
           </p>
         </div>
 
         {step === 1 ? (
           <div
-            className="rounded-3xl p-8 animate-fadeInUp"
-            style={{ background: 'white', border: '2px solid #ede9fe', boxShadow: '0 16px 60px rgba(124,58,237,0.12)' }}
+            className="rounded-3xl p-8 animate-fadeInUp bg-white"
+            style={{ border: '2px solid #C6DBF2', boxShadow: '0 16px 60px rgba(92, 139, 200,0.12)' }}
           >
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px' }}>
                   Nama Lengkap
                 </label>
-                <input type="text" className="input-field" placeholder="Masukkan nama lengkap" value={form.name} onChange={(e) => set('name', e.target.value)} required style={{ borderColor: '#ede9fe' }} />
+                <input type="text" className="input-field" placeholder="Masukkan nama lengkap" value={form.name} onChange={(e) => set('name', e.target.value)} required />
               </div>
               <div>
-                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px' }}>
                   Password
                 </label>
                 <div className="relative">
@@ -90,12 +90,11 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
                     value={form.password}
                     onChange={(e) => set('password', e.target.value)}
                     required
-                    style={{ borderColor: '#ede9fe' }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-700 transition-colors p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2F4D7B] transition-colors p-1 cursor-pointer"
                     aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
                     title={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
                   >
@@ -104,7 +103,7 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px' }}>
                   Konfirmasi Password
                 </label>
                 <div className="relative">
@@ -115,12 +114,11 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
                     value={form.confirm}
                     onChange={(e) => set('confirm', e.target.value)}
                     required
-                    style={{ borderColor: '#ede9fe' }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-purple-700 transition-colors p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2F4D7B] transition-colors p-1 cursor-pointer"
                     aria-label={showConfirm ? 'Sembunyikan password' : 'Tampilkan password'}
                     title={showConfirm ? 'Sembunyikan password' : 'Tampilkan password'}
                   >
@@ -129,30 +127,30 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px' }}>
                   Kode Akses Asisten
                 </label>
-                <input type="text" className="input-field" placeholder="Dapatkan dari koordinator" value={form.accessCode} onChange={(e) => set('accessCode', e.target.value)} required style={{ borderColor: '#ede9fe' }} />
+                <input type="text" className="input-field" placeholder="Dapatkan dari koordinator" value={form.accessCode} onChange={(e) => set('accessCode', e.target.value)} required />
               </div>
 
               {error && (
-                <div className="rounded-xl px-4 py-3 text-sm" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
-                  <Icon name="warning" size={15} className="inline mr-1 align-text-bottom" /> {error}
+                <div className="rounded-2xl px-4 py-3 text-sm flex items-start gap-1.5" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+                  <Icon name="warning" size={16} className="mt-0.5 flex-shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:shadow-lg hover:-translate-y-0.5"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)', fontFamily: 'var(--font-heading)', opacity: loading ? 0.7 : 1 }}
+                className="btn-primary w-full text-center cursor-pointer"
                 disabled={loading}
               >
                 {loading ? (<><Icon name="loader" size={16} className="inline mr-1.5 align-text-bottom animate-spin" /> Memproses...</>) : (<><Icon name="check-circle" size={16} className="inline mr-1.5 align-text-bottom" /> Daftar Sekarang</>)}
               </button>
 
-              <p className="text-center text-sm" style={{ color: '#64748b' }}>
+              <p className="text-center text-sm" style={{ color: '#2F4D7B' }}>
                 Sudah punya akun?{' '}
-                <button type="button" onClick={() => setCurrentPage('login')} className="font-semibold text-purple-600 hover:text-purple-800">
+                <button type="button" onClick={() => setCurrentPage('login')} className="font-semibold text-[#2F4D7B] hover:text-[#1B3258] cursor-pointer">
                   Login
                 </button>
               </p>
@@ -160,17 +158,20 @@ export default function RegisterAsistenPage({ setCurrentPage }: RegisterAsistenP
           </div>
         ) : (
           <div
-            className="rounded-3xl p-8 text-center animate-scaleIn"
-            style={{ background: 'white', border: '2px solid #ede9fe', boxShadow: '0 16px 60px rgba(124,58,237,0.15)' }}
+            className="rounded-3xl p-8 text-center animate-scaleIn bg-white"
+            style={{ border: '2px solid #C6DBF2', boxShadow: '0 16px 60px rgba(92, 139, 200,0.15)' }}
           >
-            <div className="mb-5 animate-float flex justify-center"><Icon name="party" size={54} color="#7c3aed" strokeWidth={1.5} /></div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.5rem', color: '#4c1d95', marginBottom: '1rem' }}>
-              Akun Asisten Berhasil Dibuat!
+            <div className="mb-5 animate-float flex justify-center"><Icon name="party" size={54} color="#5C8BC8" strokeWidth={1.5} /></div>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.5rem', color: '#1B3258', marginBottom: '1rem' }}>
+              Akun Asisten Dibuat!
             </h2>
-            <p style={{ color: '#475569', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-              Selamat <strong>{form.name}</strong>! Akun asistenmu sudah aktif dan bisa langsung dipakai untuk login.
+            <p style={{ color: '#2F4D7B', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+              Selamat <strong>{form.name}</strong>! Akun asistenmu telah siap digunakan untuk mengelola praktikum.
             </p>
-            <button onClick={() => setCurrentPage('login')} className="btn-primary w-full">
+            <button
+              onClick={() => setCurrentPage('login')}
+              className="btn-primary w-full cursor-pointer"
+            >
               Pergi ke Halaman Login
             </button>
           </div>

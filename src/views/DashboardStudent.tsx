@@ -37,7 +37,7 @@ interface StudentGroupInfo {
   meetings: MeetingItem[]
 }
 
-// Data default / fallback sesuai desain mockup
+// Data default / fallback
 const DEFAULT_STUDENT_INFO: StudentGroupInfo = {
   anggotaId: 'mock-1',
   nama: 'Siti Nur Aziza Latuconsina',
@@ -69,27 +69,24 @@ const DEFAULT_STUDENT_INFO: StudentGroupInfo = {
 function IcalLogoIcon({ className = 'w-8 h-8' }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Outer Hexagon */}
       <path
         d="M24 4L42 14.5V33.5L24 44L6 33.5V14.5L24 4Z"
-        stroke="#06aeb7"
+        stroke="#C6DBF2"
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
-      {/* Isometric Cube inner lines */}
       <path
         d="M24 4V24M42 14.5L24 24M6 14.5L24 24M24 24V44"
-        stroke="#015c61"
+        stroke="#2F4D7B"
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
-      {/* Cube inner facet */}
       <path
         d="M24 24L33 19V29L24 34L15 29V19L24 24Z"
-        stroke="#06aeb7"
+        stroke="#5C8BC8"
         strokeWidth="2.5"
         strokeLinejoin="round"
-        fill="rgba(6, 174, 183, 0.15)"
+        fill="rgba(92, 139, 200, 0.18)"
       />
     </svg>
   )
@@ -104,7 +101,7 @@ function MolecularPattern({ className = '' }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       className={`pointer-events-none ${className}`}
     >
-      <g stroke="#06aeb7" strokeWidth="1.2" opacity="0.35">
+      <g stroke="#C6DBF2" strokeWidth="1.2" opacity="0.45">
         <line x1="40" y1="50" x2="110" y2="30" />
         <line x1="110" y1="30" x2="170" y2="70" />
         <line x1="170" y1="70" x2="150" y2="140" />
@@ -121,12 +118,11 @@ function MolecularPattern({ className = '' }: { className?: string }) {
         <line x1="150" y1="140" x2="180" y2="210" />
         <line x1="70" y1="220" x2="180" y2="210" />
       </g>
-      {/* Glowing Nodes */}
       {[
         [40, 50], [110, 30], [170, 70], [150, 140], [90, 160], [40, 120],
         [230, 50], [270, 100], [230, 150], [70, 220], [180, 210]
       ].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="3.5" fill="#06aeb7" opacity="0.6" />
+        <circle key={i} cx={cx} cy={cy} r="3.5" fill="#5C8BC8" opacity="0.7" />
       ))}
     </svg>
   )
@@ -144,36 +140,33 @@ function BannerWavesBackground() {
     >
       <defs>
         <linearGradient id="bannerBgGrad" x1="0" y1="0" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#e3f6f8" />
-          <stop offset="0.5" stopColor="#eaf8fa" />
-          <stop offset="1" stopColor="#f3fcfe" />
+          <stop stopColor="#EEF4FB" />
+          <stop offset="0.5" stopColor="#F0F5FC" />
+          <stop offset="1" stopColor="#FFFFFF" />
         </linearGradient>
         <linearGradient id="waveGrad1" x1="0" y1="60" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#bcebf0" stopOpacity="0.75" />
-          <stop offset="1" stopColor="#a3e3ea" stopOpacity="0.85" />
+          <stop stopColor="#DBEAFE" stopOpacity="0.75" />
+          <stop offset="1" stopColor="#C6DBF2" stopOpacity="0.85" />
         </linearGradient>
         <linearGradient id="waveGrad2" x1="0" y1="100" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#a2e2e9" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#89dae3" stopOpacity="0.95" />
+          <stop stopColor="#C6DBF2" stopOpacity="0.9" />
+          <stop offset="1" stopColor="#5C8BC8" stopOpacity="0.95" />
         </linearGradient>
       </defs>
 
-      <rect width="1000" height="160" fill="url(#bannerBgGrad)" />
+      <rect width="1000" height="160" fill="#537AB8" />
 
-      {/* Layer 1 Soft Wave */}
       <path
         d="M0 160C140 125 280 155 450 120C620 85 780 145 1000 95V160H0Z"
-        fill="url(#waveGrad1)"
+        fill="#BAD6EB"
       />
 
-      {/* Layer 2 Smooth Flowing Wave */}
       <path
         d="M0 160C160 140 340 165 520 135C700 105 860 150 1000 125V160H0Z"
-        fill="url(#waveGrad2)"
+        fill="#EEF5FA"
       />
 
-      {/* Molecular Network in middle-right */}
-      <g stroke="#06aeb7" strokeWidth="1.2" opacity="0.3">
+      <g stroke="#5C8BC8" strokeWidth="1.2" opacity="0.35">
         <line x1="580" y1="40" x2="630" y2="25" />
         <line x1="630" y1="25" x2="670" y2="55" />
         <line x1="670" y1="55" x2="655" y2="100" />
@@ -186,90 +179,86 @@ function BannerWavesBackground() {
         <line x1="745" y1="75" x2="715" y2="110" />
         <line x1="715" y1="110" x2="655" y2="100" />
 
-        <circle cx="580" cy="40" r="3" fill="#06aeb7" />
-        <circle cx="630" cy="25" r="3" fill="#06aeb7" />
-        <circle cx="670" cy="55" r="3" fill="#06aeb7" />
-        <circle cx="655" cy="100" r="3" fill="#06aeb7" />
-        <circle cx="610" cy="115" r="3" fill="#06aeb7" />
-        <circle cx="580" cy="85" r="3" fill="#06aeb7" />
-        <circle cx="715" cy="40" r="3" fill="#06aeb7" />
-        <circle cx="745" cy="75" r="3" fill="#06aeb7" />
-        <circle cx="715" cy="110" r="3" fill="#06aeb7" />
+        <circle cx="580" cy="40" r="3" fill="#5C8BC8" />
+        <circle cx="630" cy="25" r="3" fill="#5C8BC8" />
+        <circle cx="670" cy="55" r="3" fill="#5C8BC8" />
+        <circle cx="655" cy="100" r="3" fill="#5C8BC8" />
+        <circle cx="610" cy="115" r="3" fill="#5C8BC8" />
+        <circle cx="580" cy="85" r="3" fill="#5C8BC8" />
+        <circle cx="715" cy="40" r="3" fill="#5C8BC8" />
+        <circle cx="745" cy="75" r="3" fill="#5C8BC8" />
+        <circle cx="715" cy="110" r="3" fill="#5C8BC8" />
       </g>
     </svg>
   )
 }
 
-// Icon Bar Chart Lingkaran Halus (Kiri Banner Nilai)
 function BarChartCircleBadge() {
   return (
     <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-white/95 backdrop-blur-xs border-2 border-white/90 shadow-md flex items-center justify-center shrink-0">
       <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-9 h-9">
-        <rect x="4" y="20" width="4.5" height="12" rx="2" fill="#015c61" />
-        <rect x="11.5" y="10" width="4.5" height="22" rx="2" fill="#06aeb7" />
-        <rect x="19" y="16" width="4.5" height="16" rx="2" fill="#018087" />
-        <rect x="26.5" y="22" width="4.5" height="10" rx="2" fill="#38bdf8" />
-        <circle cx="28.75" cy="14" r="2" fill="#06aeb7" />
+        <rect x="4" y="20" width="4.5" height="12" rx="2" fill="#1B3258" />
+        <rect x="11.5" y="10" width="4.5" height="22" rx="2" fill="#2F4D7B" />
+        <rect x="19" y="16" width="4.5" height="16" rx="2" fill="#5C8BC8" />
+        <rect x="26.5" y="22" width="4.5" height="10" rx="2" fill="#C6DBF2" />
+        <circle cx="28.75" cy="14" r="2" fill="#5C8BC8" />
       </svg>
     </div>
   )
 }
 
-// Icon Kalender Lingkaran Halus (Kiri Banner Jadwal)
 function CalendarCircleBadge() {
   return (
     <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-white/95 backdrop-blur-xs border-2 border-white/90 shadow-md flex items-center justify-center shrink-0">
       <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-        <rect x="4" y="8" width="28" height="24" rx="6" fill="#ffffff" stroke="#00878a" strokeWidth="2.2" />
-        <path d="M4 14H32" stroke="#00878a" strokeWidth="2.2" />
-        <line x1="10" y1="5" x2="10" y2="10" stroke="#00878a" strokeWidth="2.2" strokeLinecap="round" />
-        <line x1="26" y1="5" x2="26" y2="10" stroke="#00878a" strokeWidth="2.2" strokeLinecap="round" />
-        <circle cx="11" cy="20" r="1.5" fill="#06aeb7" />
-        <circle cx="18" cy="20" r="1.5" fill="#06aeb7" />
-        <circle cx="25" cy="20" r="1.5" fill="#06aeb7" />
-        <circle cx="11" cy="26" r="1.5" fill="#06aeb7" />
-        <circle cx="18" cy="26" r="1.5" fill="#015c61" />
+        <rect x="4" y="8" width="28" height="24" rx="6" fill="#ffffff" stroke="#2F4D7B" strokeWidth="2.2" />
+        <path d="M4 14H32" stroke="#2F4D7B" strokeWidth="2.2" />
+        <line x1="10" y1="5" x2="10" y2="10" stroke="#2F4D7B" strokeWidth="2.2" strokeLinecap="round" />
+        <line x1="26" y1="5" x2="26" y2="10" stroke="#2F4D7B" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="11" cy="20" r="1.5" fill="#C6DBF2" />
+        <circle cx="18" cy="20" r="1.5" fill="#C6DBF2" />
+        <circle cx="25" cy="20" r="1.5" fill="#C6DBF2" />
+        <circle cx="11" cy="26" r="1.5" fill="#C6DBF2" />
+        <circle cx="18" cy="26" r="1.5" fill="#1B3258" />
       </svg>
     </div>
   )
 }
 
-// Ilustrasi 3D Clipboard Nilai (Kanan Banner Nilai)
 function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: string }) {
   return (
     <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
         <filter id="clipShadow" x="-10" y="-5" width="180" height="170" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#015c61" floodOpacity="0.18" />
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#1B3258" floodOpacity="0.18" />
         </filter>
         <linearGradient id="boardGrad" x1="28" y1="24" x2="132" y2="148" gradientUnits="userSpaceOnUse">
           <stop stopColor="#ffffff" />
-          <stop offset="1" stopColor="#eaf8fa" />
+          <stop offset="1" stopColor="#EEF4FB" />
         </linearGradient>
         <linearGradient id="clipMetal" x1="56" y1="16" x2="104" y2="34" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#06aeb7" />
-          <stop offset="1" stopColor="#015c61" />
+          <stop stopColor="#C6DBF2" />
+          <stop offset="1" stopColor="#2F4D7B" />
         </linearGradient>
         <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#06aeb7" />
-          <stop offset="1" stopColor="#015c61" />
+          <stop stopColor="#C6DBF2" />
+          <stop offset="1" stopColor="#2F4D7B" />
         </linearGradient>
         <linearGradient id="barGrad2" x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#38bdf8" />
-          <stop offset="1" stopColor="#0284c7" />
+          <stop stopColor="#DBEAFE" />
+          <stop offset="1" stopColor="#5C8BC8" />
         </linearGradient>
         <linearGradient id="pie1" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#06aeb7" />
-          <stop offset="1" stopColor="#015c61" />
+          <stop stopColor="#C6DBF2" />
+          <stop offset="1" stopColor="#2F4D7B" />
         </linearGradient>
         <linearGradient id="pie2" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#5eead4" />
-          <stop offset="1" stopColor="#14b8a6" />
+          <stop stopColor="#DBEAFE" />
+          <stop offset="1" stopColor="#5C8BC8" />
         </linearGradient>
       </defs>
 
       <g transform="rotate(-3 80 80)">
-        {/* Clipboard Body */}
         <rect
           x="28"
           y="24"
@@ -277,12 +266,11 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
           height="124"
           rx="18"
           fill="url(#boardGrad)"
-          stroke="#c7edf1"
+          stroke="#C6DBF2"
           strokeWidth="2.5"
           filter="url(#clipShadow)"
         />
 
-        {/* Paper Sheet */}
         <rect
           x="36"
           y="34"
@@ -290,34 +278,29 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
           height="106"
           rx="10"
           fill="#ffffff"
-          stroke="#e0f4f5"
+          stroke="#E2E8F0"
           strokeWidth="1.5"
         />
 
-        {/* Bar Chart on Paper */}
         <rect x="44" y="66" width="6.5" height="18" rx="2" fill="url(#barGrad1)" />
         <rect x="53.5" y="52" width="6.5" height="32" rx="2" fill="url(#barGrad2)" />
         <rect x="63" y="60" width="6.5" height="24" rx="2" fill="url(#barGrad1)" />
 
-        {/* Top Right Document Lines */}
-        <rect x="78" y="54" width="34" height="4" rx="2" fill="#c7edf1" />
-        <rect x="78" y="63" width="30" height="4" rx="2" fill="#c7edf1" />
-        <rect x="78" y="72" width="24" height="4" rx="2" fill="#c7edf1" />
+        <rect x="78" y="54" width="34" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="78" y="63" width="30" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="78" y="72" width="24" height="4" rx="2" fill="#C6DBF2" />
 
-        {/* Bottom Left Document Lines */}
-        <rect x="44" y="98" width="32" height="4" rx="2" fill="#c7edf1" />
-        <rect x="44" y="106" width="26" height="4" rx="2" fill="#c7edf1" />
-        <rect x="44" y="114" width="30" height="4" rx="2" fill="#c7edf1" />
+        <rect x="44" y="98" width="32" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="44" y="106" width="26" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="44" y="114" width="30" height="4" rx="2" fill="#C6DBF2" />
 
-        {/* 3D Segmented Pie Chart on Bottom Right */}
         <g transform="translate(96, 108)">
           <path d="M0 0 L15 0 A15 15 0 0 1 0 15 Z" fill="url(#pie1)" />
           <path d="M0 0 L0 15 A15 15 0 1 1 0 -15 Z" fill="url(#pie2)" />
-          <path d="M0 0 L0 -15 A15 15 0 0 1 15 0 Z" fill="#015c61" />
+          <path d="M0 0 L0 -15 A15 15 0 0 1 15 0 Z" fill="#1B3258" />
           <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
         </g>
 
-        {/* Top Metallic / Teal Clip */}
         <rect x="56" y="16" width="48" height="18" rx="7" fill="url(#clipMetal)" stroke="#ffffff" strokeWidth="2" />
         <circle cx="80" cy="23" r="3.5" fill="#ffffff" opacity="0.85" />
       </g>
@@ -325,26 +308,24 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
   )
 }
 
-// Ilustrasi 3D Kalender (Kanan Banner Jadwal)
 function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: string }) {
   return (
     <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
         <filter id="calShadow" x="-10" y="-5" width="180" height="170" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#015c61" floodOpacity="0.18" />
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#1B3258" floodOpacity="0.18" />
         </filter>
         <linearGradient id="calHeader" x1="28" y1="26" x2="132" y2="52" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#018087" />
-          <stop offset="1" stopColor="#06aeb7" />
+          <stop stopColor="#1B3258" />
+          <stop offset="1" stopColor="#2F4D7B" />
         </linearGradient>
         <linearGradient id="clockRing" x1="85" y1="85" x2="140" y2="140" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#00878a" />
-          <stop offset="1" stopColor="#06aeb7" />
+          <stop stopColor="#2F4D7B" />
+          <stop offset="1" stopColor="#C6DBF2" />
         </linearGradient>
       </defs>
 
       <g transform="rotate(2 80 80)">
-        {/* Calendar Body */}
         <rect
           x="28"
           y="26"
@@ -352,53 +333,49 @@ function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: s
           height="106"
           rx="18"
           fill="#ffffff"
-          stroke="#c7edf1"
+          stroke="#C6DBF2"
           strokeWidth="2.5"
           filter="url(#calShadow)"
         />
 
-        {/* Calendar Header */}
         <path
           d="M28 44C28 34.0589 36.0589 26 46 26H114C123.941 26 132 34.0589 132 44V56H28V44Z"
           fill="url(#calHeader)"
         />
 
-        {/* 3 Rings on Top */}
         {[48, 80, 112].map((cx, i) => (
           <g key={i}>
-            <rect x={cx - 3.5} y="18" width="7" height="16" rx="3.5" fill="#015c61" stroke="#ffffff" strokeWidth="1.5" />
+            <rect x={cx - 3.5} y="18" width="7" height="16" rx="3.5" fill="#1B3258" stroke="#ffffff" strokeWidth="1.5" />
             <circle cx={cx} cy="26" r="2" fill="#ffffff" />
           </g>
         ))}
 
-        {/* Calendar Sheet Date Grid */}
         <g opacity="0.85">
-          <rect x="40" y="66" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="60" y="66" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="80" y="66" width="14" height="10" rx="3" fill="#06aeb7" />
-          <rect x="100" y="66" width="14" height="10" rx="3" fill="#e0f7fa" />
+          <rect x="40" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="60" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="80" y="66" width="14" height="10" rx="3" fill="#5C8BC8" />
+          <rect x="100" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
 
-          <rect x="40" y="82" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="60" y="82" width="14" height="10" rx="3" fill="#015c61" />
-          <rect x="80" y="82" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="100" y="82" width="14" height="10" rx="3" fill="#e0f7fa" />
+          <rect x="40" y="82" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="60" y="82" width="14" height="10" rx="3" fill="#0B192C" />
+          <rect x="80" y="82" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="100" y="82" width="14" height="10" rx="3" fill="#EEF6FE" />
 
-          <rect x="40" y="98" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="60" y="98" width="14" height="10" rx="3" fill="#e0f7fa" />
-          <rect x="80" y="98" width="14" height="10" rx="3" fill="#e0f7fa" />
+          <rect x="40" y="98" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="60" y="98" width="14" height="10" rx="3" fill="#EEF6FE" />
+          <rect x="80" y="98" width="14" height="10" rx="3" fill="#EEF6FE" />
         </g>
 
-        {/* 3D Clock Badge on Bottom Right */}
         <g transform="translate(112, 112)" filter="url(#calShadow)">
           <circle cx="0" cy="0" r="22" fill="url(#clockRing)" stroke="#ffffff" strokeWidth="2.5" />
-          <circle cx="0" cy="0" r="16" fill="#e0f9fb" />
-          <line x1="0" y1="-12" x2="0" y2="-9" stroke="#015c61" strokeWidth="2" strokeLinecap="round" />
-          <line x1="12" y1="0" x2="9" y2="0" stroke="#015c61" strokeWidth="2" strokeLinecap="round" />
-          <line x1="0" y1="12" x2="0" y2="9" stroke="#015c61" strokeWidth="2" strokeLinecap="round" />
-          <line x1="-12" y1="0" x2="-9" y2="0" stroke="#015c61" strokeWidth="2" strokeLinecap="round" />
-          <line x1="0" y1="0" x2="0" y2="-7" stroke="#015c61" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="0" y1="0" x2="5" y2="4" stroke="#015c61" strokeWidth="2.2" strokeLinecap="round" />
-          <circle cx="0" cy="0" r="2.5" fill="#015c61" />
+          <circle cx="0" cy="0" r="16" fill="#F4F8FD" />
+          <line x1="0" y1="-12" x2="0" y2="-9" stroke="#0B192C" strokeWidth="2" strokeLinecap="round" />
+          <line x1="12" y1="0" x2="9" y2="0" stroke="#0B192C" strokeWidth="2" strokeLinecap="round" />
+          <line x1="0" y1="12" x2="0" y2="9" stroke="#0B192C" strokeWidth="2" strokeLinecap="round" />
+          <line x1="-12" y1="0" x2="-9" y2="0" stroke="#0B192C" strokeWidth="2" strokeLinecap="round" />
+          <line x1="0" y1="0" x2="0" y2="-7" stroke="#0B192C" strokeWidth="2.5" strokeLinecap="round" />
+          <line x1="0" y1="0" x2="5" y2="4" stroke="#0B192C" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="0" cy="0" r="2.5" fill="#0B192C" />
         </g>
       </g>
     </svg>
@@ -410,7 +387,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
 
-  // Accordion state untuk bagian Nilai Saya
   const [collapsed, setCollapsed] = useState<{ [key: string]: boolean }>({
     ta: false,
     tr: false,
@@ -421,7 +397,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // --- Student Real Info & Schedule dari Supabase ---
   const [studentInfo, setStudentInfo] = useState<StudentGroupInfo | null>(null)
   const [allPraktikum, setAllPraktikum] = useState<StudentGroupInfo[]>([])
   const [loadingInfo, setLoadingInfo] = useState(false)
@@ -429,7 +404,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   const effectiveName = user.name || DEFAULT_STUDENT_INFO.nama
   const effectiveNim = user.nim || DEFAULT_STUDENT_INFO.nim
 
-  // Inisialisasi initial initials (contoh: "Siti Nur Aziza" -> "SI")
   const getInitials = (name: string) => {
     const parts = name.trim().split(/\s+/)
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
@@ -458,10 +432,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
       .finally(() => setLoadingInfo(false))
   }, [user.nim])
 
-  // --- QR Absensi: kode BERPUTAR, dibuat & ditandatangani server tiap kali diminta
-  // (lihat /api/absensi/qr-token & src/lib/qrAttendance.ts), lalu di-regenerasi otomatis
-  // sebelum kadaluarsa. Ini mencegah titip-absen lewat screenshot QR lama: begitu kadaluarsa,
-  // server menolaknya walau gambarnya masih terlihat valid di layar/galeri orang lain.
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [qrSecondsLeft, setQrSecondsLeft] = useState<number | null>(null)
   const [qrError, setQrError] = useState(false)
@@ -487,7 +457,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
         const dataUrl = await QRCode.toDataURL(json.payload, {
           width: 320,
           margin: 1,
-          color: { dark: '#015c61', light: '#ffffff' },
+          color: { dark: '#1B2A4A', light: '#ffffff' },
         })
         if (cancelled) return
 
@@ -501,8 +471,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
           setQrSecondsLeft(Math.max(0, Math.round((expMs - Date.now()) / 1000)))
         }, 1000)
 
-        // Regenerasi ~5 detik sebelum QR ini kadaluarsa di server, supaya yang tampil di
-        // layar selalu QR yang masih berlaku (efektif: kode baru tiap ~30 detik).
         scheduleRefresh(Math.max(1000, expMs - Date.now() - 5000))
       } catch {
         if (!cancelled) {
@@ -520,7 +488,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
     }
   }, [user.nim])
 
-  // --- Nilai Saya (data asli dari Supabase dengan fallback visual) ---
   const [nilaiPertemuan, setNilaiPertemuan] = useState<{ id: string; urutan_ke: number | null; jenis: string; label: string }[]>([])
   const [nilaiRows, setNilaiRows] = useState<{ pertemuan_id: string; kode_komponen: string; nilai: number | null }[]>([])
   const [nilaiLoading, setNilaiLoading] = useState(false)
@@ -564,7 +531,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   const currentJurusanKode = studentInfo?.jurusanKode || DEFAULT_STUDENT_INFO.jurusanKode
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: '#eef9fa', color: '#1e293b' }}>
+    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: '#F0F5FC', color: '#1B3258' }}>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -575,7 +542,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
       {/* ===================== SIDEBAR ===================== */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#e0f4f5] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#C6DBF2] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
@@ -584,7 +551,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
           {/* Logo ICAL Text */}
           <div className="mb-6">
             <h1
-              className="text-2xl sm:text-[1.75rem] font-extrabold text-[#015c61] tracking-tight leading-none"
+              className="text-2xl sm:text-[1.75rem] font-extrabold text-[#1B3258] tracking-tight leading-none"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               ICAL
@@ -595,19 +562,19 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
           <div className="flex items-center gap-3.5 mb-7">
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 shadow-xs"
-              style={{ background: '#015c61' }}
+              style={{ background: '#2F4D7B' }}
             >
               {getInitials(effectiveName)}
             </div>
             <div className="min-w-0 flex-1">
               <div
-                className="font-bold text-[#0f3b46] text-sm leading-snug truncate"
+                className="font-bold text-[#1B3258] text-sm leading-snug truncate"
                 style={{ fontFamily: 'var(--font-heading)' }}
                 title={effectiveName}
               >
                 {effectiveName}
               </div>
-              <div className="text-[11px] text-[#546e7a] font-medium truncate mt-0.5">
+              <div className="text-[11px] text-[#2F4D7B] font-medium truncate mt-0.5">
                 Praktikan • Kelompok {currentNamaKelompok}
               </div>
             </div>
@@ -627,13 +594,13 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 cursor-pointer text-left ${
                     isActive
                       ? 'text-white'
-                      : 'text-[#475569] hover:bg-[#eef9fa] hover:text-[#015c61]'
+                      : 'text-[#2F4D7B] hover:bg-[#EEF4FB] hover:text-[#2F4D7B]'
                   }`}
                   style={
                     isActive
                       ? {
-                          background: 'linear-gradient(90deg, #018087 0%, #06aeb7 100%)',
-                          boxShadow: '0 6px 18px rgba(6, 174, 183, 0.35)',
+                          background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                          boxShadow: '0 6px 18px rgba(92, 139, 200, 0.35)',
                         }
                       : {}
                   }
@@ -641,7 +608,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   <Icon
                     name={link.icon}
                     size={20}
-                    color={isActive ? '#ffffff' : '#475569'}
+                    color={isActive ? '#ffffff' : '#2F4D7B'}
                     strokeWidth={isActive ? 2.2 : 1.8}
                   />
                   <span style={{ fontFamily: 'var(--font-heading)' }}>{link.label}</span>
@@ -653,7 +620,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
         {/* Bottom Sidebar with Fluid Wave Graphic & Logout */}
         <div className="relative pt-32 pb-6 px-6 overflow-hidden mt-auto">
-          {/* Background Layered Wave Graphic + Molecular Network */}
           <div className="absolute inset-0 pointer-events-none flex flex-col justify-end">
             <svg
               viewBox="0 0 288 320"
@@ -664,31 +630,28 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             >
               <defs>
                 <linearGradient id="sidebarWaveCyan" x1="0" y1="0" x2="288" y2="200" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#00b4bd" />
-                  <stop offset="1" stopColor="#017b82" />
+                  <stop stopColor="#C6DBF2" />
+                  <stop offset="1" stopColor="#5C8BC8" />
                 </linearGradient>
                 <linearGradient id="sidebarWaveDark" x1="0" y1="50" x2="288" y2="320" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#017277" />
-                  <stop offset="0.5" stopColor="#015c61" />
-                  <stop offset="1" stopColor="#004347" />
+                  <stop stopColor="#2F4D7B" />
+                  <stop offset="0.5" stopColor="#243E6B" />
+                  <stop offset="1" stopColor="#1B3258" />
                 </linearGradient>
               </defs>
 
-              {/* Outer Cyan Accent Wave */}
               <path
                 d="M0 120C70 160 190 50 288 110V320H0V120Z"
-                fill="url(#sidebarWaveCyan)"
+                fill="#BAD6EB"
                 opacity="0.85"
               />
 
-              {/* Main Deep Teal Wave */}
               <path
                 d="M0 150C80 190 180 90 288 140V320H0V150Z"
-                fill="url(#sidebarWaveDark)"
+                fill="#162D4E"
               />
 
-              {/* Molecular Network (Hexagons and connecting nodes overlapping the wave boundary) */}
-              <g stroke="#06aeb7" strokeWidth="1.2" opacity="0.45">
+              <g stroke="#C6DBF2" strokeWidth="1.2" opacity="0.45">
                 <line x1="210" y1="50" x2="250" y2="30" />
                 <line x1="250" y1="30" x2="280" y2="55" />
                 <line x1="280" y1="55" x2="270" y2="95" />
@@ -709,7 +672,6 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                 <line x1="215" y1="240" x2="255" y2="260" />
               </g>
 
-              {/* Glowing Nodes */}
               {[
                 [210, 50], [250, 30], [280, 55], [270, 95], [230, 110], [200, 85],
                 [155, 95], [125, 130], [140, 170], [185, 160],
@@ -720,14 +682,13 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   cx={cx}
                   cy={cy}
                   r="3.5"
-                  fill={cy > 150 ? '#ffffff' : '#06aeb7'}
+                  fill={cy > 150 ? '#ffffff' : '#C6DBF2'}
                   opacity={cy > 150 ? 0.6 : 0.75}
                 />
               ))}
             </svg>
           </div>
 
-          {/* Logout Button */}
           <div className="relative z-10">
             <button
               onClick={onLogout}
@@ -744,40 +705,38 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
       {/* ===================== MAIN CONTENT ===================== */}
       <div className="flex-1 lg:ml-72 flex flex-col min-w-0">
         {/* Top Bar Header */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#e1f4f5] px-6 sm:px-8 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#C6DBF2] px-6 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-[#015c61] hover:bg-teal-50 cursor-pointer"
+              className="lg:hidden p-2 rounded-xl text-[#2F4D7B] hover:bg-[#EEF4FB] cursor-pointer"
             >
               <Icon name="menu" size={22} />
             </button>
             <h1
-              className="text-lg sm:text-xl font-bold text-[#0f3b46]"
+              className="text-lg sm:text-xl font-bold text-[#1B3258]"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               Dashboard Praktikan
             </h1>
           </div>
 
-          {/* Header Right Actions */}
           <div className="flex items-center gap-3">
-            {/* Profile Pill Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#e2e8f0] rounded-2xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#C6DBF2] rounded-2xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
               >
-                <span className="text-xs sm:text-sm font-semibold text-[#0f3b46]" style={{ fontFamily: 'var(--font-heading)' }}>
+                <span className="text-xs sm:text-sm font-semibold text-[#1B3258]" style={{ fontFamily: 'var(--font-heading)' }}>
                   {effectiveName}
                 </span>
                 <Icon name="chevron-down" size={15} color="#64748b" strokeWidth={2} />
               </button>
 
               {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#e2e8f0] py-2 z-50 animate-fadeInUp">
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#C6DBF2] py-2 z-50 animate-fadeInUp">
                   <div className="px-4 py-2 border-b border-slate-100">
-                    <div className="text-xs font-bold text-[#0f3b46] truncate">{effectiveName}</div>
+                    <div className="text-xs font-bold text-[#1B3258] truncate">{effectiveName}</div>
                     <div className="text-[0.7rem] text-slate-500">NIM: {effectiveNim}</div>
                   </div>
                   <button
@@ -785,13 +744,13 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                       setUserDropdownOpen(false)
                       setActiveSection('qr')
                     }}
-                    className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-teal-50 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-[#EEF4FB] flex items-center gap-2 cursor-pointer"
                   >
-                    <Icon name="qr-code" size={14} color="#015c61" /> QR Absensi Saya
+                    <Icon name="qr-code" size={14} color="#2F4D7B" /> QR Absensi Saya
                   </button>
                   <button
                     onClick={onLogout}
-                    className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    className="w-full px-4 py-2 text-left text-xs text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
                   >
                     <Icon name="logout" size={14} color="#dc2626" /> Keluar
                   </button>
@@ -803,34 +762,32 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
         {/* Main Body Area */}
         <main className="p-4 sm:p-7 flex-1 relative overflow-hidden">
-          {/* Subtle wave gradient background decoration at bottom right */}
           <div className="fixed bottom-0 right-0 w-[550px] h-[350px] pointer-events-none z-0 opacity-40">
             <svg viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
               <path
                 d="M100 300C250 220 380 270 500 180V300H100Z"
-                fill="url(#bottomDecorWave)"
+                fill="#BAD6EB"
               />
               <defs>
                 <linearGradient id="bottomDecorWave" x1="100" y1="200" x2="500" y2="300" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#b2ebf2" stopOpacity="0.4" />
-                  <stop offset="1" stopColor="#06aeb7" stopOpacity="0.15" />
+                  <stop stopColor="#C6DBF2" stopOpacity="0.4" />
+                  <stop offset="1" stopColor="#5C8BC8" stopOpacity="0.15" />
                 </linearGradient>
               </defs>
             </svg>
           </div>
 
           <div className="max-w-6xl mx-auto space-y-6 relative z-10">
-            {/* ===================== TAB 1: BERANDA ===================== */}
+            {/* TAB 1: BERANDA */}
             {activeSection === 'home' && (
               <>
                 {/* Hero Banner */}
                 <div
                   className="rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"
                   style={{
-                    background: 'linear-gradient(110deg, #014346 0%, #015c61 45%, #00878a 100%)',
+                    background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
                   }}
                 >
-                  {/* Left Text */}
                   <div className="relative z-10 max-w-xl">
                     <h2
                       className="text-white font-bold text-xl sm:text-2xl lg:text-[1.65rem] tracking-tight"
@@ -838,35 +795,32 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     >
                       Halo, {effectiveName}!
                     </h2>
-                    <p className="text-teal-100/90 text-xs sm:text-sm mt-2 font-normal leading-relaxed">
+                    <p className="text-[#C6DBF2] text-xs sm:text-sm mt-2 font-normal leading-relaxed">
                       Selamat datang praktikan ICAL, Semester Ganjil 2026/2027
                     </p>
                   </div>
 
-                  {/* Background molecular pattern overlay */}
                   <div className="absolute -bottom-10 right-8 opacity-25 pointer-events-none">
                     <MolecularPattern className="w-80 h-64" />
                   </div>
                 </div>
 
                 {/* Info Kelompokku Card */}
-                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#e1f4f5] shadow-xs relative">
-                  {/* Top Header of Card */}
+                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#C6DBF2] shadow-xs relative">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2.5">
-                      <Icon name="users" size={20} color="#015c61" strokeWidth={2} />
+                      <Icon name="users" size={20} color="#2F4D7B" strokeWidth={2} />
                       <h3
-                        className="font-bold text-[#0f3b46] text-base sm:text-lg"
+                        className="font-bold text-[#1B3258] text-base sm:text-lg"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Info Kelompokku
                       </h3>
                     </div>
 
-                    {/* Faint Dot Matrix Decoration on top-right */}
                     <div className="grid grid-cols-4 gap-1.5 opacity-20 pointer-events-none">
                       {Array.from({ length: 12 }).map((_, i) => (
-                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#06aeb7]" />
+                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#5C8BC8]" />
                       ))}
                     </div>
                   </div>
@@ -874,91 +828,90 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   {/* 4 Metric Cards Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
                     {/* 1. Kelompok */}
-                    <div className="group relative overflow-hidden bg-[#f2fafb] hover:bg-gradient-to-br hover:from-[#015c61] hover:to-[#06aeb7] active:bg-gradient-to-br active:from-[#015c61] active:to-[#06aeb7] border border-[#e2f4f5] hover:border-cyan-300/50 active:border-cyan-300/50 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(6,174,183,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#015c61] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="users" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#015c61] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentNamaKelompok}
                         </div>
-                        <div className="text-xs text-[#64748b] group-hover:text-teal-100/90 group-active:text-teal-100/90 mt-0.5 font-medium transition-colors duration-300">Kelompok</div>
+                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Kelompok</div>
                       </div>
                     </div>
 
                     {/* 2. Shift */}
-                    <div className="group relative overflow-hidden bg-[#f2fafb] hover:bg-gradient-to-br hover:from-[#015c61] hover:to-[#06aeb7] active:bg-gradient-to-br active:from-[#015c61] active:to-[#06aeb7] border border-[#e2f4f5] hover:border-cyan-300/50 active:border-cyan-300/50 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(6,174,183,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#015c61] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="building" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#015c61] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentShift}
                         </div>
-                        <div className="text-xs text-[#64748b] group-hover:text-teal-100/90 group-active:text-teal-100/90 mt-0.5 font-medium transition-colors duration-300">Shift</div>
+                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Shift</div>
                       </div>
                     </div>
 
-                    {/* 3. Asisten (Special Rich Animation) */}
-                    <div className="group relative overflow-hidden bg-[#f2fafb] hover:bg-gradient-to-br hover:from-[#013f42] hover:via-[#015c61] hover:to-[#06aeb7] active:bg-gradient-to-br active:from-[#013f42] active:via-[#015c61] active:to-[#06aeb7] border border-[#e2f4f5] hover:border-cyan-300/60 active:border-cyan-300/60 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-400 hover:-translate-y-2 hover:scale-[1.02] active:scale-95 hover:shadow-[0_16px_30px_-6px_rgba(6,174,183,0.45)] active:shadow-lg cursor-pointer select-none touch-manipulation">
-                      {/* Diagonal Shimmer */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full group-active:translate-x-full transition-transform duration-700 pointer-events-none" />
+                    {/* 3. Asisten */}
+                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: hover: active:bg-[#537AB8] active: active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-400 hover:-translate-y-2 hover:scale-[1.02] active:scale-95 hover:shadow-[0_16px_30px_-6px_rgba(92, 139, 200,0.45)] active:shadow-lg cursor-pointer select-none touch-manipulation">
+                      <div className="absolute inset-0 bg-[#537AB8] from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full group-active:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 group-hover:ring-2 group-hover:ring-white/40 group-active:ring-2 group-active:ring-white/40 flex items-center justify-center text-[#015c61] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-115 group-active:scale-115 group-hover:rotate-3">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 group-hover:ring-2 group-hover:ring-white/40 group-active:ring-2 group-active:ring-white/40 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-115 group-active:scale-115 group-hover:rotate-3">
                         <Icon name="user" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div className="min-w-0">
                         <div
-                          className="font-bold text-[#015c61] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight truncate max-w-[130px] transition-colors duration-300"
+                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight truncate max-w-[130px] transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                           title={currentAsisten}
                         >
                           {currentAsisten}
                         </div>
-                        <div className="text-xs text-[#64748b] group-hover:text-teal-100/90 group-active:text-teal-100/90 mt-0.5 font-medium transition-colors duration-300 flex items-center gap-1">
+                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300 flex items-center gap-1">
                           <span>Asisten</span>
-                          <span className="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 text-[10px] text-cyan-200">✨</span>
+                          <span className="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 text-[10px] text-amber-200">✨</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 4. Praktikum */}
-                    <div className="group relative overflow-hidden bg-[#f2fafb] hover:bg-gradient-to-br hover:from-[#015c61] hover:to-[#06aeb7] active:bg-gradient-to-br active:from-[#015c61] active:to-[#06aeb7] border border-[#e2f4f5] hover:border-cyan-300/50 active:border-cyan-300/50 rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(6,174,183,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#015c61] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="flask" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#015c61] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentPraktikumKode}
                         </div>
-                        <div className="text-xs text-[#64748b] group-hover:text-teal-100/90 group-active:text-teal-100/90 mt-0.5 font-medium transition-colors duration-300">Praktikum</div>
+                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Praktikum</div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Horizontal Metadata Details Row */}
-                  <div className="mt-5 pt-4 border-t border-[#edf7f8] flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-600">
-                    <span className="flex items-center gap-2 font-medium text-[#015c61]">
-                      <Icon name="clock" size={16} color="#015c61" strokeWidth={1.8} />
+                  {/* Horizontal Metadata */}
+                  <div className="mt-5 pt-4 border-t border-[#C6DBF2] flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[#2F4D7B]">
+                    <span className="flex items-center gap-2 font-medium text-[#2F4D7B]">
+                      <Icon name="clock" size={16} color="#2F4D7B" strokeWidth={1.8} />
                       {currentHari}, {currentJamMulai} - {currentJamSelesai} WIB
                     </span>
                     <span className="text-slate-300 hidden sm:inline">|</span>
-                    <span className="flex items-center gap-2 text-slate-600 font-medium">
-                      <Icon name="map-pin" size={16} color="#06aeb7" strokeWidth={1.8} />
+                    <span className="flex items-center gap-2 text-[#2F4D7B] font-medium">
+                      <Icon name="map-pin" size={16} color="#5C8BC8" strokeWidth={1.8} />
                       {currentRuangan}
                     </span>
                     <span className="text-slate-300 hidden sm:inline">|</span>
-                    <span className="flex items-center gap-2 text-slate-600 font-medium">
-                      <Icon name="users" size={16} color="#06aeb7" strokeWidth={1.8} />
+                    <span className="flex items-center gap-2 text-[#2F4D7B] font-medium">
+                      <Icon name="users" size={16} color="#5C8BC8" strokeWidth={1.8} />
                       Kelas {currentNamaKelas} ({currentJurusanKode})
                     </span>
                   </div>
@@ -966,18 +919,18 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                 {/* 3 Quick Action Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-                  {/* Card 1: Lihat Jadwal */}
+                  {/* Card 1 */}
                   <div
                     onClick={() => setActiveSection('schedule')}
-                    className="bg-white rounded-3xl p-5 border border-[#e1f4f5] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61]">
-                        <Icon name="calendar" size={22} color="#015c61" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
+                        <Icon name="calendar" size={22} color="#2F4D7B" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#0f3b46] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           Lihat Jadwal
@@ -985,23 +938,23 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Cek jadwal praktikum</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#00878a] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
 
-                  {/* Card 2: Nilai Saya */}
+                  {/* Card 2 */}
                   <div
                     onClick={() => setActiveSection('grades')}
-                    className="bg-white rounded-3xl p-5 border border-[#e1f4f5] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61]">
-                        <Icon name="bar-chart" size={22} color="#015c61" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
+                        <Icon name="bar-chart" size={22} color="#2F4D7B" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#0f3b46] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           Nilai Saya
@@ -1009,23 +962,23 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Lihat nilai praktikum</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#00878a] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
 
-                  {/* Card 3: QR Absensi */}
+                  {/* Card 3 */}
                   <div
                     onClick={() => setActiveSection('qr')}
-                    className="bg-white rounded-3xl p-5 border border-[#e1f4f5] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61]">
-                        <Icon name="smartphone" size={22} color="#015c61" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
+                        <Icon name="smartphone" size={22} color="#2F4D7B" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#0f3b46] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           QR Absensi
@@ -1033,7 +986,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Scan untuk absensi</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#00878a] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
@@ -1041,28 +994,27 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
               </>
             )}
 
-            {/* ===================== TAB 2: JADWAL ===================== */}
+            {/* TAB 2: JADWAL */}
             {activeSection === 'schedule' && (
               <>
                 {/* Jadwal Banner */}
-                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#cbebed] min-h-[145px]">
+                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#C6DBF2] min-h-[145px]">
                   <BannerWavesBackground />
                   <div className="flex items-center gap-4 sm:gap-5 relative z-10">
                     <CalendarCircleBadge />
                     <div className="max-w-md">
                       <h2
-                        className="font-bold text-[#0f3b46] text-xl sm:text-2xl tracking-tight"
+                        className="font-bold text-[#1B3258] text-xl sm:text-2xl tracking-tight"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Jadwal Pertemuan ({currentPraktikumKode})
                       </h2>
-                      <p className="text-xs sm:text-sm text-[#336677] mt-1 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#2F4D7B] mt-1 leading-relaxed">
                         Berikut adalah jadwal pertemuan Praktikan Laboratorium {currentPraktikumKode}.
                       </p>
                     </div>
                   </div>
 
-                  {/* 3D Calendar Illustration on Right */}
                   <div className="relative z-10 shrink-0 hidden sm:flex items-center justify-center">
                     <CalendarBannerIllustration className="w-32 h-32 sm:w-36 sm:h-36 drop-shadow-md" />
                   </div>
@@ -1074,40 +1026,36 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     return (
                       <div
                         key={m.id || idx}
-                        className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-[#e1f4f5] shadow-xs hover:shadow-sm transition-all duration-200 flex items-center justify-between gap-3 sm:gap-4"
+                        className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-[#C6DBF2] shadow-xs hover:shadow-sm transition-all duration-200 flex items-center justify-between gap-3 sm:gap-4"
                       >
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                          {/* Grip dots handle */}
                           <div className="text-slate-300 hidden sm:block shrink-0">
                             <Icon name="grip-vertical" size={18} color="#cbd5e1" />
                           </div>
 
-                          {/* Checkbox / Pertemuan Icon */}
                           <div
                             className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xs"
                             style={{
-                              background: 'linear-gradient(135deg, #00878a 0%, #06aeb7 100%)',
+                              background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
                             }}
                           >
                             <Icon name="check" size={20} color="#ffffff" strokeWidth={2.5} />
                           </div>
 
-                          {/* Pertemuan Details */}
                           <div className="min-w-0">
                             <h4
-                              className="font-bold text-[#0f3b46] text-sm sm:text-base leading-snug truncate"
+                              className="font-bold text-[#1B3258] text-sm sm:text-base leading-snug truncate"
                               style={{ fontFamily: 'var(--font-heading)' }}
                             >
                               {m.label}
                             </h4>
-                            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#64748b] mt-0.5">
-                              <Icon name="calendar" size={13} color="#64748b" />
+                            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#5D789B] mt-0.5">
+                              <Icon name="calendar" size={13} color="#5D789B" />
                               <span>{m.date}</span>
                             </div>
                           </div>
                         </div>
 
-                        {/* Status Badge: Selesai */}
                         <div className="shrink-0">
                           <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-[#f0fdf4] text-[#059669] border border-[#bbf7d0]">
                             <Icon name="check-circle" size={13} color="#059669" strokeWidth={2.2} />
@@ -1121,45 +1069,43 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
               </>
             )}
 
-            {/* ===================== TAB 3: NILAI SAYA ===================== */}
+            {/* TAB 3: NILAI SAYA */}
             {activeSection === 'grades' && (
               <>
-                {/* Nilai Saya Banner */}
-                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#cbebed] min-h-[145px]">
+                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#C6DBF2] min-h-[145px]">
                   <BannerWavesBackground />
                   <div className="flex items-center gap-4 sm:gap-5 relative z-10">
                     <BarChartCircleBadge />
                     <div className="max-w-md">
                       <h2
-                        className="font-bold text-[#0f3b46] text-xl sm:text-2xl tracking-tight"
+                        className="font-bold text-[#1B3258] text-xl sm:text-2xl tracking-tight"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Nilai Saya
                       </h2>
-                      <p className="text-xs sm:text-sm text-[#336677] mt-1 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#2F4D7B] mt-1 leading-relaxed">
                         Pantau perkembangan penilaian praktikummu dengan mudah dan transparan.
                       </p>
                     </div>
                   </div>
 
-                  {/* 3D Clipboard Illustration on Right */}
                   <div className="relative z-10 shrink-0 hidden sm:flex items-center justify-center">
                     <NilaiBannerIllustration className="w-32 h-32 sm:w-36 sm:h-36 drop-shadow-md" />
                   </div>
                 </div>
 
-                {/* 3 Grade Categories Cards Grid */}
+                {/* Grade Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Card 1: Tugas Awal */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#e1f4f5] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#015c61] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="clipboard-list" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#0f3b46] text-base"
+                            className="font-bold text-[#1B3258] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Tugas Awal
@@ -1167,9 +1113,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('ta')}
-                          className="w-7 h-7 rounded-full bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61] hover:bg-teal-100 transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#015c61" strokeWidth={2} />
+                          <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1185,15 +1131,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#f3fafb] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#06aeb7]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#f1f8f9] text-[#64748b] border border-[#e6f4f5]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1205,15 +1151,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   </div>
 
                   {/* Card 2: Tugas Rumah */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#e1f4f5] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#015c61] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="home" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#0f3b46] text-base"
+                            className="font-bold text-[#1B3258] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Tugas Rumah
@@ -1221,9 +1167,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('tr')}
-                          className="w-7 h-7 rounded-full bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61] hover:bg-teal-100 transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#015c61" strokeWidth={2} />
+                          <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1239,15 +1185,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#f3fafb] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#06aeb7]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#f1f8f9] text-[#64748b] border border-[#e6f4f5]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1259,15 +1205,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   </div>
 
                   {/* Card 3: Keaktifan */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#e1f4f5] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#015c61] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="star" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#0f3b46] text-base"
+                            className="font-bold text-[#1B3258] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Keaktifan
@@ -1275,9 +1221,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('p')}
-                          className="w-7 h-7 rounded-full bg-[#f0fbfb] border border-[#e0f4f5] flex items-center justify-center text-[#015c61] hover:bg-teal-100 transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#015c61" strokeWidth={2} />
+                          <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1293,15 +1239,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#f3fafb] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#06aeb7]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#f1f8f9] text-[#64748b] border border-[#e6f4f5]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1315,23 +1261,20 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
               </>
             )}
 
-            {/* ===================== TAB 4: QR ABSENSI ===================== */}
+            {/* TAB 4: QR ABSENSI */}
             {activeSection === 'qr' && (
               <>
-                {/* QR Section Title */}
                 <div className="flex items-center gap-2.5">
-                  <Icon name="qr-code" size={22} color="#06aeb7" strokeWidth={2} />
+                  <Icon name="qr-code" size={22} color="#2F4D7B" strokeWidth={2} />
                   <h2
-                    className="font-bold text-[#0f3b46] text-lg sm:text-xl"
+                    className="font-bold text-[#1B3258] text-lg sm:text-xl"
                     style={{ fontFamily: 'var(--font-heading)' }}
                   >
                     QR Code Absensi
                   </h2>
                 </div>
 
-                {/* Big Center QR Card */}
-                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#e1f4f5] shadow-xs relative overflow-hidden flex flex-col items-center justify-center text-center">
-                  {/* Decorative Molecular Nodes in Corners */}
+                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#C6DBF2] shadow-xs relative overflow-hidden flex flex-col items-center justify-center text-center">
                   <div className="absolute -top-6 -right-6 opacity-25 pointer-events-none">
                     <MolecularPattern className="w-60 h-48" />
                   </div>
@@ -1339,26 +1282,22 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     <MolecularPattern className="w-60 h-48" />
                   </div>
 
-                  {/* Top Scan Badge Icon */}
-                  <div className="w-12 h-12 rounded-full bg-[#e0f7fa] flex items-center justify-center text-[#015c61] mb-3 shadow-2xs">
-                    <Icon name="scan" size={22} color="#015c61" strokeWidth={2} />
+                  <div className="w-12 h-12 rounded-full bg-[#EEF4FB] flex items-center justify-center text-[#2F4D7B] mb-3 shadow-2xs">
+                    <Icon name="scan" size={22} color="#2F4D7B" strokeWidth={2} />
                   </div>
 
-                  {/* Instructions */}
-                  <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-md mb-1 leading-relaxed">
+                  <p className="text-[#2F4D7B] text-xs sm:text-sm font-medium max-w-md mb-1 leading-relaxed">
                     Tunjukkan QR code ini kepada asisten untuk konfirmasi kehadiran
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-400 font-medium max-w-md mb-6 leading-relaxed">
                     Kode ini berganti otomatis setiap ~30 detik demi keamanan — screenshot lama tidak akan berlaku.
                   </p>
 
-                  {/* QR Code Container with Frame */}
-                  <div className="relative p-4 rounded-3xl bg-white border-2 border-[#06aeb7]/80 shadow-md">
-                    {/* Stylized Frame Corner Accents */}
-                    <div className="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-[#00878a] rounded-tl-xl" />
-                    <div className="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-[#00878a] rounded-tr-xl" />
-                    <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-[#00878a] rounded-bl-xl" />
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-[#00878a] rounded-br-xl" />
+                  <div className="relative p-4 rounded-3xl bg-white border-2 border-[#5C8BC8]/80 shadow-md">
+                    <div className="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-[#2F4D7B] rounded-tl-xl" />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-[#2F4D7B] rounded-tr-xl" />
+                    <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-[#2F4D7B] rounded-bl-xl" />
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-[#2F4D7B] rounded-br-xl" />
 
                     {qrDataUrl ? (
                       <img
@@ -1373,33 +1312,30 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                       </div>
                     ) : (
                       <div className="w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center text-slate-400">
-                        <Icon name="loader" size={28} className="animate-spin" />
+                        <Icon name="loader" size={28} className="animate-spin text-[#5C8BC8]" />
                       </div>
                     )}
                   </div>
 
-                  {/* Rotating countdown badge */}
                   {qrDataUrl && !qrError && qrSecondsLeft !== null && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e0f7fa] text-[#00878a] text-[11px] font-bold">
-                      <Icon name="loader" size={12} color="#00878a" />
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF4FB] text-[#2F4D7B] text-[11px] font-bold border border-[#C6DBF2]">
+                      <Icon name="loader" size={12} color="#2F4D7B" />
                       Kode baru dalam {qrSecondsLeft}s
                     </div>
                   )}
 
-                  {/* Student Details */}
                   <div className="mt-6">
                     <h3
-                      className="font-bold text-[#0f3b46] text-lg sm:text-xl"
+                      className="font-bold text-[#1B3258] text-lg sm:text-xl"
                       style={{ fontFamily: 'var(--font-heading)' }}
                     >
                       {effectiveName}
                     </h3>
                     <div className="text-xs sm:text-sm text-slate-500 mt-1">
-                      NIM: <span className="font-bold text-[#00878a]">{effectiveNim}</span>
+                      NIM: <span className="font-bold text-[#2F4D7B]">{effectiveNim}</span>
                     </div>
                   </div>
 
-                  {/* Active Status Badge */}
                   <div className="mt-5">
                     <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm font-semibold bg-[#dcfce7] text-[#166534] border border-[#bbf7d0] shadow-2xs">
                       <Icon name="check-circle" size={16} color="#166534" strokeWidth={2.2} />

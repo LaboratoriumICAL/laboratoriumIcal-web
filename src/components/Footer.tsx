@@ -18,7 +18,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
   return (
     <footer
       style={{
-        background: 'linear-gradient(135deg, #014346, #015c61)',
+        background: 'linear-gradient(135deg, #101F35 0%, #162D4E 45%, #23416C 85%, #2F558E 100%)',
         color: 'white',
       }}
     >
@@ -33,16 +33,16 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 className="w-10 h-10 object-contain"
               />
               <div>
-                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'white', fontSize: '1.1rem' }}>
+                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'white', fontSize: '1.15rem' }}>
                   ICAL
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: '#BAD6EB' }}>
                   Intelligent Control & Automation Laboratory
                 </div>
               </div>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: '1.6' }}>
-              Laboratorium Institut Teknologi PLN untuk pengembangan kompetensi mahasiswa di bidang sistem kontrol dan otomasi industri.
+            <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: '0.85rem', lineHeight: '1.6' }}>
+              Laboratorium Institut Teknologi PLN untuk pengembangan kompetensi mahasiswa di bidang sistem kontrol dan otomasi industri cerdas.
             </p>
           </div>
 
@@ -56,8 +56,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 <button
                   key={link.page}
                   onClick={() => setCurrentPage(link.page)}
-                  className="text-left text-sm transition-colors hover:text-white"
-                  style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-body)' }}
+                  className="text-left text-sm transition-colors hover:text-[#BAD6EB] cursor-pointer"
+                  style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'var(--font-body)' }}
                 >
                   {link.label}
                 </button>
@@ -72,24 +72,24 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             </h4>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
-                <span className="text-cyan-200 mt-0.5"><Icon name="map-pin" size={16} /></span>
-                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+                <span className="text-[#BAD6EB] mt-0.5"><Icon name="map-pin" size={16} /></span>
+                <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>
                   Gedung B Lantai 2, Institut Teknologi PLN, Jakarta Barat
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-cyan-200"><Icon name="mail" size={16} /></span>
+                <span className="text-[#BAD6EB]"><Icon name="mail" size={16} /></span>
                 <a
                   href="mailto:laboratoriumsiskon@gmail.com"
-                  className="text-sm transition-colors hover:text-white"
-                  style={{ color: 'rgba(255,255,255,0.7)' }}
+                  className="text-sm transition-colors hover:text-[#BAD6EB]"
+                  style={{ color: 'rgba(255,255,255,0.85)' }}
                 >
                   laboratoriumsiskon@gmail.com
                 </a>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-cyan-200"><Icon name="phone" size={16} /></span>
-                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>+62 81283020758</span>
+                <span className="text-[#BAD6EB]"><Icon name="phone" size={16} /></span>
+                <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>+62 81283020758</span>
               </div>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           className="pt-6 flex items-center justify-center text-center"
           style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}
         >
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+          <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.85rem' }}>
             &copy; {new Date().getFullYear()} Intelligent Control & Automation Laboratory. All rights reserved.
           </div>
         </div>

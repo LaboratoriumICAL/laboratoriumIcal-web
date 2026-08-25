@@ -19,7 +19,7 @@ export async function GET() {
       version: s.versi || '',
       icon: s.icon || 'laptop',
       description: s.deskripsi || '',
-      color: s.warna || '#015c61',
+      color: s.warna || '#2F4D7B',
       tags: s.tags || [],
       downloadUrl: s.download_url || '',
       guideUrl: s.guide_url || '',
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const versi = String(body.version || body.versi || '').trim()
     const deskripsi = String(body.description || body.deskripsi || '').trim()
     const icon = String(body.icon || 'laptop')
-    const warna = String(body.color || body.warna || '#015c61')
+    const warna = String(body.color || body.warna || '#2F4D7B')
     const tags = Array.isArray(body.tags) ? body.tags : []
     const downloadUrl = String(body.downloadUrl || body.download_url || '').trim()
     const guideUrl = String(body.guideUrl || body.guide_url || '').trim()

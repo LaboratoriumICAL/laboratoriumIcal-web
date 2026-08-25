@@ -27,7 +27,6 @@ export default function SoftwarePage() {
     sourceType: 'youtube' | 'drive'
   } | null>(null)
 
-  // Fetch software dari Supabase
   useEffect(() => {
     fetch('/api/software')
       .then((r) => r.json())
@@ -36,13 +35,10 @@ export default function SoftwarePage() {
           setSoftwareList(json.software)
         }
       })
-      .catch(() => {
-        // Fallback to initial software if DB not yet migrated
-      })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  // Close modal on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setActiveVideo(null)
@@ -52,21 +48,81 @@ export default function SoftwarePage() {
   }, [])
 
   return (
-    <div className="min-h-screen pb-24 font-sans" style={{ background: '#f0fbfb' }}>
+    <div className="min-h-screen pb-24 font-sans" style={{ background: '#F0F5FC' }}>
       {/* Header */}
       <div
         className="relative pt-24 pb-14 overflow-hidden mb-12"
-        style={{ background: 'linear-gradient(135deg, #014346, #015c61, #016e75)' }}
+        style={{
+          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+        }}
       >
-        <div className="absolute inset-0 dots-bg opacity-20" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-8 text-center">
-          <div className="section-badge mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}>
-            <Icon name="laptop" size={14} /> Software Praktikum
+        {/* Sharp Dot Matrix Background */}
+        <div
+          className="absolute inset-0 dots-header pointer-events-none opacity-40"
+          style={{ zIndex: 1 }}
+        />
+
+        {/* Ambient Glow Accents */}
+        <div
+          className="absolute -top-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(186, 214, 235, 0.2) 0%, transparent 70%)',
+            zIndex: 2,
+          }}
+        />
+        <div
+          className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            zIndex: 2,
+          }}
+        />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-8 text-center" style={{ zIndex: 10 }}>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5 shadow-sm"
+            style={{
+              background: 'rgba(255, 255, 255, 0.18)',
+              color: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+            }}
+          >
+            Software Praktikum
           </div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(1.8rem,4vw,2.8rem)', color: 'white' }}>
-            Perangkat Lunak Kami
+          <h1
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 800,
+              fontSize: 'clamp(2.1rem, 5vw, 3.4rem)',
+              lineHeight: 1.2,
+              marginBottom: '1.1rem',
+              color: 'white',
+              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+            }}
+          >
+            <span className="text-white block">Perangkat Lunak</span>
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+              }}
+            >
+              Laboratorium ICAL
+            </span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.85)', marginTop: '0.75rem', fontSize: '1.05rem' }}>
+          <p
+            className="max-w-2xl mx-auto text-base sm:text-lg font-normal"
+            style={{
+              color: '#E8F1FA',
+              lineHeight: 1.7,
+              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+            }}
+          >
             Koleksi alat teknis resmi dan mudah digunakan untuk mendukung seluruh kegiatan praktikum Anda
           </p>
         </div>
@@ -77,7 +133,7 @@ export default function SoftwarePage() {
         {loading && (
           <div className="text-center py-12 text-slate-400">
             <div className="inline-block animate-spin mb-3">
-              <Icon name="loader" size={24} color="#015c61" />
+              <Icon name="loader" size={24} color="#5C8BC8" />
             </div>
             <div>Memuat daftar perangkat lunak...</div>
           </div>
@@ -87,96 +143,96 @@ export default function SoftwarePage() {
           return (
             <div
               key={s.id || i}
-              className="relative p-[1.5px] drop-shadow-[0_12px_36px_rgba(1,92,97,0.08)] transition-transform duration-300 hover:-translate-y-1"
+              className="relative p-[2.5px] drop-shadow-[0_16px_40px_rgba(83,122,184,0.18)] transition-transform duration-300 hover:-translate-y-1.5"
               style={{
-                background: 'linear-gradient(135deg, #c7edef, #b8e6e8 50%, #d5f2f4)',
+                background: 'linear-gradient(135deg, #102544 0%, #1E4B85 35%, #537AB8 70%, #93C5FD 100%)',
                 clipPath: 'polygon(46px 0%, 100% 0%, 100% calc(100% - 46px), calc(100% - 46px) 100%, 0% 100%, 0% 46px)',
               }}
             >
               <div
                 className="relative overflow-hidden p-8 sm:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-14"
                 style={{
-                  background: 'linear-gradient(135deg, #eaf6f7, #e1f4f5 50%, #eef9fa)',
-                  clipPath: 'polygon(45px 0%, 100% 0%, 100% calc(100% - 45px), calc(100% - 45px) 100%, 0% 100%, 0% 45px)',
+                  background: 'linear-gradient(135deg, #F4F9FF 0%, #E6F2FD 35%, #D4E9FC 70%, #C4E0FA 100%)',
+                  clipPath: 'polygon(44.5px 0%, 100% 0%, 100% calc(100% - 44.5px), calc(100% - 44.5px) 100%, 0% 100%, 0% 44.5px)',
                 }}
               >
-                {/* Top-left dot grid (4 cols x 5 rows) */}
-                <div className="absolute left-6 top-6 grid grid-cols-4 gap-1.5 opacity-25 pointer-events-none">
-                  {Array.from({ length: 20 }).map((_, idx) => (
-                    <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#06aeb7]" />
-                  ))}
-                </div>
-
-                {/* Bottom-right dot grid (5 cols x 4 rows) */}
-                <div className="absolute right-6 bottom-6 grid grid-cols-5 gap-1.5 opacity-25 pointer-events-none">
-                  {Array.from({ length: 20 }).map((_, idx) => (
-                    <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#06aeb7]" />
-                  ))}
-                </div>
-
-                {/* Top-right orbital arc with bead */}
-                <svg className="absolute top-0 right-0 w-48 h-48 pointer-events-none opacity-40" viewBox="0 0 160 160" fill="none">
-                  <path d="M160 20 C 100 20, 60 60, 60 120" stroke="#06aeb7" strokeWidth="1.5" />
-                  <circle cx="60" cy="120" r="3.5" fill="#06aeb7" />
-                </svg>
-
-                {/* Bottom-left soft organic blob */}
+                {/* Ambient Soft Blue Radial Glows */}
                 <div
-                  className="absolute bottom-0 left-0 w-48 h-48 rounded-full mix-blend-multiply filter blur-2xl opacity-40 pointer-events-none"
-                  style={{ background: '#b2ecee', transform: 'translate(-20%, 20%)' }}
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      'radial-gradient(circle at 18% 50%, rgba(83, 122, 184, 0.22) 0%, transparent 60%), radial-gradient(circle at 85% 15%, rgba(147, 197, 253, 0.45) 0%, transparent 50%), radial-gradient(circle at 90% 90%, rgba(22, 45, 78, 0.08) 0%, transparent 40%)',
+                  }}
                 />
 
-                {/* Left Icon (Double Ring / Orbit Badge with Cenat-Cenut Ripple & Orbiting Bead) */}
-                <div className="relative shrink-0 flex items-center justify-center p-3">
-                  {/* Outer pulsating radar ripple 1 (Cenat-cenut) */}
+                {/* Top-left dot grid (Biru Muda Bercahaya) */}
+                <div className="absolute left-6 top-6 grid grid-cols-4 gap-1.5 opacity-70 pointer-events-none">
+                  {Array.from({ length: 20 }).map((_, idx) => (
+                    <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#8EBCE6]" />
+                  ))}
+                </div>
+
+                {/* Bottom-right dot grid (Biru Muda Bercahaya) */}
+                <div className="absolute right-6 bottom-6 grid grid-cols-5 gap-1.5 opacity-70 pointer-events-none">
+                  {Array.from({ length: 20 }).map((_, idx) => (
+                    <span key={idx} className="w-1.5 h-1.5 rounded-full bg-[#8EBCE6]" />
+                  ))}
+                </div>
+
+                {/* Top-right orbital arc */}
+                <svg className="absolute top-0 right-0 w-52 h-52 pointer-events-none opacity-50" viewBox="0 0 160 160" fill="none">
+                  <path d="M160 20 C 100 20, 60 60, 60 120" stroke="#7BAEDC" strokeWidth="1.75" strokeDasharray="5 3" />
+                  <circle cx="60" cy="120" r="4" fill="#2563EB" />
+                </svg>
+
+                {/* Left Icon (Double Ring / Orbit Badge in Biru Tua & Biru Muda) */}
+                <div className="relative shrink-0 flex items-center justify-center p-3 z-10">
+                  {/* Radar ripple 1 */}
                   <div
                     className="absolute w-40 h-40 sm:w-48 sm:h-48 rounded-full pointer-events-none"
                     style={{
-                      border: '2px solid rgba(6, 174, 183, 0.45)',
+                      border: '2px solid rgba(147, 197, 253, 0.85)',
                       animation: 'radarPing 2.8s cubic-bezier(0, 0, 0.2, 1) infinite',
                     }}
                   />
 
-                  {/* Outer pulsating radar ripple 2 (Delayed) */}
+                  {/* Radar ripple 2 */}
                   <div
                     className="absolute w-40 h-40 sm:w-48 sm:h-48 rounded-full pointer-events-none"
                     style={{
-                      border: '1.5px solid rgba(6, 174, 183, 0.3)',
+                      border: '1.5px solid rgba(147, 197, 253, 0.65)',
                       animation: 'radarPing 2.8s cubic-bezier(0, 0, 0.2, 1) 1.4s infinite',
                     }}
                   />
 
-                  {/* Main Orbit Ring with breathing pulse */}
+                  {/* Main Orbit Ring */}
                   <div
                     className="w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center relative"
                     style={{
-                      border: '1.5px solid #a5eef2',
+                      border: '2px solid #9DC4EB',
                       animation: 'pulseRipple 3.5s ease-in-out infinite',
                     }}
                   >
-                    {/* Orbit track for the revolving bead along the perimeter */}
                     <div
                       className="absolute inset-0 rounded-full pointer-events-none"
                       style={{
                         animation: 'orbitSpin 7s linear infinite',
                       }}
                     >
-                      {/* Glowing bead moving smoothly around the circle edge */}
                       <div
-                        className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-[#06aeb7] shadow-[0_0_8px_#06aeb7]"
+                        className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#162D4E] shadow-[0_0_12px_#3B82F6]"
                       />
                     </div>
 
-                    {/* Elevated white circular disc with soft pulse */}
                     <div
                       className="w-28 h-28 sm:w-34 sm:h-34 rounded-full bg-white flex items-center justify-center relative z-10 transition-transform duration-300 hover:scale-105"
                       style={{
-                        boxShadow: '0 8px 24px rgba(1,92,97,0.08)',
-                        border: '1px solid #d2f3f5',
+                        boxShadow: '0 10px 28px rgba(83, 122, 184, 0.25)',
+                        border: '2px solid #BAD6EB',
                         animation: 'pulseHeartbeat 3.5s ease-in-out infinite',
                       }}
                     >
-                      <Icon name={s.icon} size={46} color="#015c61" strokeWidth={1.75} />
+                      <Icon name={s.icon} size={46} color="#162D4E" strokeWidth={1.9} />
                     </div>
                   </div>
                 </div>
@@ -185,11 +241,12 @@ export default function SoftwarePage() {
                 <div className="flex-1 text-center md:text-left relative z-10">
                   {/* Version badge */}
                   <div
-                    className="inline-block px-3.5 py-1 rounded-full text-xs font-bold mb-2.5 shadow-sm"
+                    className="inline-block px-3.5 py-1 rounded-full text-xs font-bold mb-2.5 shadow-xs"
                     style={{
-                      background: 'white',
-                      color: '#015c61',
-                      border: '1px solid #d2f3f5',
+                      background: 'rgba(255, 255, 255, 0.85)',
+                      backdropFilter: 'blur(4px)',
+                      color: '#162D4E',
+                      border: '1.5px solid #BAD6EB',
                       fontFamily: 'var(--font-heading)',
                     }}
                   >
@@ -200,7 +257,7 @@ export default function SoftwarePage() {
                   <h3
                     className="text-2xl sm:text-3xl md:text-[2.1rem] font-extrabold mb-2 tracking-tight"
                     style={{
-                      color: '#014346',
+                      color: '#102544',
                       fontFamily: 'var(--font-heading)',
                     }}
                   >
@@ -208,7 +265,7 @@ export default function SoftwarePage() {
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 text-sm sm:text-[0.95rem] mb-4 leading-relaxed max-w-xl">
+                  <p className="text-[#2C4D78] text-sm sm:text-[0.95rem] mb-4 leading-relaxed max-w-xl font-medium">
                     {s.description}
                   </p>
 
@@ -217,11 +274,11 @@ export default function SoftwarePage() {
                     {s.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-3.5 py-1 rounded-full text-xs sm:text-sm font-bold shadow-sm"
+                        className="px-3.5 py-1 rounded-full text-xs sm:text-sm font-bold shadow-xs transition-all hover:scale-105"
                         style={{
-                          background: 'white',
-                          color: '#015c61',
-                          border: '1px solid #d2f3f5',
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          color: '#162D4E',
+                          border: '1.5px solid #BAD6EB',
                         }}
                       >
                         {tag}
@@ -235,9 +292,10 @@ export default function SoftwarePage() {
                       href={s.downloadUrl}
                       target={s.downloadUrl !== '#' ? '_blank' : undefined}
                       rel={s.downloadUrl !== '#' ? 'noopener noreferrer' : undefined}
-                      className="px-7 py-2.5 rounded-full font-bold text-sm text-white flex items-center gap-2 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+                      className="px-7 py-2.5 rounded-full font-bold text-sm text-white flex items-center gap-2 shadow-md hover:shadow-xl transition-all hover:scale-[1.03] cursor-pointer"
                       style={{
-                        background: '#015c61',
+                        background: 'linear-gradient(135deg, #102544 0%, #164E8E 50%, #1D70D8 100%)',
+                        boxShadow: '0 4px 14px rgba(29, 112, 216, 0.35)',
                         fontFamily: 'var(--font-heading)',
                       }}
                       onClick={(e) => {
@@ -250,14 +308,12 @@ export default function SoftwarePage() {
                       <Icon name="download" size={16} color="white" /> Unduh
                     </a>
 
-                    {/* Panduan Button (Opens video in-app on the same tab) */}
                     <button
                       type="button"
-                      className="px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
+                      className="px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-xs hover:shadow-md transition-all hover:scale-[1.03] cursor-pointer bg-white"
                       style={{
-                        background: 'white',
-                        color: '#015c61',
-                        border: '1.5px solid #015c61',
+                        color: '#162D4E',
+                        border: '1.5px solid #9DC4EB',
                         fontFamily: 'var(--font-heading)',
                       }}
                       onClick={() => {
@@ -284,7 +340,7 @@ export default function SoftwarePage() {
                         }
                       }}
                     >
-                      <Icon name="book-open" size={16} color="#015c61" /> Panduan
+                      <Icon name="book-open" size={16} color="#162D4E" /> Panduan
                     </button>
                   </div>
                 </div>
@@ -294,14 +350,14 @@ export default function SoftwarePage() {
         })}
       </div>
 
-      {/* In-App Video Guide Modal (YouTube / Google Drive - Plays on same tab) */}
+      {/* In-App Video Guide Modal */}
       {activeVideo && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/75 backdrop-blur-sm animate-fadeInUp"
           onClick={() => setActiveVideo(null)}
         >
           <div
-            className="relative w-full max-w-4xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-teal-500/30"
+            className="relative w-full max-w-4xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-[#5C8BC8]/40"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Video Modal Header */}
@@ -321,7 +377,7 @@ export default function SoftwarePage() {
                   href={activeVideo.guideUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-xs text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-colors"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold text-xs text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-colors"
                 >
                   {activeVideo.sourceType === 'drive' ? 'Buka di Google Drive ↗' : 'Buka di YouTube ↗'}
                 </a>
@@ -336,7 +392,7 @@ export default function SoftwarePage() {
               </div>
             </div>
 
-            {/* Video Player Container 16:9 */}
+            {/* Video Player Container */}
             <div className="relative w-full aspect-video bg-black">
               <iframe
                 src={activeVideo.embedUrl}

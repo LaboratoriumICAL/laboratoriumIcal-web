@@ -10,6 +10,8 @@ import ModulePage from './views/ModulePage'
 import SoftwarePage from './views/SoftwarePage'
 import TemplatePage from './views/TemplatePage'
 import ContactPage from './views/ContactPage'
+import DskDetailPage from './views/DskDetailPage'
+import PlcDetailPage from './views/PlcDetailPage'
 import LoginPage from './views/LoginPage'
 import RegisterPage from './views/RegisterPage'
 import RegisterAsistenPage from './views/RegisterAsistenPage'
@@ -183,6 +185,14 @@ export default function App() {
         return <SchedulePage />
       case 'module':
         return <ModulePage />
+      case 'dsk':
+      case 'dsk-detail':
+      case 'modul-dsk':
+        return <DskDetailPage setCurrentPage={setCurrentPage} />
+      case 'plc':
+      case 'plc-detail':
+      case 'modul-plc':
+        return <PlcDetailPage setCurrentPage={setCurrentPage} />
       case 'software':
         return <SoftwarePage />
       case 'template':
@@ -222,11 +232,11 @@ export default function App() {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-4"
-        style={{ background: 'linear-gradient(135deg, #f0fbfb, #e0f7fa, #ccf0f2)' }}
+        style={{ background: '#537AB8' }}
       >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-3 border-teal-200 border-t-teal-700 rounded-full animate-spin" />
-          <p style={{ color: '#015c61', fontSize: '0.9rem', fontWeight: 500, fontFamily: 'var(--font-heading)' }}>
+        <div className="flex flex-col items-center gap-3.5">
+          <div className="w-11 h-11 border-3 border-blue-400/30 border-t-blue-400 rounded-full animate-spin shadow-[0_0_20px_rgba(59,130,246,0.5)]" />
+          <p style={{ color: '#C6DBF2', fontSize: '0.95rem', fontWeight: 600, fontFamily: 'var(--font-heading)', letterSpacing: '0.05em' }}>
             Memuat ICAL...
           </p>
         </div>

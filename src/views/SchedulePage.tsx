@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Icon } from '../components/Icon'
 
 interface PraktikumOption { id: string; kode: string; nama: string }
@@ -18,6 +18,7 @@ export default function SchedulePage() {
   const [results, setResults] = useState<Group[] | null>(null)
   const [scheduleDates, setScheduleDates] = useState<ScheduleEntry[]>([])
   const [openGroup, setOpenGroup] = useState<string | null>(null)
+  const [memberSearchTerm, setMemberSearchTerm] = useState('')
   const [searched, setSearched] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -30,8 +31,6 @@ export default function SchedulePage() {
       .finally(() => setLoadingJurusan(false))
   }, [])
 
-  // Daftar tetap 3 jenis praktikum yang selalu tampil di dropdown,
-  // terlepas dari jurusan yang dipilih ada datanya atau tidak.
   const JENIS_PRAKTIKUM_TETAP = [
     { kode: 'DSK', nama: 'Dasar Sistem Kontrol' },
     { kode: 'PLC', nama: 'Programmable Logic Controller' },
@@ -41,16 +40,15 @@ export default function SchedulePage() {
   const currentJurusan = jurusanList.find((j) => j.kode === selectedProgram)
   const availableClasses = currentJurusan?.kelasTersedia || []
 
-  // Cek apakah kombinasi jurusan + jenis praktikum yang dipilih benar-benar
-  // ada di database (yaitu ada baris praktikum untuk jurusan ini).
   const practicumUnavailable =
     !!selectedProgram &&
     !!selectedPracticum &&
     !currentJurusan?.praktikum.some((p) => p.kode === selectedPracticum)
 
+  const canSearch = !!selectedProgram && !!selectedPracticum && !!selectedClass && !practicumUnavailable
+
   const handleSearch = async () => {
-    if (!selectedProgram || !selectedPracticum || !selectedClass) return
-    if (practicumUnavailable) return
+    if (!canSearch) return
     setLoading(true)
     setError('')
     try {
@@ -61,6 +59,7 @@ export default function SchedulePage() {
       setScheduleDates(json.scheduleDates || [])
       setSearched(true)
       setOpenGroup(null)
+      setMemberSearchTerm('')
     } catch (err: any) {
       setError(err.message)
       setResults([])
@@ -78,26 +77,101 @@ export default function SchedulePage() {
     setScheduleDates([])
     setSearched(false)
     setOpenGroup(null)
+    setMemberSearchTerm('')
     setError('')
   }
 
+  const filteredResults = useMemo(() => {
+    if (!results) return []
+    const q = memberSearchTerm.toLowerCase().trim()
+    if (!q) return results
+    return results.filter((g) => {
+      const hasMember = (g.members || []).some(
+        (m) => (m.name || '').toLowerCase().includes(q) || (m.nim || '').toLowerCase().includes(q)
+      )
+      const hasAssistant = (g.assistant || '').toLowerCase().includes(q)
+      const hasGroupId = (g.id || '').toLowerCase().includes(q)
+      return hasMember || hasAssistant || hasGroupId
+    })
+  }, [results, memberSearchTerm])
+
   return (
-    <div className="min-h-screen" style={{ background: '#f0fbfb' }}>
+    <div className="min-h-screen" style={{ background: '#F0F5FC' }}>
       {/* Header */}
       <div
-        className="relative pt-24 pb-12 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #014346, #015c61, #016e75)' }}
+        className="relative pt-24 pb-14 overflow-hidden mb-6"
+        style={{
+          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+        }}
       >
-        <div className="absolute inset-0 dots-bg opacity-20" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-8 text-center">
-          <div className="section-badge mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.15)', color: 'white', border: '1px solid rgba(255,255,255,0.3)' }}>
+        {/* Sharp Dot Matrix Background */}
+        <div
+          className="absolute inset-0 dots-header pointer-events-none opacity-40"
+          style={{ zIndex: 1 }}
+        />
+
+        {/* Ambient Glow Accents */}
+        <div
+          className="absolute -top-20 -right-20 w-80 h-80 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(186, 214, 235, 0.2) 0%, transparent 70%)',
+            zIndex: 2,
+          }}
+        />
+        <div
+          className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            zIndex: 2,
+          }}
+        />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-8 text-center" style={{ zIndex: 10 }}>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5 shadow-sm"
+            style={{
+              background: 'rgba(255, 255, 255, 0.18)',
+              color: '#FFFFFF',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+            }}
+          >
             Jadwal Praktikum
           </div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(1.8rem,4vw,2.8rem)', color: 'white' }}>
-            Cek Jadwal Praktikummu
+          <h1
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontWeight: 800,
+              fontSize: 'clamp(2.1rem, 5vw, 3.4rem)',
+              lineHeight: 1.2,
+              marginBottom: '1.1rem',
+              color: 'white',
+              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+            }}
+          >
+            <span className="text-white block">Jadwal Praktikum</span>
+            <span
+              style={{
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+              }}
+            >
+              Laboratorium ICAL
+            </span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.8)', marginTop: '0.75rem', fontSize: '1rem' }}>
-            Pilih jurusan, jenis praktikum, dan kelas untuk menemukan jadwal dan kelompokmu
+          <p
+            className="max-w-2xl mx-auto text-base sm:text-lg font-normal"
+            style={{
+              color: '#E8F1FA',
+              lineHeight: 1.7,
+              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+            }}
+          >
+            Pilih program studi, jenis praktikum, dan kelas untuk menemukan jadwal dan kelompokmu secara cepat
           </p>
         </div>
       </div>
@@ -105,19 +179,18 @@ export default function SchedulePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-8 py-12">
         {/* Search card */}
         <div
-          className="rounded-3xl p-6 sm:p-8 mb-8"
+          className="rounded-3xl p-6 sm:p-8 mb-8 bg-white"
           style={{
-            background: 'white',
-            border: '1.5px solid #e0f7fa',
-            boxShadow: '0 8px 40px rgba(1,92,97,0.10)',
+            border: '1.5px solid #C6DBF2',
+            boxShadow: '0 8px 32px rgba(92, 139, 200,0.08)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#015c61', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-            <Icon name="search" size={18} className="inline mr-1.5 align-text-bottom" /> Filter Pencarian
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
+            <Icon name="search" size={18} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Filter Pencarian
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Jurusan
               </label>
               <select
@@ -132,7 +205,7 @@ export default function SchedulePage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Jenis Praktikum
               </label>
               <select
@@ -147,72 +220,65 @@ export default function SchedulePage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#475569', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Kelas
               </label>
               <select
                 className="input-field"
                 value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                disabled={!selectedPracticum || practicumUnavailable}
+                onChange={(e) => { setSelectedClass(e.target.value); setResults(null); }}
+                disabled={!selectedProgram || !selectedPracticum || loadingJurusan}
               >
-                <option value="">-- Pilih Kelas --</option>
-                {availableClasses.map((c) => <option key={c} value={c}>Kelas {c}</option>)}
+                <option value="">
+                  {loadingJurusan ? 'Memuat kelas...' : !selectedPracticum ? '-- Pilih Praktikum Dulu --' : availableClasses.length === 0 ? '-- Tidak Ada Kelas --' : '-- Pilih Kelas --'}
+                </option>
+                {availableClasses.map((cls) => (
+                  <option key={cls} value={cls}>Kelas {cls}</option>
+                ))}
               </select>
             </div>
           </div>
 
-          {practicumUnavailable && (
-            <div
-              className="rounded-xl px-4 py-3 text-sm mb-6 flex items-center gap-2"
-              style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}
-            >
-              <Icon name="warning" size={15} /> Tidak Tersedia — praktikum ini belum dibuka untuk jurusan yang dipilih.
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <button
-              onClick={handleSearch}
-              disabled={!selectedProgram || !selectedPracticum || !selectedClass || practicumUnavailable || loading}
-              className="btn-primary flex items-center gap-2"
-              style={{ opacity: (!selectedProgram || !selectedPracticum || !selectedClass || practicumUnavailable || loading) ? 0.5 : 1 }}
-            >
-              {loading ? <Icon name="loader" size={16} className="animate-spin" /> : <Icon name="search" size={16} />}
-              {loading ? 'Mencari...' : 'Cari Jadwal'}
-            </button>
-            {searched && (
-              <button onClick={handleReset} className="btn-secondary">
-                Reset
-              </button>
+          <button
+            onClick={handleSearch}
+            disabled={!canSearch || loading}
+            className="w-full btn-primary justify-center py-3.5"
+            style={{ opacity: canSearch && !loading ? 1 : 0.6 }}
+          >
+            {loading ? (
+              <><Icon name="loader" size={18} className="animate-spin mr-2" /> Mencari Jadwal...</>
+            ) : (
+              <><Icon name="search" size={18} className="mr-1.5" /> Cari Jadwal & Kelompok</>
             )}
-          </div>
+          </button>
         </div>
 
+        {/* Error state */}
         {error && (
-          <div className="rounded-xl px-4 py-3 text-sm mb-6" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
-            <Icon name="warning" size={15} className="inline mr-1 align-text-bottom" /> {error}
+          <div className="rounded-2xl p-4 mb-6 flex items-start gap-3 bg-red-50 border border-red-200">
+            <Icon name="warning" size={18} color="#EF4444" className="shrink-0 mt-0.5" />
+            <p style={{ color: '#EF4444', fontSize: '0.9rem' }}>{error}</p>
           </div>
         )}
 
         {/* Schedule dates */}
         {searched && scheduleDates.length > 0 && (
           <div
-            className="rounded-2xl p-5 mb-6"
-            style={{ background: 'linear-gradient(135deg, #f0fbfb, #e0f7fa)', border: '1.5px solid #a5eef2' }}
+            className="rounded-3xl p-6 mb-6"
+            style={{ background: '#EEF5FA', border: '1.5px solid #C6DBF2' }}
           >
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#015c61', marginBottom: '0.75rem' }}>
-              <Icon name="calendar" size={16} className="inline mr-1.5 align-text-bottom" /> Jadwal Pertemuan
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', marginBottom: '0.75rem' }}>
+              <Icon name="calendar" size={16} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Jadwal Pertemuan
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
               {scheduleDates.map((s, i) => (
                 <div
                   key={i}
-                  className="rounded-xl p-3 text-center"
-                  style={{ background: 'white', border: '1px solid #e0f7fa' }}
+                  className="rounded-2xl p-3 text-center bg-white shadow-xs"
+                  style={{ border: '1px solid #C6DBF2' }}
                 >
-                  <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.8rem', color: '#015c61' }}>{s.label}</div>
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>{s.date}</div>
+                  <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.8rem', color: '#2F4D7B' }}>{s.label}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#2F4D7B', marginTop: '3px' }}>{s.date}</div>
                 </div>
               ))}
             </div>
@@ -222,123 +288,217 @@ export default function SchedulePage() {
         {/* Results */}
         {searched && results !== null && !error && (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#015c61', fontSize: '1.2rem', marginBottom: '1rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '1.2rem', marginBottom: '0.75rem' }}>
               {results.length > 0
-                ? (<><Icon name="clipboard-list" size={17} className="inline mr-1.5 align-text-bottom" /> Ditemukan {results.length} Kelompok — Kelas {selectedClass}</>)
+                ? (<><Icon name="clipboard-list" size={17} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Ditemukan {results.length} Kelompok — Kelas {selectedClass}</>)
                 : (<><Icon name="frown" size={17} className="inline mr-1.5 align-text-bottom" /> Tidak Ada Data</>)}
             </h2>
 
+            {/* Fitur Cari Nama Praktikan / NIM (Tengah & Presisi) */}
+            {results.length > 0 && (
+              <div className="my-6 flex flex-col items-center justify-center text-center">
+                <div className="relative w-full max-w-lg">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#537AB8]">
+                    <Icon name="search" size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    className="input-field bg-white transition-all text-sm sm:text-base rounded-2xl"
+                    placeholder="Cari nama praktikan atau NIM..."
+                    value={memberSearchTerm}
+                    onChange={(e) => setMemberSearchTerm(e.target.value)}
+                    style={{
+                      paddingLeft: '2.85rem',
+                      paddingRight: '2.85rem',
+                      borderColor: memberSearchTerm ? '#537AB8' : '#C6DBF2',
+                      boxShadow: memberSearchTerm
+                        ? '0 0 0 4px rgba(83, 122, 184, 0.18), 0 4px 16px rgba(92, 139, 200, 0.1)'
+                        : '0 2px 10px rgba(92, 139, 200, 0.06)',
+                    }}
+                  />
+                  {memberSearchTerm && (
+                    <button
+                      onClick={() => setMemberSearchTerm('')}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#5D789B] hover:text-[#1B3258] transition-colors cursor-pointer"
+                      title="Hapus pencarian"
+                    >
+                      <span className="w-5 h-5 rounded-full bg-[#E2EDF8] hover:bg-[#C6DBF2] text-[#2F4D7B] flex items-center justify-center text-xs font-bold">
+                        ✕
+                      </span>
+                    </button>
+                  )}
+                </div>
+                {memberSearchTerm.trim() && (
+                  <div className="mt-2.5 text-xs font-semibold text-[#2F4D7B] flex items-center justify-center gap-2 animate-fadeIn">
+                    <span>Hasil pencarian untuk: <strong className="text-[#1B3258]">&ldquo;{memberSearchTerm}&rdquo;</strong></span>
+                    <span className="text-slate-400">•</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#EEF5FA] text-[#537AB8] border border-[#C6DBF2] font-bold">
+                      {filteredResults.length} kelompok ditemukan
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {results.length === 0 && (
               <div
-                className="rounded-2xl p-10 text-center"
-                style={{ background: 'white', border: '1.5px solid #e0f7fa' }}
+                className="rounded-3xl p-10 text-center bg-white"
+                style={{ border: '1.5px solid #C6DBF2' }}
               >
-                <div className="mb-4 flex justify-center"><Icon name="inbox" size={44} color="#94a3b8" strokeWidth={1.5} /></div>
-                <p style={{ color: '#64748b' }}>Data jadwal untuk kelas ini belum tersedia. Kelompok & anggota diisi oleh asisten.</p>
+                <div className="mb-4 flex justify-center"><Icon name="inbox" size={44} color="#94A3B8" strokeWidth={1.5} /></div>
+                <p style={{ color: '#2F4D7B' }}>Data jadwal untuk kelas ini belum tersedia. Kelompok & anggota diisi oleh asisten.</p>
+              </div>
+            )}
+
+            {results.length > 0 && memberSearchTerm.trim() && filteredResults.length === 0 && (
+              <div
+                className="rounded-3xl p-8 text-center bg-white mb-6"
+                style={{ border: '1.5px solid #C6DBF2' }}
+              >
+                <div className="mb-3 flex justify-center text-[#5C8BC8]"><Icon name="search" size={36} /></div>
+                <p className="font-bold text-[#1B3258] mb-1">Praktikan Tidak Ditemukan</p>
+                <p style={{ color: '#5D789B', fontSize: '0.85rem' }}>
+                  Tidak ada praktikan dengan nama atau NIM &ldquo;{memberSearchTerm}&rdquo; di Kelas {selectedClass}.
+                </p>
+                <button
+                  onClick={() => setMemberSearchTerm('')}
+                  className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-[#2F4D7B] bg-[#EEF5FA] hover:bg-[#E2EDF8] transition-colors cursor-pointer"
+                >
+                  Reset Pencarian
+                </button>
               </div>
             )}
 
             <div className="space-y-3">
               {[1, 2].map((shift) => {
-                const shiftGroups = results.filter((g) => g.shift === shift)
-                const unassigned = shift === 1 ? results.filter((g) => g.shift !== 1 && g.shift !== 2) : []
+                const shiftGroups = filteredResults.filter((g) => g.shift === shift)
+                const unassigned = shift === 1 ? filteredResults.filter((g) => g.shift !== 1 && g.shift !== 2) : []
                 const listForShift = shift === 1 ? [...shiftGroups, ...unassigned] : shiftGroups
                 if (!listForShift.length) return null
                 return (
                   <div key={shift}>
                     <div
                       className="flex items-center gap-3 mb-3"
-                      style={{ color: shift === 1 ? '#015c61' : '#016e75', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
+                      style={{ color: '#1B3258', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
                     >
                       <span
-                        className="px-3 py-1 rounded-full text-white text-sm"
-                        style={{ background: shift === 1 ? 'linear-gradient(135deg,#015c61,#06aeb7)' : 'linear-gradient(135deg,#016e75,#5cd5db)' }}
+                        className="px-3.5 py-1 rounded-full text-white text-sm shadow-xs font-semibold"
+                        style={{ background: '#537AB8' }}
                       >
                         Shift {shift}
                       </span>
-                      <span style={{ color: '#94a3b8', fontWeight: 400, fontSize: '0.85rem' }}>
+                      <span style={{ color: '#2F4D7B', fontWeight: 400, fontSize: '0.85rem' }}>
                         {shift === 1 ? '08.00 – 11.00 WIB' : '13.00 – 16.00 WIB'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                      {listForShift.map((group) => (
-                        <div key={group.id}>
-                          <div
-                            className="rounded-2xl p-4 card-hover cursor-pointer"
-                            style={{
-                              background: openGroup === group.id ? 'linear-gradient(135deg,#f0fbfb,#e0f7fa)' : 'white',
-                              border: `1.5px solid ${openGroup === group.id ? '#5cd5db' : '#e0f7fa'}`,
-                              boxShadow: '0 2px 12px rgba(1,92,97,0.06)',
-                            }}
-                            onClick={() => setOpenGroup(openGroup === group.id ? null : group.id)}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className="min-w-[2.75rem] h-10 px-2.5 rounded-xl flex items-center justify-center text-center text-white font-bold shadow-xs shrink-0"
-                                style={{
-                                  background: shift === 1 ? 'linear-gradient(135deg,#015c61,#06aeb7)' : 'linear-gradient(135deg,#016e75,#5cd5db)',
-                                  fontFamily: 'var(--font-heading)',
-                                  fontSize: group.id.length > 3 ? '0.78rem' : '0.875rem',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                {group.id}
-                              </div>
-                              <span style={{ fontSize: '1.2rem' }}>{openGroup === group.id ? '▲' : '▼'}</span>
-                            </div>
-                            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#015c61', fontSize: '0.95rem' }}>
-                              Kelompok {group.id}
-                            </div>
-                            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px' }}>
-                              <Icon name="user" size={12} className="inline mr-1 align-text-bottom" /> Asisten: <strong style={{ color: '#06aeb7' }}>{group.assistant}</strong>
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
-                              {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
-                            </div>
-                          </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+                      {listForShift.map((group) => {
+                        const isExpanded = memberSearchTerm.trim() ? true : openGroup === group.id
+                        const queryLower = memberSearchTerm.toLowerCase().trim()
 
-                          {openGroup === group.id && (
+                        return (
+                          <div key={group.id}>
                             <div
-                              className="rounded-b-2xl -mt-2 pt-4 px-4 pb-4 animate-slideIn"
-                              style={{ background: 'white', border: '1.5px solid #5cd5db', borderTop: 'none' }}
+                              className="rounded-2xl p-4 card-hover cursor-pointer transition-all"
+                              style={{
+                                background: isExpanded ? '#EEF5FA' : 'white',
+                                border: `1.5px solid ${isExpanded ? '#5C8BC8' : '#C6DBF2'}`,
+                                boxShadow: '0 4px 16px rgba(92, 139, 200,0.08)',
+                              }}
+                              onClick={() => setOpenGroup(openGroup === group.id ? null : group.id)}
                             >
-                              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#015c61', fontSize: '0.85rem', marginBottom: '8px' }}>
-                                Daftar Anggota Kelompok {group.id}
-                              </div>
-                              <div
-                                className="text-xs mb-3 px-3 py-2 rounded-lg"
-                                style={{ background: '#f0fbfb', color: '#015c61', fontWeight: 600 }}
-                              >
-                                <Icon name="user" size={12} className="inline mr-1 align-text-bottom" /> Asisten Pendamping: {group.assistant}
-                              </div>
-                              {group.members.length === 0 ? (
-                                <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Belum ada anggota untuk kelompok ini.</p>
-                              ) : (
-                                <div className="space-y-2">
-                                  {group.members.map((m, i) => (
-                                    <div
-                                      key={i}
-                                      className="flex items-center gap-3 px-3 py-2 rounded-xl"
-                                      style={{ background: '#f0fbfb', border: '1px solid #e0f7fa' }}
-                                    >
-                                      <span
-                                        className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                        style={{ background: 'linear-gradient(135deg,#015c61,#06aeb7)' }}
-                                      >
-                                        {i + 1}
-                                      </span>
-                                      <div>
-                                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1e293b' }}>{m.name}</div>
-                                        <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{m.nim}</div>
-                                      </div>
-                                    </div>
-                                  ))}
+                              <div className="flex items-center justify-between mb-2">
+                                <div
+                                  className="min-w-[2.75rem] h-10 px-2.5 rounded-xl flex items-center justify-center text-center text-white font-bold shadow-xs shrink-0"
+                                  style={{
+                                    background: '#537AB8',
+                                    fontFamily: 'var(--font-heading)',
+                                    fontSize: group.id.length > 3 ? '0.78rem' : '0.875rem',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {group.id}
                                 </div>
-                              )}
+                                <span style={{ fontSize: '1.2rem', color: '#5C8BC8' }}>{isExpanded ? '▲' : '▼'}</span>
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '0.95rem' }}>
+                                Kelompok {group.id}
+                              </div>
+                              <div style={{ fontSize: '0.8rem', color: '#2F4D7B', marginTop: '4px' }}>
+                                <Icon name="user" size={12} className="inline mr-1 align-text-bottom text-[#5C8BC8]" /> Asisten: <strong style={{ color: '#2F4D7B' }}>{group.assistant}</strong>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#5D789B', marginTop: '2px' }}>
+                                {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
+
+                            {isExpanded && (
+                              <div
+                                className="rounded-b-2xl -mt-2 pt-4 px-4 pb-4 animate-slideIn bg-white"
+                                style={{ border: '1.5px solid #5C8BC8', borderTop: 'none' }}
+                              >
+                                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#1B3258', fontSize: '0.85rem', marginBottom: '8px' }}>
+                                  Daftar Anggota Kelompok {group.id}
+                                </div>
+                                <div
+                                  className="text-xs mb-3 px-3 py-2 rounded-xl"
+                                  style={{ background: '#EEF4FB', color: '#2F4D7B', fontWeight: 600, border: '1px solid #C6DBF2' }}
+                                >
+                                  <Icon name="user" size={12} className="inline mr-1 align-text-bottom" /> Asisten Pendamping: {group.assistant}
+                                </div>
+                                {group.members.length === 0 ? (
+                                  <p style={{ fontSize: '0.8rem', color: '#5D789B' }}>Belum ada anggota untuk kelompok ini.</p>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {group.members.map((m, i) => {
+                                      const isMatch = queryLower && (
+                                        (m.name || '').toLowerCase().includes(queryLower) ||
+                                        (m.nim || '').toLowerCase().includes(queryLower)
+                                      )
+
+                                      return (
+                                        <div
+                                          key={i}
+                                          className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all"
+                                          style={{
+                                            background: isMatch ? '#FEF9C3' : '#F8FAFC',
+                                            border: isMatch ? '1.5px solid #FACC15' : '1px solid #E2E8F0',
+                                            boxShadow: isMatch ? '0 2px 8px rgba(250, 204, 21, 0.25)' : 'none',
+                                          }}
+                                        >
+                                          <span
+                                            className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                            style={{
+                                              background: isMatch
+                                                ? '#D97706'
+                                                : 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                            }}
+                                          >
+                                            {i + 1}
+                                          </span>
+                                          <div className="flex-1 min-w-0">
+                                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: isMatch ? '#78350F' : '#1B3258' }}>
+                                              {m.name}
+                                            </div>
+                                            <div style={{ fontSize: '0.72rem', color: isMatch ? '#B45309' : '#5D789B' }}>
+                                              {m.nim}
+                                            </div>
+                                          </div>
+                                          {isMatch && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 shrink-0">
+                                              Cocok
+                                            </span>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )

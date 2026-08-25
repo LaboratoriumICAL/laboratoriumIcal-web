@@ -9,7 +9,7 @@ import {
   Frown, Download, Lightbulb, PartyPopper, Brain, Check, X, ArrowRight,
   ArrowLeft, Loader2, Instagram, MessageSquare, Building2, ChevronUp, ChevronDown,
   Bell, FlaskConical, QrCode, Scan, Minus, Plus, Star, GripVertical,
-  Key, Lock, EyeOff, Send, ShieldCheck,
+  Key, Lock, EyeOff, Send, ShieldCheck, Video, Zap, Play, Activity, Flame, Film,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -36,6 +36,9 @@ export const iconMap: Record<string, LucideIcon> = {
   factory: Factory,
   smartphone: Smartphone,
   trophy: Trophy,
+  award: Trophy,
+  layers: FolderOpen,
+  shield: ShieldCheck,
   'file-text': FileText,
   rocket: Rocket,
   'clipboard-list': ClipboardList,
@@ -94,6 +97,12 @@ export const iconMap: Record<string, LucideIcon> = {
   key: Key,
   'eye-off': EyeOff,
   'shield-check': ShieldCheck,
+  video: Video,
+  zap: Zap,
+  play: Play,
+  activity: Activity,
+  flame: Flame,
+  film: Film,
 };
 
 export type IconName = keyof typeof iconMap;

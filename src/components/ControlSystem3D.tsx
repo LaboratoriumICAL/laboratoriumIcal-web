@@ -1,9 +1,60 @@
 'use client'
 
-import { useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, MeshDistortMaterial, Float, Stars } from '@react-three/drei'
+import { OrbitControls, Float, Stars, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
+
+function LabLogoCore() {
+  const logoTexture = useTexture('/images/logo-lab.png')
+  const coreRef = useRef<THREE.Group>(null)
+
+  useFrame((_, delta) => {
+    if (coreRef.current) {
+      coreRef.current.rotation.y += delta * 0.25
+    }
+  })
+
+  return (
+    <group ref={coreRef}>
+      {/* 3D Volumetric Circular Disc Medallion Base (Same nuance as 3D boxes) */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[1.42, 1.42, 0.12, 64]} />
+        <meshStandardMaterial
+          color="#162D4E"
+          metalness={0.85}
+          roughness={0.2}
+        />
+      </mesh>
+
+      {/* Front 3D Lab Logo with True Colors */}
+      <mesh position={[0, 0, 0.065]}>
+        <planeGeometry args={[2.3, 2.3]} />
+        <meshStandardMaterial
+          map={logoTexture}
+          transparent
+          alphaTest={0.01}
+          metalness={0.15}
+          roughness={0.35}
+          side={THREE.FrontSide}
+        />
+      </mesh>
+
+      {/* Back 3D Lab Logo with True Colors */}
+      <mesh position={[0, 0, -0.065]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[2.3, 2.3]} />
+        <meshStandardMaterial
+          map={logoTexture}
+          transparent
+          alphaTest={0.01}
+          metalness={0.15}
+          roughness={0.35}
+          side={THREE.FrontSide}
+        />
+      </mesh>
+    </group>
+  )
+}
 
 function AutomationCore() {
   const groupRef = useRef<THREE.Group>(null)
@@ -11,9 +62,9 @@ function AutomationCore() {
   const ring2 = useRef<THREE.Mesh>(null)
   const ring3 = useRef<THREE.Mesh>(null)
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15
+      groupRef.current.rotation.y += delta * 0.12
     }
     if (ring1.current) ring1.current.rotation.x += delta * 0.4
     if (ring2.current) ring2.current.rotation.y += delta * 0.3
@@ -23,34 +74,21 @@ function AutomationCore() {
   return (
     <group ref={groupRef}>
       <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-        {/* Core Processor (PLC/Microcontroller representation) */}
-        <mesh>
-          <octahedronGeometry args={[1.5, 0]} />
-          <meshStandardMaterial 
-            color="#0ea5e9" 
-            metalness={0.8} 
-            roughness={0.2} 
-            emissive="#0284c7"
-            emissiveIntensity={0.4}
-          />
-        </mesh>
-        <mesh>
-          <octahedronGeometry args={[1.8, 0]} />
-          <meshBasicMaterial color="#a5eef2" wireframe transparent opacity={0.2} />
-        </mesh>
+        {/* 3D Pure Lab Logo Emblem */}
+        <LabLogoCore />
 
         {/* Gyroscopic Mechanical Rings (Automation) */}
         <mesh ref={ring1}>
           <torusGeometry args={[2.8, 0.08, 16, 64]} />
-          <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.3} />
+          <meshStandardMaterial color="#BAD6EB" metalness={0.85} roughness={0.2} />
         </mesh>
         <mesh ref={ring2} rotation={[Math.PI / 3, 0, 0]}>
           <torusGeometry args={[3.6, 0.05, 16, 64]} />
-          <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.4} />
+          <meshStandardMaterial color="#84A6D6" metalness={0.8} roughness={0.25} />
         </mesh>
         <mesh ref={ring3} rotation={[0, Math.PI / 4, 0]}>
           <torusGeometry args={[4.4, 0.06, 16, 64]} />
-          <meshStandardMaterial color="#06aeb7" metalness={0.8} roughness={0.2} />
+          <meshStandardMaterial color="#537AB8" metalness={0.9} roughness={0.15} />
         </mesh>
 
         {/* Distributed Control Nodes (Sensors/Actuators) */}
@@ -63,22 +101,16 @@ function AutomationCore() {
             <group key={i} position={[x, Math.sin(angle * 2) * 1.5, z]}>
               <mesh rotation={[angle, angle, angle]}>
                 <boxGeometry args={[0.5, 0.5, 0.5]} />
-                <meshStandardMaterial color="#0f172a" metalness={0.7} roughness={0.2} />
+                <meshStandardMaterial color="#162D4E" metalness={0.85} roughness={0.2} />
               </mesh>
               {/* Node Indicator Light */}
               <mesh position={[0, 0, 0.26]}>
                 <planeGeometry args={[0.3, 0.3]} />
-                <meshBasicMaterial color={i % 2 === 0 ? "#10b981" : "#38bdf8"} />
+                <meshBasicMaterial color={i % 2 === 0 ? "#BAD6EB" : "#537AB8"} />
               </mesh>
             </group>
           )
         })}
-
-        {/* Digital Factory Floor / Circuit Grid */}
-        <mesh position={[0, -4, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[25, 25, 25, 25]} />
-          <meshBasicMaterial color="#015c61" wireframe transparent opacity={0.2} />
-        </mesh>
       </Float>
     </group>
   )
@@ -88,14 +120,16 @@ export default function ControlSystem3D() {
   return (
     <div className="w-full h-full relative">
       <Canvas camera={{ position: [0, 2, 8.5], fov: 45 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1.5} color="#d6f8fa" />
-        <pointLight position={[-10, -10, -5]} intensity={1} color="#06aeb7" />
+        <ambientLight intensity={0.85} />
+        <directionalLight position={[10, 10, 5]} intensity={2.2} color="#FFFFFF" />
+        <pointLight position={[-10, -10, -5]} intensity={1.8} color="#BAD6EB" />
         
         {/* Flowing Data Particles */}
-        <Stars radius={50} depth={20} count={1000} factor={3} saturation={0.5} fade speed={1.5} />
+        <Stars radius={50} depth={20} count={1400} factor={4} saturation={0.8} fade speed={1.5} />
         
-        <AutomationCore />
+        <Suspense fallback={null}>
+          <AutomationCore />
+        </Suspense>
         
         {/* Allow user to inspect the industrial system */}
         <OrbitControls 

@@ -4,9 +4,9 @@ import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
 // Warna avatar deterministik dari NIM, dipertahankan sama urutannya seperti data lama
 // supaya kartu kontak yang sudah pernah tampil tidak berubah warna.
 const AVATAR_COLORS = [
-  '#2563eb', '#7c3aed', '#0ea5e9', '#059669', '#db2777', '#d97706', '#0891b2', '#be185d',
+  '#5C8BC8', '#7c3aed', '#0ea5e9', '#059669', '#db2777', '#d97706', '#0891b2', '#be185d',
   '#9333ea', '#b45309', '#16a34a', '#dc2626', '#4f46e5', '#0d9488', '#ca8a04', '#c026d3',
-  '#65a30d', '#e11d48', '#1d4ed8', '#7e22ce', '#0369a1', '#15803d', '#a21caf', '#b91c1c', '#0f766e',
+  '#65a30d', '#e11d48', '#3B639B', '#7e22ce', '#0369a1', '#15803d', '#a21caf', '#b91c1c', '#0f766e',
 ]
 const colorForId = (id: string) => {
   let hash = 0
@@ -16,27 +16,42 @@ const colorForId = (id: string) => {
 
 function mapProfileToAssistant(p: any) {
   const nama = p.nama_lengkap || ''
+  const isKoord = Boolean(
+    p.is_koordinator ||
+    p.nip_nim_asisten === '202311005' ||
+    nama.toLowerCase().includes('hakimi')
+  )
   return {
     id: p.id,
     name: nama,
     nim: p.nip_nim_asisten || p.nim || '',
     wa: p.no_whatsapp || '',
     ig: p.instagram || '',
-    role: p.is_koordinator ? 'Koordinator' : 'Asisten',
+    role: isKoord ? 'Koordinator' : 'Asisten',
     color: colorForId(p.id),
     initial: nama.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase(),
     photo: p.foto_url || '',
   }
 }
 
-// GET /api/asisten -> Ambil daftar asisten (atau cari by nim/name)
+// GET /api/asisten -> Ambil daftar asisten (atau cari by id/nim/name)
 export async function GET(req: NextRequest) {
   try {
+    const id = req.nextUrl.searchParams.get('id')
     const nim = req.nextUrl.searchParams.get('nim')
     const name = req.nextUrl.searchParams.get('name')
     const sb = getSupabaseAdmin()
 
     let query = sb.from('profiles').select('*').eq('role', 'asisten')
+
+    if (id) {
+      query = query.eq('id', id)
+      const { data, error } = await query.maybeSingle()
+      if (error) throw error
+      if (!data) return NextResponse.json({ ok: false, assistant: null })
+      return NextResponse.json({ ok: true, assistant: mapProfileToAssistant(data) })
+    }
+
     if (nim) {
       query = query.eq('nip_nim_asisten', nim)
       const { data, error } = await query.maybeSingle()
@@ -53,10 +68,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: true, assistant: mapProfileToAssistant(data) })
     }
 
-    const { data, error } = await query.order('is_koordinator', { ascending: false }).order('nama_lengkap', { ascending: true })
+    const { data, error } = await query.order('nip_nim_asisten', { ascending: true })
     if (error) throw error
 
-    const assistants = (data || []).map(mapProfileToAssistant)
+    const assistants = (data || [])
+      .map(mapProfileToAssistant)
+      .sort((a, b) => (a.nim || '').localeCompare(b.nim || '', undefined, { numeric: true }))
 
     return NextResponse.json({ ok: true, assistants })
   } catch (err: any) {

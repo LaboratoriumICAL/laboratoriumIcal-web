@@ -55,11 +55,11 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: scrolled ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.75)',
+          background: scrolled ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.9)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(165,238,242,0.8)' : '1px solid rgba(255,255,255,0.5)',
-          boxShadow: scrolled ? '0 4px 24px rgba(1,92,97,0.08)' : 'none',
+          borderBottom: scrolled ? '1px solid #BAD6EB' : '1px solid rgba(186,214,235,0.6)',
+          boxShadow: scrolled ? '0 4px 20px rgba(83,122,184,0.1)' : 'none',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,14 +67,14 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
             {/* Logos */}
             <button
               onClick={() => setCurrentPage('home')}
-              className="flex items-center gap-3 group"
+              className="flex items-center gap-3 group cursor-pointer"
             >
               <ITPLNLogo />
               <div
                 style={{
-                  width: '1px',
-                  height: '32px',
-                  background: 'linear-gradient(to bottom, transparent, #a5eef2, transparent)',
+                  width: '1.5px',
+                  height: '30px',
+                  background: '#BAD6EB',
                 }}
               />
               <ICALLogo />
@@ -82,15 +82,30 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
 
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <button
-                  key={link.page}
-                  onClick={() => setCurrentPage(link.page)}
-                  className={`nav-link ${currentPage === link.page ? 'active' : ''}`}
-                >
-                  {link.label}
-                </button>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = currentPage === link.page
+                return (
+                  <button
+                    key={link.page}
+                    onClick={() => setCurrentPage(link.page)}
+                    className="relative py-1 text-sm font-semibold transition-all duration-200 cursor-pointer hover:text-[#537AB8]"
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      color: isActive ? '#162D4E' : '#3B577D',
+                    }}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span
+                        className="absolute bottom-[-4px] left-0 right-0 h-[2.5px] rounded-full shadow-xs"
+                        style={{
+                          background: 'linear-gradient(90deg, #162D4E 0%, #537AB8 60%, #84A6D6 100%)',
+                        }}
+                      />
+                    )}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Right actions */}
@@ -121,20 +136,20 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
 
             {/* Mobile hamburger */}
             <button
-              className="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+              className="lg:hidden flex flex-col gap-1.5 p-2 rounded-xl hover:bg-slate-100 transition-colors"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
               <span
-                className="block h-0.5 w-6 bg-slate-600 transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
                 style={{ transform: menuOpen ? 'rotate(45deg) translateY(8px)' : '' }}
               />
               <span
-                className="block h-0.5 w-6 bg-slate-600 transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
                 style={{ opacity: menuOpen ? 0 : 1 }}
               />
               <span
-                className="block h-0.5 w-6 bg-slate-600 transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
                 style={{ transform: menuOpen ? 'rotate(-45deg) translateY(-8px)' : '' }}
               />
             </button>
@@ -146,15 +161,15 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
           className="lg:hidden overflow-hidden transition-all duration-300"
           style={{ maxHeight: menuOpen ? '500px' : '0', opacity: menuOpen ? 1 : 0 }}
         >
-          <div className="px-4 py-4 space-y-1 bg-white border-t border-blue-100">
+          <div className="px-4 py-4 space-y-1 bg-white border-t border-[#BAD6EB]">
             {navLinks.map((link) => (
               <button
                 key={link.page}
                 onClick={() => { setCurrentPage(link.page); setMenuOpen(false); }}
-                className="block w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors"
+                className="block w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-colors"
                 style={{
-                  color: currentPage === link.page ? '#015c61' : '#475569',
-                  background: currentPage === link.page ? '#f0fbfb' : 'transparent',
+                  color: currentPage === link.page ? '#162D4E' : '#3B577D',
+                  background: currentPage === link.page ? '#EEF5FA' : 'transparent',
                 }}
               >
                 {link.label}

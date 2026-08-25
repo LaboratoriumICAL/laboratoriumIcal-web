@@ -142,20 +142,31 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
     reader.readAsDataURL(file)
   }
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col" style={{ background: '#ffffff' }}>
+      {/* Floating Close Pill for Instant Visibility */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-900/85 hover:bg-rose-600 text-white text-xs font-bold transition-all shadow-lg backdrop-blur-md cursor-pointer border border-white/20"
+        title="Tutup Scanner (Esc)"
+      >
+        <Icon name="x" size={15} color="white" />
+        <span>Tutup</span>
+      </button>
+
       {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-3 shrink-0 border-b border-slate-100">
-        <span style={{ color: '#015c61', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.05rem' }}>
+      <div className="flex items-center justify-between px-6 pt-6 pb-3 shrink-0 border-b border-slate-100 pr-24">
+        <span style={{ color: '#1B3258', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.05rem' }}>
           Scan QR Praktikan
         </span>
-        <button
-          onClick={onClose}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-slate-200"
-          style={{ background: '#f1f5f9' }}
-        >
-          <Icon name="x" size={18} color="#475569" />
-        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 pb-4">
@@ -163,7 +174,7 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
         <div className="flex items-center justify-center py-4">
           <div
             className="relative rounded-3xl overflow-hidden"
-            style={{ width: '100%', maxWidth: '340px', aspectRatio: '3/4', background: '#0f172a', boxShadow: '0 16px 36px rgba(1,92,97,0.15)', border: '4px solid #e0f7fa' }}
+            style={{ width: '100%', maxWidth: '340px', aspectRatio: '3/4', background: '#1B3258', boxShadow: '0 16px 36px rgba(92, 139, 200,0.2)', border: '4px solid #C6DBF2' }}
           >
             <video
               ref={videoRef}
@@ -185,7 +196,7 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
                     {cameraError}
                   </p>
                 ) : (
-                  <span style={{ color: '#64748b', fontFamily: 'var(--font-heading)', fontWeight: 700, letterSpacing: '0.15em', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#A5C3E8', fontFamily: 'var(--font-heading)', fontWeight: 700, letterSpacing: '0.15em', fontSize: '0.9rem' }}>
                     VIEWFINDER
                   </span>
                 )}
@@ -196,7 +207,7 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
               <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center">
                 <span
                   className="px-3.5 py-1 rounded-full shadow-md"
-                  style={{ background: 'rgba(1,92,97,0.85)', backdropFilter: 'blur(4px)', color: '#ffffff', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em' }}
+                  style={{ background: 'rgba(27, 50, 88,0.85)', backdropFilter: 'blur(4px)', color: '#ffffff', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.05em' }}
                 >
                   MENCARI QR...
                 </span>
@@ -220,10 +231,10 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
                   bottom: pos.bottom,
                   width: 40,
                   height: 40,
-                  borderTop: pos.borderTop ? '4px solid #06aeb7' : undefined,
-                  borderLeft: pos.borderLeft ? '4px solid #06aeb7' : undefined,
-                  borderBottom: pos.borderBottom ? '4px solid #06aeb7' : undefined,
-                  borderRight: pos.borderRight ? '4px solid #06aeb7' : undefined,
+                  borderTop: pos.borderTop ? '4px solid #5C8BC8' : undefined,
+                  borderLeft: pos.borderLeft ? '4px solid #5C8BC8' : undefined,
+                  borderBottom: pos.borderBottom ? '4px solid #5C8BC8' : undefined,
+                  borderRight: pos.borderRight ? '4px solid #5C8BC8' : undefined,
                   borderRadius:
                     pos.borderTop && pos.borderLeft
                       ? '12px 0 0 0'
@@ -243,7 +254,7 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
           <div className="max-w-md mx-auto rounded-2xl p-5 mt-2" style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', boxShadow: '0 4px 16px rgba(0,0,0,0.05)' }}>
             {scanLoading && (
               <div className="flex items-center justify-center py-6">
-                <Icon name="loader" size={22} className="animate-spin" color="#015c61" />
+                <Icon name="loader" size={22} className="animate-spin" color="#2F4D7B" />
               </div>
             )}
             {scanError && !scanLoading && (
@@ -292,15 +303,30 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
       </div>
 
       {/* Bottom controls */}
-      <div className="px-8 pb-10 pt-4 flex items-center justify-center gap-10 shrink-0 border-t border-slate-100">
+      <div className="px-8 pb-10 pt-4 flex items-center justify-center gap-8 sm:gap-12 shrink-0 border-t border-slate-100">
+        {/* Tombol Tutup Scanner */}
+        <div className="flex flex-col items-center gap-2">
+          <button
+            onClick={onClose}
+            className="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 shadow-xs cursor-pointer"
+            title="Tutup Scanner"
+          >
+            <Icon name="x" size={20} color="#e11d48" />
+          </button>
+          <span style={{ color: '#e11d48', fontSize: '0.68rem', textAlign: 'center', fontWeight: 600 }}>
+            Tutup<br />Scanner
+          </span>
+        </div>
+
+        {/* Tombol Kamera / Scan */}
         <div className="flex flex-col items-center gap-2">
           <button
             onClick={mode === 'result' ? handleScanAgain : undefined}
             disabled={mode === 'scan'}
-            className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-105"
+            className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-105 cursor-pointer"
             style={{
-              background: 'linear-gradient(135deg,#015c61,#06aeb7)',
-              boxShadow: '0 8px 24px rgba(1,92,97,0.35)',
+              background: '#537AB8',
+              boxShadow: '0 8px 24px rgba(92,139,200,0.4)',
               opacity: mode === 'scan' ? 0.85 : 1,
             }}
           >
@@ -310,18 +336,19 @@ export default function QRScannerOverlay({ onClose, onDecode, scanResult, scanLo
               <Icon name="camera" size={24} color="white" />
             )}
           </button>
-          <span style={{ color: '#015c61', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+          <span style={{ color: '#2F4D7B', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em' }}>
             {mode === 'scan' ? 'SCANNING...' : 'TAP TO SCAN'}
           </span>
         </div>
 
+        {/* Tombol Unggah Galeri */}
         <div className="flex flex-col items-center gap-2">
           <button
             onClick={() => galleryInputRef.current?.click()}
-            className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-teal-50"
-            style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0' }}
+            className="w-12 h-12 rounded-full flex items-center justify-center transition-all hover:bg-blue-50 cursor-pointer"
+            style={{ background: '#f8fafc', border: '1.5px solid #C6DBF2' }}
           >
-            <Icon name="image" size={20} color="#015c61" />
+            <Icon name="image" size={20} color="#2F4D7B" />
           </button>
           <span style={{ color: '#64748b', fontSize: '0.68rem', textAlign: 'center', fontWeight: 500 }}>
             Unggah dari<br />Galeri
