@@ -71,22 +71,22 @@ function IcalLogoIcon({ className = 'w-8 h-8' }: { className?: string }) {
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <path
         d="M24 4L42 14.5V33.5L24 44L6 33.5V14.5L24 4Z"
-        stroke="#C6DBF2"
+        stroke="#D6E4F0"
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
       <path
         d="M24 4V24M42 14.5L24 24M6 14.5L24 24M24 24V44"
-        stroke="#2F4D7B"
+        stroke="#FFFFFF"
         strokeWidth="3.5"
         strokeLinejoin="round"
       />
       <path
         d="M24 24L33 19V29L24 34L15 29V19L24 24Z"
-        stroke="#5C8BC8"
+        stroke="#0284C7"
         strokeWidth="2.5"
         strokeLinejoin="round"
-        fill="rgba(92, 139, 200, 0.18)"
+        fill="rgba(2, 96, 212, 0.15)"
       />
     </svg>
   )
@@ -101,7 +101,7 @@ function MolecularPattern({ className = '' }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg"
       className={`pointer-events-none ${className}`}
     >
-      <g stroke="#C6DBF2" strokeWidth="1.2" opacity="0.45">
+      <g stroke="#D6E4F0" strokeWidth="1.2" opacity="0.45">
         <line x1="40" y1="50" x2="110" y2="30" />
         <line x1="110" y1="30" x2="170" y2="70" />
         <line x1="170" y1="70" x2="150" y2="140" />
@@ -122,13 +122,13 @@ function MolecularPattern({ className = '' }: { className?: string }) {
         [40, 50], [110, 30], [170, 70], [150, 140], [90, 160], [40, 120],
         [230, 50], [270, 100], [230, 150], [70, 220], [180, 210]
       ].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="3.5" fill="#5C8BC8" opacity="0.7" />
+        <circle key={i} cx={cx} cy={cy} r="3.5" fill="#0284C7" opacity="0.7" />
       ))}
     </svg>
   )
 }
 
-// Background Wave Gradien Khusus Banner Jadwal & Nilai
+// Background Wave Gradien Khusus Banner (Ultra Deep Navy High-Tech)
 function BannerWavesBackground() {
   return (
     <svg
@@ -139,34 +139,50 @@ function BannerWavesBackground() {
       preserveAspectRatio="none"
     >
       <defs>
-        <linearGradient id="bannerBgGrad" x1="0" y1="0" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#EEF4FB" />
-          <stop offset="0.5" stopColor="#F0F5FC" />
-          <stop offset="1" stopColor="#FFFFFF" />
+        <linearGradient id="deepNavyBannerBgStudent" x1="0" y1="0" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#000B1A" />
+          <stop offset="0.45" stopColor="#00183F" />
+          <stop offset="1" stopColor="#002B66" />
         </linearGradient>
-        <linearGradient id="waveGrad1" x1="0" y1="60" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#DBEAFE" stopOpacity="0.75" />
-          <stop offset="1" stopColor="#C6DBF2" stopOpacity="0.85" />
-        </linearGradient>
-        <linearGradient id="waveGrad2" x1="0" y1="100" x2="1000" y2="160" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#C6DBF2" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#5C8BC8" stopOpacity="0.95" />
-        </linearGradient>
+        <radialGradient id="bannerGlowCyanStudent" cx="860" cy="75" r="260" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#38BDF8" stopOpacity="0.25" />
+          <stop offset="0.65" stopColor="#0284C7" stopOpacity="0.08" />
+          <stop offset="1" stopColor="#000B1A" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="bannerGlowBlueStudent" cx="140" cy="45" r="220" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#0260D4" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#000B1A" stopOpacity="0" />
+        </radialGradient>
       </defs>
 
-      <rect width="1000" height="160" fill="#537AB8" />
+      {/* Deep Navy Base & Ambient Lighting */}
+      <rect width="1000" height="160" fill="url(#deepNavyBannerBgStudent)" />
+      <rect width="1000" height="160" fill="url(#bannerGlowCyanStudent)" />
+      <rect width="1000" height="160" fill="url(#bannerGlowBlueStudent)" />
 
+      {/* High-Tech Dot Matrix Pattern */}
+      <g opacity="0.16">
+        {Array.from({ length: 15 }).map((_, r) =>
+          Array.from({ length: 5 }).map((_, c) => (
+            <circle key={`dot-${r}-${c}`} cx={380 + r * 30} cy={18 + c * 26} r="1.2" fill="#BAE6FD" />
+          ))
+        )}
+      </g>
+
+      {/* Wave 1: Flowing Sky Blue Ambient Ribbon */}
       <path
-        d="M0 160C140 125 280 155 450 120C620 85 780 145 1000 95V160H0Z"
-        fill="#BAD6EB"
+        d="M0 160C140 120 280 148 450 115C620 80 780 138 1000 90V160H0Z"
+        fill="rgba(56, 189, 248, 0.08)"
       />
 
+      {/* Wave 2: Luminous Deep Royal Blue Curve */}
       <path
-        d="M0 160C160 140 340 165 520 135C700 105 860 150 1000 125V160H0Z"
-        fill="#EEF5FA"
+        d="M0 160C160 135 340 158 520 128C700 98 860 142 1000 115V160H0Z"
+        fill="rgba(2, 96, 212, 0.16)"
       />
 
-      <g stroke="#5C8BC8" strokeWidth="1.2" opacity="0.35">
+      {/* High-Tech Circuit & Molecular Constellation in Center-Right */}
+      <g stroke="#38BDF8" strokeWidth="1.2" opacity="0.4">
         <line x1="580" y1="40" x2="630" y2="25" />
         <line x1="630" y1="25" x2="670" y2="55" />
         <line x1="670" y1="55" x2="655" y2="100" />
@@ -179,15 +195,15 @@ function BannerWavesBackground() {
         <line x1="745" y1="75" x2="715" y2="110" />
         <line x1="715" y1="110" x2="655" y2="100" />
 
-        <circle cx="580" cy="40" r="3" fill="#5C8BC8" />
-        <circle cx="630" cy="25" r="3" fill="#5C8BC8" />
-        <circle cx="670" cy="55" r="3" fill="#5C8BC8" />
-        <circle cx="655" cy="100" r="3" fill="#5C8BC8" />
-        <circle cx="610" cy="115" r="3" fill="#5C8BC8" />
-        <circle cx="580" cy="85" r="3" fill="#5C8BC8" />
-        <circle cx="715" cy="40" r="3" fill="#5C8BC8" />
-        <circle cx="745" cy="75" r="3" fill="#5C8BC8" />
-        <circle cx="715" cy="110" r="3" fill="#5C8BC8" />
+        <circle cx="580" cy="40" r="3" fill="#38BDF8" />
+        <circle cx="630" cy="25" r="3" fill="#38BDF8" />
+        <circle cx="670" cy="55" r="3" fill="#38BDF8" />
+        <circle cx="655" cy="100" r="3" fill="#38BDF8" />
+        <circle cx="610" cy="115" r="3" fill="#38BDF8" />
+        <circle cx="580" cy="85" r="3" fill="#38BDF8" />
+        <circle cx="715" cy="40" r="3" fill="#38BDF8" />
+        <circle cx="745" cy="75" r="3" fill="#38BDF8" />
+        <circle cx="715" cy="110" r="3" fill="#38BDF8" />
       </g>
     </svg>
   )
@@ -195,13 +211,13 @@ function BannerWavesBackground() {
 
 function BarChartCircleBadge() {
   return (
-    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-white/95 backdrop-blur-xs border-2 border-white/90 shadow-md flex items-center justify-center shrink-0">
+    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md flex items-center justify-center shrink-0">
       <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-9 h-9">
-        <rect x="4" y="20" width="4.5" height="12" rx="2" fill="#1B3258" />
-        <rect x="11.5" y="10" width="4.5" height="22" rx="2" fill="#2F4D7B" />
-        <rect x="19" y="16" width="4.5" height="16" rx="2" fill="#5C8BC8" />
-        <rect x="26.5" y="22" width="4.5" height="10" rx="2" fill="#C6DBF2" />
-        <circle cx="28.75" cy="14" r="2" fill="#5C8BC8" />
+        <rect x="4" y="20" width="4.5" height="12" rx="2" fill="#38BDF8" />
+        <rect x="11.5" y="10" width="4.5" height="22" rx="2" fill="#0284C7" />
+        <rect x="19" y="16" width="4.5" height="16" rx="2" fill="#0284C7" />
+        <rect x="26.5" y="22" width="4.5" height="10" rx="2" fill="#D6E4F0" />
+        <circle cx="28.75" cy="14" r="2" fill="#0284C7" />
       </svg>
     </div>
   )
@@ -209,17 +225,17 @@ function BarChartCircleBadge() {
 
 function CalendarCircleBadge() {
   return (
-    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-white/95 backdrop-blur-xs border-2 border-white/90 shadow-md flex items-center justify-center shrink-0">
+    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md flex items-center justify-center shrink-0">
       <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
-        <rect x="4" y="8" width="28" height="24" rx="6" fill="#ffffff" stroke="#2F4D7B" strokeWidth="2.2" />
-        <path d="M4 14H32" stroke="#2F4D7B" strokeWidth="2.2" />
-        <line x1="10" y1="5" x2="10" y2="10" stroke="#2F4D7B" strokeWidth="2.2" strokeLinecap="round" />
-        <line x1="26" y1="5" x2="26" y2="10" stroke="#2F4D7B" strokeWidth="2.2" strokeLinecap="round" />
-        <circle cx="11" cy="20" r="1.5" fill="#C6DBF2" />
-        <circle cx="18" cy="20" r="1.5" fill="#C6DBF2" />
-        <circle cx="25" cy="20" r="1.5" fill="#C6DBF2" />
-        <circle cx="11" cy="26" r="1.5" fill="#C6DBF2" />
-        <circle cx="18" cy="26" r="1.5" fill="#1B3258" />
+        <rect x="4" y="8" width="28" height="24" rx="6" fill="#ffffff" stroke="#FFFFFF" strokeWidth="2.2" />
+        <path d="M4 14H32" stroke="#FFFFFF" strokeWidth="2.2" />
+        <line x1="10" y1="5" x2="10" y2="10" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" />
+        <line x1="26" y1="5" x2="26" y2="10" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="11" cy="20" r="1.5" fill="#D6E4F0" />
+        <circle cx="18" cy="20" r="1.5" fill="#D6E4F0" />
+        <circle cx="25" cy="20" r="1.5" fill="#D6E4F0" />
+        <circle cx="11" cy="26" r="1.5" fill="#D6E4F0" />
+        <circle cx="18" cy="26" r="1.5" fill="#38BDF8" />
       </svg>
     </div>
   )
@@ -230,31 +246,31 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
     <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
         <filter id="clipShadow" x="-10" y="-5" width="180" height="170" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#1B3258" floodOpacity="0.18" />
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#00142F" floodOpacity="0.18" />
         </filter>
         <linearGradient id="boardGrad" x1="28" y1="24" x2="132" y2="148" gradientUnits="userSpaceOnUse">
           <stop stopColor="#ffffff" />
-          <stop offset="1" stopColor="#EEF4FB" />
+          <stop offset="1" stopColor="#F0F7FF" />
         </linearGradient>
         <linearGradient id="clipMetal" x1="56" y1="16" x2="104" y2="34" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#C6DBF2" />
-          <stop offset="1" stopColor="#2F4D7B" />
+          <stop stopColor="#D6E4F0" />
+          <stop offset="1" stopColor="#002466" />
         </linearGradient>
         <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#C6DBF2" />
-          <stop offset="1" stopColor="#2F4D7B" />
+          <stop stopColor="#D6E4F0" />
+          <stop offset="1" stopColor="#002466" />
         </linearGradient>
         <linearGradient id="barGrad2" x1="0" y1="0" x2="0" y2="1">
           <stop stopColor="#DBEAFE" />
-          <stop offset="1" stopColor="#5C8BC8" />
+          <stop offset="1" stopColor="#0284C7" />
         </linearGradient>
         <linearGradient id="pie1" x1="0" y1="0" x2="1" y2="1">
-          <stop stopColor="#C6DBF2" />
-          <stop offset="1" stopColor="#2F4D7B" />
+          <stop stopColor="#D6E4F0" />
+          <stop offset="1" stopColor="#002466" />
         </linearGradient>
         <linearGradient id="pie2" x1="0" y1="0" x2="1" y2="1">
           <stop stopColor="#DBEAFE" />
-          <stop offset="1" stopColor="#5C8BC8" />
+          <stop offset="1" stopColor="#0284C7" />
         </linearGradient>
       </defs>
 
@@ -266,7 +282,7 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
           height="124"
           rx="18"
           fill="url(#boardGrad)"
-          stroke="#C6DBF2"
+          stroke="#D6E4F0"
           strokeWidth="2.5"
           filter="url(#clipShadow)"
         />
@@ -286,18 +302,18 @@ function NilaiBannerIllustration({ className = 'w-36 h-36' }: { className?: stri
         <rect x="53.5" y="52" width="6.5" height="32" rx="2" fill="url(#barGrad2)" />
         <rect x="63" y="60" width="6.5" height="24" rx="2" fill="url(#barGrad1)" />
 
-        <rect x="78" y="54" width="34" height="4" rx="2" fill="#C6DBF2" />
-        <rect x="78" y="63" width="30" height="4" rx="2" fill="#C6DBF2" />
-        <rect x="78" y="72" width="24" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="78" y="54" width="34" height="4" rx="2" fill="#D6E4F0" />
+        <rect x="78" y="63" width="30" height="4" rx="2" fill="#D6E4F0" />
+        <rect x="78" y="72" width="24" height="4" rx="2" fill="#D6E4F0" />
 
-        <rect x="44" y="98" width="32" height="4" rx="2" fill="#C6DBF2" />
-        <rect x="44" y="106" width="26" height="4" rx="2" fill="#C6DBF2" />
-        <rect x="44" y="114" width="30" height="4" rx="2" fill="#C6DBF2" />
+        <rect x="44" y="98" width="32" height="4" rx="2" fill="#D6E4F0" />
+        <rect x="44" y="106" width="26" height="4" rx="2" fill="#D6E4F0" />
+        <rect x="44" y="114" width="30" height="4" rx="2" fill="#D6E4F0" />
 
         <g transform="translate(96, 108)">
           <path d="M0 0 L15 0 A15 15 0 0 1 0 15 Z" fill="url(#pie1)" />
           <path d="M0 0 L0 15 A15 15 0 1 1 0 -15 Z" fill="url(#pie2)" />
-          <path d="M0 0 L0 -15 A15 15 0 0 1 15 0 Z" fill="#1B3258" />
+          <path d="M0 0 L0 -15 A15 15 0 0 1 15 0 Z" fill="#38BDF8" />
           <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
         </g>
 
@@ -313,15 +329,15 @@ function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: s
     <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <defs>
         <filter id="calShadow" x="-10" y="-5" width="180" height="170" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#1B3258" floodOpacity="0.18" />
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#00142F" floodOpacity="0.18" />
         </filter>
         <linearGradient id="calHeader" x1="28" y1="26" x2="132" y2="52" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#1B3258" />
-          <stop offset="1" stopColor="#2F4D7B" />
+          <stop stopColor="#00142F" />
+          <stop offset="1" stopColor="#002466" />
         </linearGradient>
         <linearGradient id="clockRing" x1="85" y1="85" x2="140" y2="140" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2F4D7B" />
-          <stop offset="1" stopColor="#C6DBF2" />
+          <stop stopColor="#002466" />
+          <stop offset="1" stopColor="#D6E4F0" />
         </linearGradient>
       </defs>
 
@@ -333,7 +349,7 @@ function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: s
           height="106"
           rx="18"
           fill="#ffffff"
-          stroke="#C6DBF2"
+          stroke="#D6E4F0"
           strokeWidth="2.5"
           filter="url(#calShadow)"
         />
@@ -345,7 +361,7 @@ function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: s
 
         {[48, 80, 112].map((cx, i) => (
           <g key={i}>
-            <rect x={cx - 3.5} y="18" width="7" height="16" rx="3.5" fill="#1B3258" stroke="#ffffff" strokeWidth="1.5" />
+            <rect x={cx - 3.5} y="18" width="7" height="16" rx="3.5" fill="#38BDF8" stroke="#ffffff" strokeWidth="1.5" />
             <circle cx={cx} cy="26" r="2" fill="#ffffff" />
           </g>
         ))}
@@ -353,7 +369,7 @@ function CalendarBannerIllustration({ className = 'w-36 h-36' }: { className?: s
         <g opacity="0.85">
           <rect x="40" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
           <rect x="60" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
-          <rect x="80" y="66" width="14" height="10" rx="3" fill="#5C8BC8" />
+          <rect x="80" y="66" width="14" height="10" rx="3" fill="#0284C7" />
           <rect x="100" y="66" width="14" height="10" rx="3" fill="#EEF6FE" />
 
           <rect x="40" y="82" width="14" height="10" rx="3" fill="#EEF6FE" />
@@ -531,7 +547,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   const currentJurusanKode = studentInfo?.jurusanKode || DEFAULT_STUDENT_INFO.jurusanKode
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: '#F0F5FC', color: '#1B3258' }}>
+    <div className="min-h-screen flex flex-col lg:flex-row" style={{ background: '#F4F8FC', color: '#00142F' }}>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -542,7 +558,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
       {/* ===================== SIDEBAR ===================== */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#C6DBF2] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-[#D6E4F0] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden ${
           sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
@@ -551,7 +567,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
           {/* Logo ICAL Text */}
           <div className="mb-6">
             <h1
-              className="text-2xl sm:text-[1.75rem] font-extrabold text-[#1B3258] tracking-tight leading-none"
+              className="text-2xl sm:text-[1.75rem] font-extrabold text-[#00142F] tracking-tight leading-none"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               ICAL
@@ -562,19 +578,19 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
           <div className="flex items-center gap-3.5 mb-7">
             <div
               className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 shadow-xs"
-              style={{ background: '#2F4D7B' }}
+              style={{ background: '#002466' }}
             >
               {getInitials(effectiveName)}
             </div>
             <div className="min-w-0 flex-1">
               <div
-                className="font-bold text-[#1B3258] text-sm leading-snug truncate"
+                className="font-bold text-[#00142F] text-sm leading-snug truncate"
                 style={{ fontFamily: 'var(--font-heading)' }}
                 title={effectiveName}
               >
                 {effectiveName}
               </div>
-              <div className="text-[11px] text-[#2F4D7B] font-medium truncate mt-0.5">
+              <div className="text-[11px] text-[#002466] font-medium truncate mt-0.5">
                 Praktikan • Kelompok {currentNamaKelompok}
               </div>
             </div>
@@ -594,13 +610,14 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 cursor-pointer text-left ${
                     isActive
                       ? 'text-white'
-                      : 'text-[#2F4D7B] hover:bg-[#EEF4FB] hover:text-[#2F4D7B]'
+                      : 'text-[#002466] hover:bg-[#F0F7FF] hover:text-[#002466]'
                   }`}
                   style={
                     isActive
                       ? {
-                          background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
-                          boxShadow: '0 6px 18px rgba(92, 139, 200, 0.35)',
+                          background: 'linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)',
+                          boxShadow: '0 6px 18px rgba(0, 11, 26, 0.4)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
                         }
                       : {}
                   }
@@ -608,7 +625,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   <Icon
                     name={link.icon}
                     size={20}
-                    color={isActive ? '#ffffff' : '#2F4D7B'}
+                    color={isActive ? '#ffffff' : '#002466'}
                     strokeWidth={isActive ? 2.2 : 1.8}
                   />
                   <span style={{ fontFamily: 'var(--font-heading)' }}>{link.label}</span>
@@ -630,13 +647,13 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             >
               <defs>
                 <linearGradient id="sidebarWaveCyan" x1="0" y1="0" x2="288" y2="200" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#C6DBF2" />
-                  <stop offset="1" stopColor="#5C8BC8" />
+                  <stop stopColor="#D6E4F0" />
+                  <stop offset="1" stopColor="#0284C7" />
                 </linearGradient>
                 <linearGradient id="sidebarWaveDark" x1="0" y1="50" x2="288" y2="320" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#2F4D7B" />
-                  <stop offset="0.5" stopColor="#243E6B" />
-                  <stop offset="1" stopColor="#1B3258" />
+                  <stop stopColor="#002466" />
+                  <stop offset="0.5" stopColor="#001C4A" />
+                  <stop offset="1" stopColor="#00142F" />
                 </linearGradient>
               </defs>
 
@@ -651,7 +668,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                 fill="#162D4E"
               />
 
-              <g stroke="#C6DBF2" strokeWidth="1.2" opacity="0.45">
+              <g stroke="#D6E4F0" strokeWidth="1.2" opacity="0.45">
                 <line x1="210" y1="50" x2="250" y2="30" />
                 <line x1="250" y1="30" x2="280" y2="55" />
                 <line x1="280" y1="55" x2="270" y2="95" />
@@ -682,7 +699,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   cx={cx}
                   cy={cy}
                   r="3.5"
-                  fill={cy > 150 ? '#ffffff' : '#C6DBF2'}
+                  fill={cy > 150 ? '#ffffff' : '#D6E4F0'}
                   opacity={cy > 150 ? 0.6 : 0.75}
                 />
               ))}
@@ -705,16 +722,16 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
       {/* ===================== MAIN CONTENT ===================== */}
       <div className="flex-1 lg:ml-72 flex flex-col min-w-0">
         {/* Top Bar Header */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#C6DBF2] px-6 sm:px-8 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#D6E4F0] px-6 sm:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-[#2F4D7B] hover:bg-[#EEF4FB] cursor-pointer"
+              className="lg:hidden p-2 rounded-xl text-[#002466] hover:bg-[#F0F7FF] cursor-pointer"
             >
               <Icon name="menu" size={22} />
             </button>
             <h1
-              className="text-lg sm:text-xl font-bold text-[#1B3258]"
+              className="text-lg sm:text-xl font-bold text-[#00142F]"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               Dashboard Praktikan
@@ -725,18 +742,18 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#C6DBF2] rounded-2xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-white border border-[#D6E4F0] rounded-2xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
               >
-                <span className="text-xs sm:text-sm font-semibold text-[#1B3258]" style={{ fontFamily: 'var(--font-heading)' }}>
+                <span className="text-xs sm:text-sm font-semibold text-[#00142F]" style={{ fontFamily: 'var(--font-heading)' }}>
                   {effectiveName}
                 </span>
                 <Icon name="chevron-down" size={15} color="#64748b" strokeWidth={2} />
               </button>
 
               {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#C6DBF2] py-2 z-50 animate-fadeInUp">
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#D6E4F0] py-2 z-50 animate-fadeInUp">
                   <div className="px-4 py-2 border-b border-slate-100">
-                    <div className="text-xs font-bold text-[#1B3258] truncate">{effectiveName}</div>
+                    <div className="text-xs font-bold text-[#00142F] truncate">{effectiveName}</div>
                     <div className="text-[0.7rem] text-slate-500">NIM: {effectiveNim}</div>
                   </div>
                   <button
@@ -744,9 +761,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                       setUserDropdownOpen(false)
                       setActiveSection('qr')
                     }}
-                    className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-[#EEF4FB] flex items-center gap-2 cursor-pointer"
+                    className="w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-[#F0F7FF] flex items-center gap-2 cursor-pointer"
                   >
-                    <Icon name="qr-code" size={14} color="#2F4D7B" /> QR Absensi Saya
+                    <Icon name="qr-code" size={14} color="#002466" /> QR Absensi Saya
                   </button>
                   <button
                     onClick={onLogout}
@@ -770,8 +787,8 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
               />
               <defs>
                 <linearGradient id="bottomDecorWave" x1="100" y1="200" x2="500" y2="300" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#C6DBF2" stopOpacity="0.4" />
-                  <stop offset="1" stopColor="#5C8BC8" stopOpacity="0.15" />
+                  <stop stopColor="#D6E4F0" stopOpacity="0.4" />
+                  <stop offset="1" stopColor="#0284C7" stopOpacity="0.15" />
                 </linearGradient>
               </defs>
             </svg>
@@ -785,7 +802,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                 <div
                   className="rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"
                   style={{
-                    background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                    background: 'linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)', boxShadow: '0 16px 36px -10px rgba(0,11,26,0.5)', border: '1px solid rgba(255, 255, 255, 0.12)',
                   }}
                 >
                   <div className="relative z-10 max-w-xl">
@@ -795,7 +812,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     >
                       Halo, {effectiveName}!
                     </h2>
-                    <p className="text-[#C6DBF2] text-xs sm:text-sm mt-2 font-normal leading-relaxed">
+                    <p className="text-[#D6E4F0] text-xs sm:text-sm mt-2 font-normal leading-relaxed">
                       Selamat datang praktikan ICAL, Semester Ganjil 2026/2027
                     </p>
                   </div>
@@ -806,12 +823,12 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                 </div>
 
                 {/* Info Kelompokku Card */}
-                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#C6DBF2] shadow-xs relative">
+                <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#D6E4F0] shadow-xs relative">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2.5">
-                      <Icon name="users" size={20} color="#2F4D7B" strokeWidth={2} />
+                      <Icon name="users" size={20} color="#002466" strokeWidth={2} />
                       <h3
-                        className="font-bold text-[#1B3258] text-base sm:text-lg"
+                        className="font-bold text-[#00142F] text-base sm:text-lg"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Info Kelompokku
@@ -820,7 +837,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                     <div className="grid grid-cols-4 gap-1.5 opacity-20 pointer-events-none">
                       {Array.from({ length: 12 }).map((_, i) => (
-                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#5C8BC8]" />
+                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-[#0284C7]" />
                       ))}
                     </div>
                   </div>
@@ -828,53 +845,53 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   {/* 4 Metric Cards Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
                     {/* 1. Kelompok */}
-                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F4F8FC] hover:bg-[#0260D4] hover: hover: active:bg-[#0260D4] active: active: border border-[#D6E4F0] hover:border-[#D6E4F0] active:border-[#D6E4F0] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(2, 96, 212, 0.25)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#002466] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="users" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#00142F] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentNamaKelompok}
                         </div>
-                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Kelompok</div>
+                        <div className="text-xs text-[#64748B] group-hover:text-[#D6E4F0] group-active:text-[#D6E4F0] mt-0.5 font-medium transition-colors duration-300">Kelompok</div>
                       </div>
                     </div>
 
                     {/* 2. Shift */}
-                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F4F8FC] hover:bg-[#0260D4] hover: hover: active:bg-[#0260D4] active: active: border border-[#D6E4F0] hover:border-[#D6E4F0] active:border-[#D6E4F0] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(2, 96, 212, 0.25)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#002466] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="building" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#00142F] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentShift}
                         </div>
-                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Shift</div>
+                        <div className="text-xs text-[#64748B] group-hover:text-[#D6E4F0] group-active:text-[#D6E4F0] mt-0.5 font-medium transition-colors duration-300">Shift</div>
                       </div>
                     </div>
 
                     {/* 3. Asisten */}
-                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: hover: active:bg-[#537AB8] active: active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-400 hover:-translate-y-2 hover:scale-[1.02] active:scale-95 hover:shadow-[0_16px_30px_-6px_rgba(92, 139, 200,0.45)] active:shadow-lg cursor-pointer select-none touch-manipulation">
-                      <div className="absolute inset-0 bg-[#537AB8] from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full group-active:translate-x-full transition-transform duration-700 pointer-events-none" />
+                    <div className="group relative overflow-hidden bg-[#F4F8FC] hover:bg-[#0260D4] hover: hover: hover: active:bg-[#0260D4] active: active: active: border border-[#D6E4F0] hover:border-[#D6E4F0] active:border-[#D6E4F0] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-400 hover:-translate-y-2 hover:scale-[1.02] active:scale-95 hover:shadow-[0_16px_30px_-6px_rgba(92, 139, 200,0.45)] active:shadow-lg cursor-pointer select-none touch-manipulation">
+                      <div className="absolute inset-0 bg-[#0260D4] from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full group-active:translate-x-full transition-transform duration-700 pointer-events-none" />
 
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 group-hover:ring-2 group-hover:ring-white/40 group-active:ring-2 group-active:ring-white/40 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-115 group-active:scale-115 group-hover:rotate-3">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 group-hover:ring-2 group-hover:ring-white/40 group-active:ring-2 group-active:ring-white/40 flex items-center justify-center text-[#002466] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-115 group-active:scale-115 group-hover:rotate-3">
                         <Icon name="user" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div className="min-w-0">
                         <div
-                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight truncate max-w-[130px] transition-colors duration-300"
+                          className="font-bold text-[#00142F] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight truncate max-w-[130px] transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                           title={currentAsisten}
                         >
                           {currentAsisten}
                         </div>
-                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300 flex items-center gap-1">
+                        <div className="text-xs text-[#64748B] group-hover:text-[#D6E4F0] group-active:text-[#D6E4F0] mt-0.5 font-medium transition-colors duration-300 flex items-center gap-1">
                           <span>Asisten</span>
                           <span className="opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 text-[10px] text-amber-200">✨</span>
                         </div>
@@ -882,36 +899,36 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     </div>
 
                     {/* 4. Praktikum */}
-                    <div className="group relative overflow-hidden bg-[#F0F5FC] hover:bg-[#537AB8] hover: hover: active:bg-[#537AB8] active: active: border border-[#C6DBF2] hover:border-[#C6DBF2] active:border-[#C6DBF2] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(92, 139, 200,0.35)] active:shadow-md cursor-pointer select-none touch-manipulation">
-                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#2F4D7B] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
+                    <div className="group relative overflow-hidden bg-[#F4F8FC] hover:bg-[#0260D4] hover: hover: active:bg-[#0260D4] active: active: border border-[#D6E4F0] hover:border-[#D6E4F0] active:border-[#D6E4F0] rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 transition-all duration-300 hover:-translate-y-1.5 active:scale-95 hover:shadow-[0_12px_24px_-6px_rgba(2, 96, 212, 0.25)] active:shadow-md cursor-pointer select-none touch-manipulation">
+                      <div className="w-10 h-10 rounded-xl bg-white group-hover:bg-white/20 group-active:bg-white/20 flex items-center justify-center text-[#002466] group-hover:text-white group-active:text-white shrink-0 shadow-2xs transition-all duration-300 group-hover:scale-110 group-active:scale-110">
                         <Icon name="flask" size={20} color="currentColor" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
+                          className="font-bold text-[#00142F] group-hover:text-white group-active:text-white text-base sm:text-lg leading-tight transition-colors duration-300"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           {currentPraktikumKode}
                         </div>
-                        <div className="text-xs text-[#5D789B] group-hover:text-[#C6DBF2] group-active:text-[#C6DBF2] mt-0.5 font-medium transition-colors duration-300">Praktikum</div>
+                        <div className="text-xs text-[#64748B] group-hover:text-[#D6E4F0] group-active:text-[#D6E4F0] mt-0.5 font-medium transition-colors duration-300">Praktikum</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Horizontal Metadata */}
-                  <div className="mt-5 pt-4 border-t border-[#C6DBF2] flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[#2F4D7B]">
-                    <span className="flex items-center gap-2 font-medium text-[#2F4D7B]">
-                      <Icon name="clock" size={16} color="#2F4D7B" strokeWidth={1.8} />
+                  <div className="mt-5 pt-4 border-t border-[#D6E4F0] flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-[#002466]">
+                    <span className="flex items-center gap-2 font-medium text-[#002466]">
+                      <Icon name="clock" size={16} color="#002466" strokeWidth={1.8} />
                       {currentHari}, {currentJamMulai} - {currentJamSelesai} WIB
                     </span>
                     <span className="text-slate-300 hidden sm:inline">|</span>
-                    <span className="flex items-center gap-2 text-[#2F4D7B] font-medium">
-                      <Icon name="map-pin" size={16} color="#5C8BC8" strokeWidth={1.8} />
+                    <span className="flex items-center gap-2 text-[#002466] font-medium">
+                      <Icon name="map-pin" size={16} color="#0284C7" strokeWidth={1.8} />
                       {currentRuangan}
                     </span>
                     <span className="text-slate-300 hidden sm:inline">|</span>
-                    <span className="flex items-center gap-2 text-[#2F4D7B] font-medium">
-                      <Icon name="users" size={16} color="#5C8BC8" strokeWidth={1.8} />
+                    <span className="flex items-center gap-2 text-[#002466] font-medium">
+                      <Icon name="users" size={16} color="#0284C7" strokeWidth={1.8} />
                       Kelas {currentNamaKelas} ({currentJurusanKode})
                     </span>
                   </div>
@@ -922,15 +939,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   {/* Card 1 */}
                   <div
                     onClick={() => setActiveSection('schedule')}
-                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#D6E4F0] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
-                        <Icon name="calendar" size={22} color="#2F4D7B" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466]">
+                        <Icon name="calendar" size={22} color="#002466" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#00142F] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           Lihat Jadwal
@@ -938,7 +955,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Cek jadwal praktikum</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
@@ -946,15 +963,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   {/* Card 2 */}
                   <div
                     onClick={() => setActiveSection('grades')}
-                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#D6E4F0] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
-                        <Icon name="bar-chart" size={22} color="#2F4D7B" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466]">
+                        <Icon name="bar-chart" size={22} color="#002466" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#00142F] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           Nilai Saya
@@ -962,7 +979,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Lihat nilai praktikum</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
@@ -970,15 +987,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   {/* Card 3 */}
                   <div
                     onClick={() => setActiveSection('qr')}
-                    className="bg-white rounded-3xl p-5 border border-[#C6DBF2] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
+                    className="bg-white rounded-3xl p-5 border border-[#D6E4F0] shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between cursor-pointer group hover:-translate-y-1"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B]">
-                        <Icon name="smartphone" size={22} color="#2F4D7B" strokeWidth={1.8} />
+                      <div className="w-12 h-12 rounded-2xl bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466]">
+                        <Icon name="smartphone" size={22} color="#002466" strokeWidth={1.8} />
                       </div>
                       <div>
                         <div
-                          className="font-bold text-[#1B3258] text-sm sm:text-base leading-tight"
+                          className="font-bold text-[#00142F] text-sm sm:text-base leading-tight"
                           style={{ fontFamily: 'var(--font-heading)' }}
                         >
                           QR Absensi
@@ -986,7 +1003,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         <div className="text-xs text-slate-500 mt-1">Scan untuk absensi</div>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center group-hover:translate-x-1 transition-transform shadow-xs shrink-0">
                       <Icon name="arrow-right" size={16} color="#ffffff" strokeWidth={2.2} />
                     </div>
                   </div>
@@ -998,18 +1015,17 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             {activeSection === 'schedule' && (
               <>
                 {/* Jadwal Banner */}
-                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#C6DBF2] min-h-[145px]">
+                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_16px_36px_-10px_rgba(0,11,26,0.5)] border border-white/15 min-h-[145px]" style={{ background: "linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)" }}>
                   <BannerWavesBackground />
                   <div className="flex items-center gap-4 sm:gap-5 relative z-10">
                     <CalendarCircleBadge />
                     <div className="max-w-md">
-                      <h2
-                        className="font-bold text-[#1B3258] text-xl sm:text-2xl tracking-tight"
+                      <h2 className="font-bold text-white text-xl sm:text-2xl tracking-tight"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Jadwal Pertemuan ({currentPraktikumKode})
                       </h2>
-                      <p className="text-xs sm:text-sm text-[#2F4D7B] mt-1 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#BAE6FD] mt-1 leading-relaxed">
                         Berikut adalah jadwal pertemuan Praktikan Laboratorium {currentPraktikumKode}.
                       </p>
                     </div>
@@ -1026,7 +1042,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     return (
                       <div
                         key={m.id || idx}
-                        className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-[#C6DBF2] shadow-xs hover:shadow-sm transition-all duration-200 flex items-center justify-between gap-3 sm:gap-4"
+                        className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-[#D6E4F0] shadow-xs hover:shadow-sm transition-all duration-200 flex items-center justify-between gap-3 sm:gap-4"
                       >
                         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                           <div className="text-slate-300 hidden sm:block shrink-0">
@@ -1036,7 +1052,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                           <div
                             className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xs"
                             style={{
-                              background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                              background: 'linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)', boxShadow: '0 16px 36px -10px rgba(0,11,26,0.5)', border: '1px solid rgba(255, 255, 255, 0.12)',
                             }}
                           >
                             <Icon name="check" size={20} color="#ffffff" strokeWidth={2.5} />
@@ -1044,13 +1060,13 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                           <div className="min-w-0">
                             <h4
-                              className="font-bold text-[#1B3258] text-sm sm:text-base leading-snug truncate"
+                              className="font-bold text-[#00142F] text-sm sm:text-base leading-snug truncate"
                               style={{ fontFamily: 'var(--font-heading)' }}
                             >
                               {m.label}
                             </h4>
-                            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#5D789B] mt-0.5">
-                              <Icon name="calendar" size={13} color="#5D789B" />
+                            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[#64748B] mt-0.5">
+                              <Icon name="calendar" size={13} color="#64748B" />
                               <span>{m.date}</span>
                             </div>
                           </div>
@@ -1072,18 +1088,17 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             {/* TAB 3: NILAI SAYA */}
             {activeSection === 'grades' && (
               <>
-                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm border border-[#C6DBF2] min-h-[145px]">
+                <div className="rounded-3xl relative overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_16px_36px_-10px_rgba(0,11,26,0.5)] border border-white/15 min-h-[145px]" style={{ background: "linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)" }}>
                   <BannerWavesBackground />
                   <div className="flex items-center gap-4 sm:gap-5 relative z-10">
                     <BarChartCircleBadge />
                     <div className="max-w-md">
-                      <h2
-                        className="font-bold text-[#1B3258] text-xl sm:text-2xl tracking-tight"
+                      <h2 className="font-bold text-white text-xl sm:text-2xl tracking-tight"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         Nilai Saya
                       </h2>
-                      <p className="text-xs sm:text-sm text-[#2F4D7B] mt-1 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-[#BAE6FD] mt-1 leading-relaxed">
                         Pantau perkembangan penilaian praktikummu dengan mudah dan transparan.
                       </p>
                     </div>
@@ -1097,15 +1112,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                 {/* Grade Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Card 1: Tugas Awal */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="clipboard-list" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#1B3258] text-base"
+                            className="font-bold text-[#00142F] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Tugas Awal
@@ -1113,9 +1128,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('ta')}
-                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
+                          <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1131,15 +1146,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1151,15 +1166,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   </div>
 
                   {/* Card 2: Tugas Rumah */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="home" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#1B3258] text-base"
+                            className="font-bold text-[#00142F] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Tugas Rumah
@@ -1167,9 +1182,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('tr')}
-                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
+                          <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1185,15 +1200,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1205,15 +1220,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                   </div>
 
                   {/* Card 3: Keaktifan */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#C6DBF2] shadow-xs flex flex-col justify-between">
+                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#2F4D7B] text-white flex items-center justify-center shadow-2xs">
+                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
                             <Icon name="star" size={17} color="#ffffff" strokeWidth={2} />
                           </div>
                           <h3
-                            className="font-bold text-[#1B3258] text-base"
+                            className="font-bold text-[#00142F] text-base"
                             style={{ fontFamily: 'var(--font-heading)' }}
                           >
                             Keaktifan
@@ -1221,9 +1236,9 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                         </div>
                         <button
                           onClick={() => toggleCollapse('p')}
-                          className="w-7 h-7 rounded-full bg-[#EEF4FB] border border-[#C6DBF2] flex items-center justify-center text-[#2F4D7B] hover:bg-[#C6DBF2] transition cursor-pointer"
+                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
                         >
-                          <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#2F4D7B" strokeWidth={2} />
+                          <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
                         </button>
                       </div>
 
@@ -1239,15 +1254,15 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                             return (
                               <div
                                 key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F0F5FC] last:border-0"
+                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#5C8BC8]" />
+                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
                                   <span className="text-sm font-medium text-slate-700">
                                     Pertemuan {num}
                                   </span>
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
                                   {score != null ? score : 'Belum dinilai'}
                                 </span>
                               </div>
@@ -1265,16 +1280,16 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
             {activeSection === 'qr' && (
               <>
                 <div className="flex items-center gap-2.5">
-                  <Icon name="qr-code" size={22} color="#2F4D7B" strokeWidth={2} />
+                  <Icon name="qr-code" size={22} color="#002466" strokeWidth={2} />
                   <h2
-                    className="font-bold text-[#1B3258] text-lg sm:text-xl"
+                    className="font-bold text-[#00142F] text-lg sm:text-xl"
                     style={{ fontFamily: 'var(--font-heading)' }}
                   >
                     QR Code Absensi
                   </h2>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#C6DBF2] shadow-xs relative overflow-hidden flex flex-col items-center justify-center text-center">
+                <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#D6E4F0] shadow-xs relative overflow-hidden flex flex-col items-center justify-center text-center">
                   <div className="absolute -top-6 -right-6 opacity-25 pointer-events-none">
                     <MolecularPattern className="w-60 h-48" />
                   </div>
@@ -1282,22 +1297,22 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                     <MolecularPattern className="w-60 h-48" />
                   </div>
 
-                  <div className="w-12 h-12 rounded-full bg-[#EEF4FB] flex items-center justify-center text-[#2F4D7B] mb-3 shadow-2xs">
-                    <Icon name="scan" size={22} color="#2F4D7B" strokeWidth={2} />
+                  <div className="w-12 h-12 rounded-full bg-[#F0F7FF] flex items-center justify-center text-[#002466] mb-3 shadow-2xs">
+                    <Icon name="scan" size={22} color="#002466" strokeWidth={2} />
                   </div>
 
-                  <p className="text-[#2F4D7B] text-xs sm:text-sm font-medium max-w-md mb-1 leading-relaxed">
+                  <p className="text-[#002466] text-xs sm:text-sm font-medium max-w-md mb-1 leading-relaxed">
                     Tunjukkan QR code ini kepada asisten untuk konfirmasi kehadiran
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-400 font-medium max-w-md mb-6 leading-relaxed">
                     Kode ini berganti otomatis setiap ~30 detik demi keamanan — screenshot lama tidak akan berlaku.
                   </p>
 
-                  <div className="relative p-4 rounded-3xl bg-white border-2 border-[#5C8BC8]/80 shadow-md">
-                    <div className="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-[#2F4D7B] rounded-tl-xl" />
-                    <div className="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-[#2F4D7B] rounded-tr-xl" />
-                    <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-[#2F4D7B] rounded-bl-xl" />
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-[#2F4D7B] rounded-br-xl" />
+                  <div className="relative p-4 rounded-3xl bg-white border-2 border-[#0284C7]/80 shadow-md">
+                    <div className="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-[#002466] rounded-tl-xl" />
+                    <div className="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-[#002466] rounded-tr-xl" />
+                    <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-[#002466] rounded-bl-xl" />
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-[#002466] rounded-br-xl" />
 
                     {qrDataUrl ? (
                       <img
@@ -1312,27 +1327,27 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                       </div>
                     ) : (
                       <div className="w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center text-slate-400">
-                        <Icon name="loader" size={28} className="animate-spin text-[#5C8BC8]" />
+                        <Icon name="loader" size={28} className="animate-spin text-[#0284C7]" />
                       </div>
                     )}
                   </div>
 
                   {qrDataUrl && !qrError && qrSecondsLeft !== null && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF4FB] text-[#2F4D7B] text-[11px] font-bold border border-[#C6DBF2]">
-                      <Icon name="loader" size={12} color="#2F4D7B" />
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F0F7FF] text-[#002466] text-[11px] font-bold border border-[#D6E4F0]">
+                      <Icon name="loader" size={12} color="#002466" />
                       Kode baru dalam {qrSecondsLeft}s
                     </div>
                   )}
 
                   <div className="mt-6">
                     <h3
-                      className="font-bold text-[#1B3258] text-lg sm:text-xl"
+                      className="font-bold text-[#00142F] text-lg sm:text-xl"
                       style={{ fontFamily: 'var(--font-heading)' }}
                     >
                       {effectiveName}
                     </h3>
                     <div className="text-xs sm:text-sm text-slate-500 mt-1">
-                      NIM: <span className="font-bold text-[#2F4D7B]">{effectiveNim}</span>
+                      NIM: <span className="font-bold text-[#002466]">{effectiveNim}</span>
                     </div>
                   </div>
 

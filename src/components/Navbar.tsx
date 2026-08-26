@@ -55,11 +55,11 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: scrolled ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.9)',
+          background: scrolled ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid #BAD6EB' : '1px solid rgba(186,214,235,0.6)',
-          boxShadow: scrolled ? '0 4px 20px rgba(83,122,184,0.1)' : 'none',
+          borderBottom: scrolled ? '1px solid #BED8F0' : '1px solid rgba(190,216,240,0.6)',
+          boxShadow: scrolled ? '0 4px 20px rgba(0,20,47,0.08)' : 'none',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,7 +74,7 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
                 style={{
                   width: '1.5px',
                   height: '30px',
-                  background: '#BAD6EB',
+                  background: '#BED8F0',
                 }}
               />
               <ICALLogo />
@@ -88,10 +88,10 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
                   <button
                     key={link.page}
                     onClick={() => setCurrentPage(link.page)}
-                    className="relative py-1 text-sm font-semibold transition-all duration-200 cursor-pointer hover:text-[#537AB8]"
+                    className="relative py-1 text-sm font-semibold transition-all duration-200 cursor-pointer hover:text-[#0284C7]"
                     style={{
                       fontFamily: 'var(--font-heading)',
-                      color: isActive ? '#162D4E' : '#3B577D',
+                      color: isActive ? '#00142F' : '#24456F',
                     }}
                   >
                     {link.label}
@@ -99,7 +99,7 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
                       <span
                         className="absolute bottom-[-4px] left-0 right-0 h-[2.5px] rounded-full shadow-xs"
                         style={{
-                          background: 'linear-gradient(90deg, #162D4E 0%, #537AB8 60%, #84A6D6 100%)',
+                          background: 'linear-gradient(90deg, #00142F 0%, #082F63 45%, #0284C7 100%)',
                         }}
                       />
                     )}
@@ -141,15 +141,15 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
               aria-label="Toggle menu"
             >
               <span
-                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#00142F] transition-all duration-300"
                 style={{ transform: menuOpen ? 'rotate(45deg) translateY(8px)' : '' }}
               />
               <span
-                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#00142F] transition-all duration-300"
                 style={{ opacity: menuOpen ? 0 : 1 }}
               />
               <span
-                className="block h-0.5 w-6 bg-[#162D4E] transition-all duration-300"
+                className="block h-0.5 w-6 bg-[#00142F] transition-all duration-300"
                 style={{ transform: menuOpen ? 'rotate(-45deg) translateY(-8px)' : '' }}
               />
             </button>
@@ -161,14 +161,14 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
           className="lg:hidden overflow-hidden transition-all duration-300"
           style={{ maxHeight: menuOpen ? '500px' : '0', opacity: menuOpen ? 1 : 0 }}
         >
-          <div className="px-4 py-4 space-y-1 bg-white border-t border-[#BAD6EB]">
+          <div className="px-4 py-4 space-y-1 bg-white border-t border-[#BED8F0]">
             {navLinks.map((link) => (
               <button
                 key={link.page}
                 onClick={() => { setCurrentPage(link.page); setMenuOpen(false); }}
                 className="block w-full text-left px-4 py-3 rounded-2xl text-sm font-semibold transition-colors"
                 style={{
-                  color: currentPage === link.page ? '#162D4E' : '#3B577D',
+                  color: currentPage === link.page ? '#00142F' : '#24456F',
                   background: currentPage === link.page ? '#EEF5FA' : 'transparent',
                 }}
               >

@@ -59,6 +59,12 @@ export default function App() {
       if (path === '/forgot-password' || search.includes('page=forgot-password')) {
         return 'forgot-password'
       }
+
+      const searchParams = new URLSearchParams(search)
+      const pageParam = searchParams.get('page')
+      if (pageParam) {
+        return pageParam
+      }
     }
     return 'home'
   })
@@ -140,7 +146,12 @@ export default function App() {
                 nim: (profile.nim as string) || undefined,
                 id: session.user.id,
               })
-              setCurrentPage(profile.role === 'asisten' ? 'dashboard-assistant' : 'dashboard-student')
+              // Hanya redirect otomatis ke dashboard jika pengguna tidak sedang membuka halaman spesifik via URL (mis. ?page=template)
+              const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+              const explicitPage = urlParams?.get('page')
+              if (!explicitPage) {
+                setCurrentPage(profile.role === 'asisten' ? 'dashboard-assistant' : 'dashboard-student')
+              }
             }
           } catch (innerErr) {
             console.error('Error saat memproses sesi user:', innerErr)

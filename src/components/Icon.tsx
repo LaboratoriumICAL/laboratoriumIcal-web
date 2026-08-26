@@ -1,6 +1,6 @@
 import {
   Landmark, GraduationCap, Briefcase, Calendar, CalendarDays, Pin,
-  AlertTriangle, BookOpen, Megaphone, Mail, Cpu, MapPin, Phone,
+  AlertTriangle, AlertCircle, BookOpen, Megaphone, Mail, Cpu, MapPin, Phone,
   BarChart3, Settings2, Laptop, Monitor, Factory, Smartphone, Trophy,
   FileText, Rocket, ClipboardList, Hand, ScrollText, NotebookText,
   SlidersHorizontal, Camera, Target, MessageCircle, Sparkles, Crown,
@@ -10,12 +10,14 @@ import {
   ArrowLeft, Loader2, Instagram, MessageSquare, Building2, ChevronUp, ChevronDown,
   Bell, FlaskConical, QrCode, Scan, Minus, Plus, Star, GripVertical,
   Key, Lock, EyeOff, Send, ShieldCheck, Video, Zap, Play, Activity, Flame, Film,
+  Trash2,
   type LucideIcon,
 } from 'lucide-react';
 
 // Peta key semantik -> komponen ikon lucide.
 // Setiap emoji yang dulu dipakai di seluruh situs dipetakan ke sini.
 export const iconMap: Record<string, LucideIcon> = {
+  trash: Trash2,
   landmark: Landmark,
   'graduation-cap': GraduationCap,
   briefcase: Briefcase,
@@ -23,6 +25,8 @@ export const iconMap: Record<string, LucideIcon> = {
   'calendar-days': CalendarDays,
   pin: Pin,
   warning: AlertTriangle,
+  'alert-triangle': AlertTriangle,
+  'alert-circle': AlertCircle,
   'book-open': BookOpen,
   megaphone: Megaphone,
   mail: Mail,

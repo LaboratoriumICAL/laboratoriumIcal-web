@@ -48,12 +48,12 @@ export default function SoftwarePage() {
   }, [])
 
   return (
-    <div className="min-h-screen pb-24 font-sans" style={{ background: '#F0F5FC' }}>
+    <div className="min-h-screen pb-24 font-sans" style={{ background: '#F4F8FC' }}>
       {/* Header */}
       <div
         className="relative pt-24 pb-14 overflow-hidden mb-12"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -73,7 +73,7 @@ export default function SoftwarePage() {
         <div
           className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)',
             zIndex: 2,
           }}
         />
@@ -86,7 +86,7 @@ export default function SoftwarePage() {
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
             }}
           >
             Software Praktikum
@@ -99,17 +99,17 @@ export default function SoftwarePage() {
               lineHeight: 1.2,
               marginBottom: '1.1rem',
               color: 'white',
-              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+              textShadow: '0 4px 20px rgba(0, 20, 47, 0.5)',
             }}
           >
             <span className="text-white block">Perangkat Lunak</span>
             <span
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #7DD3FC 70%, #38BDF8 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(56, 189, 248, 0.6))',
               }}
             >
               Laboratorium ICAL
@@ -120,7 +120,7 @@ export default function SoftwarePage() {
             style={{
               color: '#E8F1FA',
               lineHeight: 1.7,
-              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+              textShadow: '0 2px 8px rgba(0, 20, 47, 0.4)',
             }}
           >
             Koleksi alat teknis resmi dan mudah digunakan untuk mendukung seluruh kegiatan praktikum Anda
@@ -133,7 +133,7 @@ export default function SoftwarePage() {
         {loading && (
           <div className="text-center py-12 text-slate-400">
             <div className="inline-block animate-spin mb-3">
-              <Icon name="loader" size={24} color="#5C8BC8" />
+              <Icon name="loader" size={24} color="#0284C7" />
             </div>
             <div>Memuat daftar perangkat lunak...</div>
           </div>
@@ -143,9 +143,9 @@ export default function SoftwarePage() {
           return (
             <div
               key={s.id || i}
-              className="relative p-[2.5px] drop-shadow-[0_16px_40px_rgba(83,122,184,0.18)] transition-transform duration-300 hover:-translate-y-1.5"
+              className="relative p-[2.5px] drop-shadow-[0_16px_40px_rgba(0,20,47,0.12)] transition-transform duration-300 hover:-translate-y-1.5"
               style={{
-                background: 'linear-gradient(135deg, #102544 0%, #1E4B85 35%, #537AB8 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #00142F 0%, #083770 35%, #0284C7 70%, #7DD3FC 100%)',
                 clipPath: 'polygon(46px 0%, 100% 0%, 100% calc(100% - 46px), calc(100% - 46px) 100%, 0% 100%, 0% 46px)',
               }}
             >

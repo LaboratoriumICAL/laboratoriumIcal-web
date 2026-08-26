@@ -85,12 +85,12 @@ export default function TemplatePage() {
   const groups = groupByKategori(templates)
 
   return (
-    <div className="min-h-screen" style={{ background: '#F0F5FC' }}>
+    <div className="min-h-screen" style={{ background: '#F4F8FC' }}>
       {/* Header */}
       <div
         className="relative pt-24 pb-14 overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -110,7 +110,7 @@ export default function TemplatePage() {
         <div
           className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)',
             zIndex: 2,
           }}
         />
@@ -123,7 +123,7 @@ export default function TemplatePage() {
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
             }}
           >
             Template Dokumen
@@ -136,17 +136,17 @@ export default function TemplatePage() {
               lineHeight: 1.2,
               marginBottom: '1.1rem',
               color: 'white',
-              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+              textShadow: '0 4px 20px rgba(0, 20, 47, 0.5)',
             }}
           >
             <span className="text-white block">Pusat Template &</span>
             <span
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #7DD3FC 70%, #38BDF8 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(56, 189, 248, 0.6))',
               }}
             >
               Pedoman Laporan
@@ -157,7 +157,7 @@ export default function TemplatePage() {
             style={{
               color: '#E8F1FA',
               lineHeight: 1.7,
-              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+              textShadow: '0 2px 8px rgba(0, 20, 47, 0.4)',
             }}
           >
             Unduh format resmi untuk laporan, tugas rumah, dan dokumen praktikum laboratorium lainnya
@@ -167,8 +167,8 @@ export default function TemplatePage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-14">
         {loading && (
-          <div className="text-center py-10" style={{ color: '#2F4D7B' }}>
-            <Icon name="loader" size={22} className="inline animate-spin text-[#5C8BC8]" />
+          <div className="text-center py-10" style={{ color: '#24456F' }}>
+            <Icon name="loader" size={22} className="inline animate-spin text-[#0284C7]" />
           </div>
         )}
 
@@ -179,9 +179,9 @@ export default function TemplatePage() {
         )}
 
         {!loading && !error && groups.length === 0 && (
-          <div className="rounded-3xl p-10 text-center bg-white" style={{ border: '1.5px solid #C6DBF2' }}>
+          <div className="rounded-3xl p-10 text-center bg-white" style={{ border: '1.5px solid #BED8F0' }}>
             <div className="mb-4 flex justify-center"><Icon name="inbox" size={44} color="#94A3B8" strokeWidth={1.5} /></div>
-            <p style={{ color: '#2F4D7B' }}>Belum ada template yang tersedia.</p>
+            <p style={{ color: '#24456F' }}>Belum ada template dokumen yang tersedia.</p>
           </div>
         )}
 
@@ -194,10 +194,10 @@ export default function TemplatePage() {
                 {/* Category title */}
                 <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#EEF4FB] text-[#2F4D7B] border border-[#C6DBF2]">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#EEF5FA] text-[#00142F] border border-[#BED8F0]">
                       <Icon name={ICON_BY_KATEGORI[group.kategori] || 'file-text'} size={18} />
                     </div>
-                    <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.35rem', color: '#1B3258' }}>
+                    <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.35rem', color: '#00142F' }}>
                       {group.kategori}
                     </h2>
                   </div>
@@ -206,7 +206,7 @@ export default function TemplatePage() {
                   {isLaporanCategory && selectedLaporanLab && (
                     <button
                       onClick={() => setSelectedLaporanLab(null)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[#102544] bg-white hover:bg-[#EEF5FA] border border-[#BAD6EB] shadow-2xs transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[#00142F] bg-white hover:bg-[#EEF5FA] border border-[#D6E4F0] shadow-2xs transition-all cursor-pointer"
                       style={{ fontFamily: 'var(--font-heading)' }}
                     >
                       ← Kembali ke Pilihan Praktikum
@@ -225,8 +225,8 @@ export default function TemplatePage() {
                           onClick={() => setSelectedLaporanLab('dsk')}
                           className="relative bg-white rounded-3xl p-6 sm:p-8 overflow-hidden card-hover transition-all duration-300 flex flex-col justify-between group cursor-pointer"
                           style={{
-                            border: '1.5px solid #BAD6EB',
-                            boxShadow: '0 8px 24px rgba(83, 122, 184, 0.1)',
+                            border: '1.5px solid #D6E4F0',
+                            boxShadow: '0 8px 24px rgba(0, 20, 47, 0.08)',
                           }}
                         >
                           {/* Left fluid wave accent */}
@@ -236,24 +236,24 @@ export default function TemplatePage() {
                             fill="none"
                             preserveAspectRatio="none"
                           >
-                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#537AB8" />
-                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#BAD6EB" strokeWidth="2.5" fill="none" opacity="0.85" />
+                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#0260D4" />
+                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#D6E4F0" strokeWidth="2.5" fill="none" opacity="0.85" />
                           </svg>
 
                           {/* Bottom-left dot grid */}
                           <div className="absolute left-3.5 bottom-3.5 grid grid-cols-4 gap-1 opacity-25 pointer-events-none">
                             {Array.from({ length: 12 }).map((_, i) => (
-                              <span key={i} className="w-1 h-1 rounded-full bg-[#537AB8]" />
+                              <span key={i} className="w-1 h-1 rounded-full bg-[#0260D4]" />
                             ))}
                           </div>
 
                           <div className="relative z-10 pl-6 sm:pl-8">
                             <h3
-                              style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#102544', marginBottom: '0.5rem' }}
+                              style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#00142F', marginBottom: '0.5rem' }}
                             >
                               Pedoman Laporan Dasar Sistem Kontrol
                             </h3>
-                            <p style={{ color: '#4B6B94', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                            <p style={{ color: '#24456F', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                               Panduan penyusunan dan template laporan mingguan Modul 1 sampai Modul 5 serta Pedoman Laporan Besar praktikum DSK.
                             </p>
                           </div>
@@ -261,9 +261,13 @@ export default function TemplatePage() {
                           <div className="relative z-10 pl-6 sm:pl-8 pt-4 border-t border-[#E1EDF8] flex items-center justify-end">
                             <button
                               type="button"
-                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white shadow-md group-hover:shadow-lg transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedLaporanLab('dsk')
+                              }}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white shadow-md group-hover:shadow-lg transition-all cursor-pointer"
                               style={{
-                                background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
                                 fontFamily: 'var(--font-heading)',
                               }}
                             >
@@ -278,8 +282,8 @@ export default function TemplatePage() {
                           onClick={() => setSelectedLaporanLab('plc')}
                           className="relative bg-white rounded-3xl p-6 sm:p-8 overflow-hidden card-hover transition-all duration-300 flex flex-col justify-between group cursor-pointer"
                           style={{
-                            border: '1.5px solid #BAD6EB',
-                            boxShadow: '0 8px 24px rgba(83, 122, 184, 0.1)',
+                            border: '1.5px solid #D6E4F0',
+                            boxShadow: '0 8px 24px rgba(0, 20, 47, 0.08)',
                           }}
                         >
                           {/* Left fluid wave accent */}
@@ -289,24 +293,24 @@ export default function TemplatePage() {
                             fill="none"
                             preserveAspectRatio="none"
                           >
-                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#537AB8" />
-                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#BAD6EB" strokeWidth="2.5" fill="none" opacity="0.85" />
+                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#0260D4" />
+                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#D6E4F0" strokeWidth="2.5" fill="none" opacity="0.85" />
                           </svg>
 
                           {/* Bottom-left dot grid */}
                           <div className="absolute left-3.5 bottom-3.5 grid grid-cols-4 gap-1 opacity-25 pointer-events-none">
                             {Array.from({ length: 12 }).map((_, i) => (
-                              <span key={i} className="w-1 h-1 rounded-full bg-[#537AB8]" />
+                              <span key={i} className="w-1 h-1 rounded-full bg-[#0260D4]" />
                             ))}
                           </div>
 
                           <div className="relative z-10 pl-6 sm:pl-8">
                             <h3
-                              style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#102544', marginBottom: '0.5rem' }}
+                              style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#00142F', marginBottom: '0.5rem' }}
                             >
                               Pedoman Programmable Logic Controller
                             </h3>
-                            <p style={{ color: '#4B6B94', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                            <p style={{ color: '#24456F', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
                               Panduan penyusunan dan template laporan mingguan Modul 1 sampai Modul 4 serta Pedoman Laporan Besar praktikum PLC.
                             </p>
                           </div>
@@ -314,9 +318,13 @@ export default function TemplatePage() {
                           <div className="relative z-10 pl-6 sm:pl-8 pt-4 border-t border-[#E1EDF8] flex items-center justify-end">
                             <button
                               type="button"
-                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white shadow-md group-hover:shadow-lg transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedLaporanLab('plc')
+                              }}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm text-white shadow-md group-hover:shadow-lg transition-all cursor-pointer"
                               style={{
-                                background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
                                 fontFamily: 'var(--font-heading)',
                               }}
                             >
@@ -339,8 +347,8 @@ export default function TemplatePage() {
                                 key={item.id}
                                 className="relative bg-white rounded-3xl p-5 sm:p-6 overflow-hidden card-hover transition-all duration-300 flex items-center gap-4 sm:gap-5"
                                 style={{
-                                  border: isLaporanBesar ? '1.5px solid #0A58BE' : '1.5px solid #BAD6EB',
-                                  boxShadow: '0 8px 24px rgba(83, 122, 184, 0.08)',
+                                  border: '1.5px solid #D6E4F0',
+                                  boxShadow: '0 8px 24px rgba(0, 20, 47, 0.07)',
                                 }}
                               >
                                 {/* Left fluid wave accent */}
@@ -350,14 +358,14 @@ export default function TemplatePage() {
                                   fill="none"
                                   preserveAspectRatio="none"
                                 >
-                                  <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill={isLaporanBesar ? '#0A58BE' : '#537AB8'} />
-                                  <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#BAD6EB" strokeWidth="2.5" fill="none" opacity="0.85" />
+                                  <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#0260D4" />
+                                  <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#D6E4F0" strokeWidth="2.5" fill="none" opacity="0.85" />
                                 </svg>
 
                                 {/* Bottom-left dot grid */}
                                 <div className="absolute left-3.5 bottom-3.5 grid grid-cols-4 gap-1 opacity-25 pointer-events-none">
                                   {Array.from({ length: 12 }).map((_, i) => (
-                                    <span key={i} className="w-1 h-1 rounded-full bg-[#537AB8]" />
+                                    <span key={i} className="w-1 h-1 rounded-full bg-[#0260D4]" />
                                   ))}
                                 </div>
 
@@ -365,9 +373,7 @@ export default function TemplatePage() {
                                 <div
                                   className="absolute top-0 right-7 sm:right-8 w-6 sm:w-7 h-8 sm:h-9 flex items-center justify-center pt-0.5 text-white shadow-xs pointer-events-none z-10"
                                   style={{
-                                    background: isLaporanBesar
-                                      ? 'linear-gradient(135deg, #0A58BE 0%, #164E8E 100%)'
-                                      : 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                    background: 'linear-gradient(135deg, #00142F 0%, #0260D4 100%)',
                                     clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%)',
                                   }}
                                 >
@@ -379,12 +385,12 @@ export default function TemplatePage() {
                                   <div
                                     className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
                                     style={{
-                                      background: '#EEF4FB',
-                                      border: '1.5px solid #BAD6EB',
-                                      boxShadow: '0 4px 12px rgba(83, 122, 184, 0.1)',
+                                      background: '#F4F8FC',
+                                      border: '1.5px solid #D6E4F0',
+                                      boxShadow: '0 4px 12px rgba(0, 20, 47, 0.08)',
                                     }}
                                   >
-                                    <Icon name="file-text" size={24} color="#162D4E" />
+                                    <Icon name="file-text" size={24} color="#00142F" />
                                   </div>
                                 </div>
 
@@ -394,7 +400,7 @@ export default function TemplatePage() {
                                     className="font-bold text-[0.92rem] sm:text-[1rem] leading-snug line-clamp-2 mb-2"
                                     style={{
                                       fontFamily: 'var(--font-heading)',
-                                      color: '#102544',
+                                      color: '#00142F',
                                     }}
                                   >
                                     {item.nama}
@@ -402,10 +408,10 @@ export default function TemplatePage() {
 
                                   {/* Decorative dash and dots */}
                                   <div className="flex items-center gap-1.5 mb-3">
-                                    <span className="w-7 h-[3px] rounded-full bg-[#537AB8]" />
-                                    <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-80" />
-                                    <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-60" />
-                                    <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-40" />
+                                    <span className="w-7 h-[3px] rounded-full bg-[#0260D4]" />
+                                    <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-80" />
+                                    <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-60" />
+                                    <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-40" />
                                   </div>
 
                                   {/* Download button */}
@@ -414,7 +420,8 @@ export default function TemplatePage() {
                                     download={item.file_path}
                                     className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full font-bold text-xs sm:text-sm text-white shadow-xs hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
                                     style={{
-                                      background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                      background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                                      boxShadow: '0 4px 14px rgba(2, 96, 212, 0.25)',
                                       fontFamily: 'var(--font-heading)',
                                     }}
                                   >
@@ -441,8 +448,8 @@ export default function TemplatePage() {
                           key={item.id}
                           className="relative bg-white rounded-3xl p-5 sm:p-6 overflow-hidden card-hover transition-all duration-300 flex items-center gap-4 sm:gap-5"
                           style={{
-                            border: '1.5px solid #BAD6EB',
-                            boxShadow: '0 8px 24px rgba(83, 122, 184, 0.08)',
+                            border: '1.5px solid #D6E4F0',
+                            boxShadow: '0 8px 24px rgba(0, 20, 47, 0.07)',
                           }}
                         >
                           {/* Left fluid wave accent */}
@@ -452,14 +459,14 @@ export default function TemplatePage() {
                             fill="none"
                             preserveAspectRatio="none"
                           >
-                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#537AB8" />
-                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#BAD6EB" strokeWidth="2.5" fill="none" opacity="0.85" />
+                            <path d="M0 0 C 18 35, 24 55, 12 95 C 4 125, 16 148, 0 160 L 0 0 Z" fill="#0260D4" />
+                            <path d="M0 0 C 26 38, 32 62, 18 105 C 8 135, 22 152, 0 160" stroke="#D6E4F0" strokeWidth="2.5" fill="none" opacity="0.85" />
                           </svg>
 
                           {/* Bottom-left dot grid */}
                           <div className="absolute left-3.5 bottom-3.5 grid grid-cols-4 gap-1 opacity-25 pointer-events-none">
                             {Array.from({ length: 12 }).map((_, i) => (
-                              <span key={i} className="w-1 h-1 rounded-full bg-[#537AB8]" />
+                              <span key={i} className="w-1 h-1 rounded-full bg-[#0260D4]" />
                             ))}
                           </div>
 
@@ -467,7 +474,7 @@ export default function TemplatePage() {
                           <div
                             className="absolute top-0 right-7 sm:right-8 w-6 sm:w-7 h-8 sm:h-9 flex items-center justify-center pt-0.5 text-white shadow-xs pointer-events-none z-10"
                             style={{
-                              background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                              background: 'linear-gradient(135deg, #00142F 0%, #0260D4 100%)',
                               clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%)',
                             }}
                           >
@@ -479,12 +486,12 @@ export default function TemplatePage() {
                             <div
                               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center"
                               style={{
-                                background: '#EEF4FB',
-                                border: '1.5px solid #BAD6EB',
-                                boxShadow: '0 4px 12px rgba(83, 122, 184, 0.1)',
+                                background: '#F4F8FC',
+                                border: '1.5px solid #D6E4F0',
+                                boxShadow: '0 4px 12px rgba(0, 20, 47, 0.08)',
                               }}
                             >
-                              <Icon name={badgeIcon} size={24} color="#162D4E" />
+                              <Icon name={badgeIcon} size={24} color="#00142F" />
                             </div>
                           </div>
 
@@ -494,7 +501,7 @@ export default function TemplatePage() {
                               className="font-bold text-[0.92rem] sm:text-[1rem] leading-snug line-clamp-2 mb-2"
                               style={{
                                 fontFamily: 'var(--font-heading)',
-                                color: '#102544',
+                                color: '#00142F',
                               }}
                             >
                               {item.nama}
@@ -502,10 +509,10 @@ export default function TemplatePage() {
 
                             {/* Decorative dash and dots */}
                             <div className="flex items-center gap-1.5 mb-3">
-                              <span className="w-7 h-[3px] rounded-full bg-[#537AB8]" />
-                              <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-80" />
-                              <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-60" />
-                              <span className="w-1 h-1 rounded-full bg-[#537AB8] opacity-40" />
+                              <span className="w-7 h-[3px] rounded-full bg-[#0260D4]" />
+                              <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-80" />
+                              <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-60" />
+                              <span className="w-1 h-1 rounded-full bg-[#0260D4] opacity-40" />
                             </div>
 
                             {/* Download button */}
@@ -523,7 +530,8 @@ export default function TemplatePage() {
                                 download={item.file_path || true}
                                 className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full font-bold text-xs sm:text-sm text-white shadow-xs hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer"
                                 style={{
-                                  background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                  background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                                  boxShadow: '0 4px 14px rgba(2, 96, 212, 0.25)',
                                   fontFamily: 'var(--font-heading)',
                                 }}
                               >

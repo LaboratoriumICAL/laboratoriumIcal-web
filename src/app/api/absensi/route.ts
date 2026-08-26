@@ -151,7 +151,7 @@ export async function GET(req: NextRequest) {
 
     const { data: anggota, error: eA } = await sb
       .from('anggota_kelompok')
-      .select('id, kelompok_id, nama_praktikan, nim, nomor_urut')
+      .select('id, kelompok_id, nama_praktikan, nim, nomor_urut, praktikan_id')
       .in('kelompok_id', kelompokIds)
       .order('nama_praktikan', { ascending: true })
     if (eA) throw eA
@@ -177,6 +177,7 @@ export async function GET(req: NextRequest) {
         anggota_kelompok_id: a.id,
         nama: a.nama_praktikan,
         nim: a.nim,
+        hasAccount: !!a.praktikan_id,
         kelompok_id: a.kelompok_id,
         nama_kelompok: k?.nama_kelompok || '-',
         kelas_praktikum_id: k?.kelas_praktikum_id || null,

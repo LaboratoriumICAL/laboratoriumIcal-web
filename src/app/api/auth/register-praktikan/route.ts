@@ -20,8 +20,22 @@ export async function POST(req: NextRequest) {
     const sb = getSupabaseAdmin()
 
     // Cek dulu apakah NIM sudah terdaftar sebagai anggota kelompok (oleh asisten lewat Import Praktikan).
-    // Ini validasi awal yang ramah -- validasi final tetap dijaga oleh trigger DB.
-    const { data: anggota } = await sb.from('anggota_kelompok').select('id').eq('nim', nim).limit(1)
+    const { data: anggota } = await sb
+      .from('anggota_kelompok')
+      .select(`
+        id,
+        nama_praktikan,
+        kelompok:kelompok_id (
+          kelas_praktikum:kelas_praktikum_id (
+            praktikum:praktikum_id (
+              jurusan_id
+            )
+          )
+        )
+      `)
+      .eq('nim', nim)
+      .limit(1)
+
     if (!anggota || anggota.length === 0) {
       return NextResponse.json(
         { error: `NIM ${nim} belum terdaftar di kelompok praktikum manapun. Hubungi asisten untuk didaftarkan terlebih dahulu.` },
@@ -29,18 +43,27 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    let jurusanId: string | null = null
-    if (jurusanKode) {
+    // WAJIB gunakan nama resmi dari data asisten di anggota_kelompok (mencegah nama panggilan/samaran)
+    const officialName = (anggota[0].nama_praktikan || '').trim() || name
+
+    // WAJIB gunakan jurusan_id resmi dari relasi kelompok di database (mencegah manipulasi prodi)
+    const kelompokData = anggota[0]?.kelompok as any
+    const kelasData = kelompokData?.kelas_praktikum as any
+    const praktikumData = kelasData?.praktikum as any
+    const officialJurusanId = praktikumData?.jurusan_id || null
+
+    let jurusanId: string | null = officialJurusanId
+    if (!jurusanId && jurusanKode) {
       const { data: jurusan } = await sb.from('jurusan').select('id').eq('kode', jurusanKode).single()
       jurusanId = jurusan?.id || null
     }
 
-    // Buat user Auth sungguhan, langsung dikonfirmasi (tanpa perlu setup email server) supaya bisa langsung login untuk uji coba.
+    // Buat user Auth sungguhan, langsung dikonfirmasi (tanpa perlu setup email server)
     const { data: created, error: eCreate } = await sb.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
-      user_metadata: { role: 'praktikan', nama_lengkap: name },
+      user_metadata: { role: 'praktikan', nama_lengkap: officialName },
     })
     if (eCreate) {
       const msg = eCreate.message?.includes('already been registered')
@@ -52,12 +75,10 @@ export async function POST(req: NextRequest) {
     const userId = created.user?.id
     if (!userId) return NextResponse.json({ error: 'Gagal membuat akun.' }, { status: 500 })
 
-    // Trigger on_auth_user_created sudah membuat baris profiles (role, nama_lengkap, email).
-    // Lengkapi dengan nim & jurusan_id -- update ini akan divalidasi ulang oleh trigger
-    // validasi_nim_praktikan_terdaftar (memastikan NIM memang terdaftar di anggota_kelompok).
+    // Pastikan nama_lengkap di profiles selalu konsisten dengan nama resmi
     const { error: eUpdate } = await sb
       .from('profiles')
-      .update({ nim, jurusan_id: jurusanId })
+      .update({ nim, nama_lengkap: officialName, jurusan_id: jurusanId })
       .eq('id', userId)
 
     if (eUpdate) {

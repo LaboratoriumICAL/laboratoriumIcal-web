@@ -67,12 +67,12 @@ export default function ContactPage() {
     .sort((a, b) => (a.nim || '').localeCompare(b.nim || '', undefined, { numeric: true }))
 
   return (
-    <div className="min-h-screen" style={{ background: '#F0F5FC' }}>
+    <div className="min-h-screen" style={{ background: '#F4F8FC' }}>
       {/* Header */}
       <div
         className="relative pt-24 pb-14 overflow-hidden mb-6"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -92,7 +92,7 @@ export default function ContactPage() {
         <div
           className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)',
             zIndex: 2,
           }}
         />
@@ -105,7 +105,7 @@ export default function ContactPage() {
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
             }}
           >
             Kontak Asisten
@@ -118,16 +118,16 @@ export default function ContactPage() {
               lineHeight: 1.2,
               marginBottom: '1.1rem',
               color: 'white',
-              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+              textShadow: '0 4px 20px rgba(0, 20, 47, 0.5)',
             }}
           >
             <span
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #7DD3FC 70%, #38BDF8 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(56, 189, 248, 0.6))',
               }}
             >
               Tim Asisten ICAL
@@ -138,7 +138,7 @@ export default function ContactPage() {
             style={{
               color: '#E8F1FA',
               lineHeight: 1.7,
-              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+              textShadow: '0 2px 8px rgba(0, 20, 47, 0.4)',
             }}
           >
             Klik kartu asisten untuk melihat kontak dan menghubungi mereka secara langsung
@@ -151,13 +151,13 @@ export default function ContactPage() {
               placeholder="Cari nama atau NIM asisten..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-full text-sm outline-none text-slate-800 transition-all placeholder:text-slate-400 bg-white"
+              className="w-full pl-11 pr-4 py-3 rounded-full text-sm outline-none text-[#00142F] transition-all placeholder:text-slate-400 bg-white"
               style={{
-                boxShadow: '0 8px 24px rgba(92, 139, 200,0.15)',
-                border: '1.5px solid #C6DBF2',
+                boxShadow: '0 8px 24px rgba(0, 20, 47, 0.08)',
+                border: '1.5px solid #BED8F0',
               }}
             />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0284C7]">
               <Icon name="search" size={16} />
             </div>
             {searchTerm && (

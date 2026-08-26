@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     const { data: anggota } = await sb
       .from('anggota_kelompok')
-      .select('id, kelompok_id, nama_praktikan, nim, nomor_urut, kelompok:kelompok_id(id, nama_kelompok)')
+      .select('id, kelompok_id, nama_praktikan, nim, nomor_urut, praktikan_id, kelompok:kelompok_id(id, nama_kelompok)')
       .in('kelompok_id', kelompokIds)
       .order('nim', { ascending: true })
 
@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
         nama_praktikan: a.nama_praktikan,
         nim: a.nim,
         nomor_urut: a.nomor_urut,
+        hasAccount: !!a.praktikan_id,
         nama_kelompok: a.kelompok?.nama_kelompok || kelompokMap.get(a.kelompok_id) || '',
       }))
       .sort((a: any, b: any) => (a.nim || '').localeCompare(b.nim || '', undefined, { numeric: true }))

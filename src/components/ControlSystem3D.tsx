@@ -17,11 +17,11 @@ function LabLogoCore() {
 
   return (
     <group ref={coreRef}>
-      {/* 3D Volumetric Circular Disc Medallion Base (Same nuance as 3D boxes) */}
+      {/* 3D Volumetric Circular Disc Medallion Base */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[1.42, 1.42, 0.12, 64]} />
         <meshStandardMaterial
-          color="#162D4E"
+          color="#00142F"
           metalness={0.85}
           roughness={0.2}
         />
@@ -80,15 +80,15 @@ function AutomationCore() {
         {/* Gyroscopic Mechanical Rings (Automation) */}
         <mesh ref={ring1}>
           <torusGeometry args={[2.8, 0.08, 16, 64]} />
-          <meshStandardMaterial color="#BAD6EB" metalness={0.85} roughness={0.2} />
+          <meshStandardMaterial color="#BAE6FD" metalness={0.85} roughness={0.2} />
         </mesh>
         <mesh ref={ring2} rotation={[Math.PI / 3, 0, 0]}>
           <torusGeometry args={[3.6, 0.05, 16, 64]} />
-          <meshStandardMaterial color="#84A6D6" metalness={0.8} roughness={0.25} />
+          <meshStandardMaterial color="#38BDF8" metalness={0.8} roughness={0.25} />
         </mesh>
         <mesh ref={ring3} rotation={[0, Math.PI / 4, 0]}>
           <torusGeometry args={[4.4, 0.06, 16, 64]} />
-          <meshStandardMaterial color="#537AB8" metalness={0.9} roughness={0.15} />
+          <meshStandardMaterial color="#0284C7" metalness={0.9} roughness={0.15} />
         </mesh>
 
         {/* Distributed Control Nodes (Sensors/Actuators) */}
@@ -101,12 +101,12 @@ function AutomationCore() {
             <group key={i} position={[x, Math.sin(angle * 2) * 1.5, z]}>
               <mesh rotation={[angle, angle, angle]}>
                 <boxGeometry args={[0.5, 0.5, 0.5]} />
-                <meshStandardMaterial color="#162D4E" metalness={0.85} roughness={0.2} />
+                <meshStandardMaterial color="#00142F" metalness={0.85} roughness={0.2} />
               </mesh>
               {/* Node Indicator Light */}
               <mesh position={[0, 0, 0.26]}>
                 <planeGeometry args={[0.3, 0.3]} />
-                <meshBasicMaterial color={i % 2 === 0 ? "#BAD6EB" : "#537AB8"} />
+                <meshBasicMaterial color={i % 2 === 0 ? "#38BDF8" : "#0284C7"} />
               </mesh>
             </group>
           )
@@ -122,7 +122,7 @@ export default function ControlSystem3D() {
       <Canvas camera={{ position: [0, 2, 8.5], fov: 45 }}>
         <ambientLight intensity={0.85} />
         <directionalLight position={[10, 10, 5]} intensity={2.2} color="#FFFFFF" />
-        <pointLight position={[-10, -10, -5]} intensity={1.8} color="#BAD6EB" />
+        <pointLight position={[-10, -10, -5]} intensity={1.8} color="#38BDF8" />
         
         {/* Flowing Data Particles */}
         <Stars radius={50} depth={20} count={1400} factor={4} saturation={0.8} fade speed={1.5} />

@@ -2,16 +2,22 @@
 
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
-import { getSupabaseBrowser } from '../lib/supabaseClient'
 
 interface ForgotPasswordPageProps {
   setCurrentPage: (page: string) => void
 }
 
+interface ResetResponseData {
+  maskedEmail: string
+  name: string
+  nim: string
+}
+
 export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPageProps) {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [resultData, setResultData] = useState<ResetResponseData | null>(null)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,21 +26,22 @@ export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPag
     setLoading(true)
 
     try {
-      const sb = getSupabaseBrowser()
-      const redirectTo = typeof window !== 'undefined'
-        ? `${window.location.origin}/reset-password`
-        : ''
-
-      const { error: resetError } = await sb.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo,
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier: identifier.trim(),
+          origin: typeof window !== 'undefined' ? window.location.origin : '',
+        }),
       })
 
-      if (resetError) {
-        if (resetError.message && !resetError.message.toLowerCase().includes('rate limit')) {
-          console.warn('Supabase resetPasswordForEmail response:', resetError.message)
-        }
+      const json = await res.json()
+
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || 'Gagal memproses permintaan reset password.')
       }
 
+      setResultData(json.data)
       setSubmitted(true)
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat memproses permintaan reset password.')
@@ -44,14 +51,14 @@ export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPag
   }
 
   const bubbleColors = [
-    { bg: 'linear-gradient(135deg, #93C5FD 0%, #3B82F6 100%)', opacity: 0.5 }, // Sky Blue
-    { bg: 'linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 100%)', opacity: 0.45 }, // Lavender Purple
-    { bg: 'linear-gradient(135deg, #6EE7B7 0%, #10B981 100%)', opacity: 0.5 }, // Mint Emerald
-    { bg: 'linear-gradient(135deg, #FBCFE8 0%, #EC4899 100%)', opacity: 0.45 }, // Rose Pink
-    { bg: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)', opacity: 0.5 }, // Warm Amber
-    { bg: 'linear-gradient(135deg, #A5F3FC 0%, #06B6D4 100%)', opacity: 0.5 }, // Cyan Teal
-    { bg: 'linear-gradient(135deg, #FED7AA 0%, #FB923C 100%)', opacity: 0.45 }, // Coral Peach
-    { bg: 'linear-gradient(135deg, #A5B4FC 0%, #6366F1 100%)', opacity: 0.45 }, // Royal Indigo
+    { bg: 'linear-gradient(135deg, #93C5FD 0%, #3B82F6 100%)', opacity: 0.5 },
+    { bg: 'linear-gradient(135deg, #C4B5FD 0%, #8B5CF6 100%)', opacity: 0.45 },
+    { bg: 'linear-gradient(135deg, #6EE7B7 0%, #10B981 100%)', opacity: 0.5 },
+    { bg: 'linear-gradient(135deg, #FBCFE8 0%, #EC4899 100%)', opacity: 0.45 },
+    { bg: 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)', opacity: 0.5 },
+    { bg: 'linear-gradient(135deg, #A5F3FC 0%, #06B6D4 100%)', opacity: 0.5 },
+    { bg: 'linear-gradient(135deg, #FED7AA 0%, #FB923C 100%)', opacity: 0.45 },
+    { bg: 'linear-gradient(135deg, #A5B4FC 0%, #6366F1 100%)', opacity: 0.45 },
   ]
 
   const particles = [
@@ -104,74 +111,96 @@ export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPag
               fontFamily: 'var(--font-heading)',
               fontWeight: 800,
               fontSize: '1.8rem',
-              color: '#1B3258',
+              color: '#00142F',
               lineHeight: 1.2,
             }}
           >
-            Lupa Password Praktikan
+            Lupa Kata Sandi
           </div>
-          <p style={{ color: '#2F4D7B', marginTop: '6px', fontSize: '0.9rem' }}>
-            Masukkan email terdaftar Anda untuk menerima tautan pemulihan kata sandi
+          <p style={{ color: '#24456F', marginTop: '6px', fontSize: '0.9rem' }}>
+            Praktikan cukup masukkan <strong>NIM</strong> Anda untuk menerima tautan pemulihan
           </p>
         </div>
 
         {/* Card Form */}
         <div
-          className="rounded-3xl p-8 bg-white"
+          className="rounded-3xl p-7 sm:p-8 bg-white"
           style={{
-            border: '2px solid #C6DBF2',
-            boxShadow: '0 16px 60px rgba(92, 139, 200,0.12)',
+            border: '2px solid #BED8F0',
+            boxShadow: '0 16px 60px rgba(0, 20, 47, 0.08)',
           }}
         >
           {!submitted ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px' }}>
-                  Email Terdaftar
+                <label
+                  style={{
+                    display: 'block',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    color: '#162D4E',
+                    marginBottom: '6px',
+                  }}
+                >
+                  NIM atau Alamat Email
                 </label>
                 <div className="relative">
                   <input
-                    type="email"
+                    type="text"
                     className="input-field pl-10"
-                    placeholder="nama@email.com"
-                    value={email}
+                    placeholder="Contoh: 202411001 (atau email)"
+                    value={identifier}
                     onChange={(e) => {
-                      setEmail(e.target.value)
+                      setIdentifier(e.target.value)
                       if (error) setError('')
                     }}
                     required
                     autoFocus
                   />
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-                    <Icon name="mail" size={18} />
+                    <Icon name={identifier.includes('@') ? 'mail' : 'graduation-cap'} size={18} />
                   </div>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#5D789B', marginTop: '6px', lineHeight: 1.4 }}>
-                  Pastikan email yang dimasukkan sama dengan email saat pendaftaran akun praktikan.
-                </p>
+                <div className="mt-2 p-2.5 rounded-xl bg-[#F0F6FD] border border-[#D6E4F0] text-xs text-[#2C4D78] flex items-start gap-2">
+                  <span className="text-[#0260D4] font-bold">💡</span>
+                  <p className="leading-relaxed">
+                    <strong>Praktikan:</strong> Cukup masukkan NIM Anda. Tautan reset password akan otomatis dikirimkan ke email yang Anda daftarkan.
+                  </p>
+                </div>
               </div>
 
               {error && (
-                <div className="rounded-2xl px-4 py-3 text-sm flex items-start gap-1.5" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
-                  <Icon name="warning" size={16} className="mt-0.5 flex-shrink-0" />
+                <div
+                  className="rounded-2xl px-4 py-3 text-xs sm:text-sm flex items-start gap-2 animate-fadeIn"
+                  style={{
+                    background: '#FEF2F2',
+                    border: '1px solid #FECACA',
+                    color: '#DC2626',
+                  }}
+                >
+                  <Icon name="warning" size={16} className="mt-0.5 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               <button
                 type="submit"
-                className="btn-primary w-full text-center flex items-center justify-center gap-2 cursor-pointer"
-                disabled={loading || !email.trim()}
+                className="btn-primary w-full text-center flex items-center justify-center gap-2 cursor-pointer font-bold py-3.5 rounded-2xl"
+                disabled={loading || !identifier.trim()}
+                style={{
+                  background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                  boxShadow: '0 8px 24px rgba(2, 96, 212, 0.25)',
+                }}
               >
                 {loading ? (
                   <>
                     <Icon name="loader" size={16} className="animate-spin" />
-                    <span>Mengirim Link...</span>
+                    <span>Mencari Akun & Mengirim Tautan...</span>
                   </>
                 ) : (
                   <>
                     <Icon name="send" size={16} />
-                    <span>Kirim Link Reset Password</span>
+                    <span>Kirim Tautan Reset Password</span>
                   </>
                 )}
               </button>
@@ -179,39 +208,69 @@ export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPag
           ) : (
             <div className="text-center py-2 animate-fadeInUp">
               <div
-                className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-                style={{ background: '#EEF4FB', border: '1.5px solid #C6DBF2' }}
+                className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center shadow-md"
+                style={{ background: '#ECFDF5', border: '2px solid #A7F3D0' }}
               >
-                <Icon name="check-circle" size={32} color="#2F4D7B" />
+                <Icon name="check-circle" size={34} color="#059669" />
               </div>
               <h3
                 style={{
                   fontFamily: 'var(--font-heading)',
-                  fontWeight: 700,
-                  fontSize: '1.25rem',
-                  color: '#1B3258',
+                  fontWeight: 800,
+                  fontSize: '1.35rem',
+                  color: '#00142F',
                   marginBottom: '8px',
                 }}
               >
-                Tautan Terkirim!
+                Tautan Berhasil Dikirim!
               </h3>
-              <p style={{ color: '#2F4D7B', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-                Jika akun dengan email <strong className="text-[#2F4D7B]">{email}</strong> terdaftar di sistem kami, Anda akan menerima email berisi tautan pemulihan kata sandi dalam beberapa menit.
+              <p style={{ color: '#24456F', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+                Tautan pemulihan kata sandi telah dikirimkan ke alamat email terdaftar akun Anda.
               </p>
+
+              {/* Data Rincian Email Penerima */}
               <div
-                className="rounded-2xl p-4 mb-6 text-left text-xs space-y-2"
-                style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#2F4D7B' }}
+                className="rounded-2xl p-4 mb-5 text-left text-xs sm:text-sm space-y-2 border"
+                style={{ background: '#F0F6FD', borderColor: '#BAD6EB', color: '#162D4E' }}
               >
-                <div className="font-semibold text-slate-700">Tips:</div>
-                <div>• Periksa folder <strong>Spam</strong> atau <strong>Promosi</strong> jika tidak ada di kotak masuk utama.</div>
-                <div>• Tautan pemulihan berlaku selama 1 jam.</div>
+                {resultData?.name && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="user" size={14} color="#0260D4" />
+                    <span>Nama: <strong>{resultData.name}</strong></span>
+                  </div>
+                )}
+                {resultData?.nim && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="graduation-cap" size={14} color="#0260D4" />
+                    <span>NIM: <strong>{resultData.nim}</strong></span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-1 border-t border-[#D6E4F0]">
+                  <Icon name="mail" size={14} color="#059669" />
+                  <span>Email Penerima: <strong className="text-emerald-700 font-mono text-[0.92rem]">{resultData?.maskedEmail}</strong></span>
+                </div>
               </div>
 
-              <div className="space-y-3">
+              {/* Tips Petunjuk */}
+              <div
+                className="rounded-2xl p-3.5 mb-5 text-left text-xs space-y-1.5"
+                style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}
+              >
+                <div className="font-bold flex items-center gap-1.5 text-amber-900">
+                  <Icon name="info" size={13} color="#D97706" /> Petunjuk:
+                </div>
+                <div>• Periksa kotak masuk (Inbox) atau folder <strong>Spam / Junk</strong> email tersebut.</div>
+                <div>• Tautan reset password berlaku selama <strong>1 jam</strong> sejak dikirimkan.</div>
+              </div>
+
+              <div className="space-y-2.5">
                 <button
                   type="button"
                   onClick={() => setCurrentPage('login')}
-                  className="btn-primary w-full cursor-pointer"
+                  className="btn-primary w-full cursor-pointer py-3 font-bold rounded-2xl"
+                  style={{
+                    background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                  }}
                 >
                   Kembali ke Halaman Login
                 </button>
@@ -219,11 +278,12 @@ export default function ForgotPasswordPage({ setCurrentPage }: ForgotPasswordPag
                   type="button"
                   onClick={() => {
                     setSubmitted(false)
-                    setEmail('')
+                    setIdentifier('')
+                    setResultData(null)
                   }}
-                  className="text-xs text-[#2F4D7B] hover:text-[#1B3258] font-semibold cursor-pointer"
+                  className="text-xs text-[#0260D4] hover:text-[#00142F] font-bold cursor-pointer underline"
                 >
-                  Kirim ulang ke email lain
+                  Kirim ulang dengan NIM atau email lain
                 </button>
               </div>
             </div>

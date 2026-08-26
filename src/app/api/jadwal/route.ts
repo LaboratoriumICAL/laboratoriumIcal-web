@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const kelompokIds = (kelompokRows || []).map((k) => k.id)
 
     const { data: anggotaRows } = kelompokIds.length
-      ? await sb.from('anggota_kelompok').select('kelompok_id, nama_praktikan, nim, nomor_urut').in('kelompok_id', kelompokIds).order('nomor_urut')
+      ? await sb.from('anggota_kelompok').select('kelompok_id, nama_praktikan, nim, nomor_urut, praktikan_id').in('kelompok_id', kelompokIds).order('nomor_urut')
       : { data: [] as any[] }
 
     const { data: pertemuanRows } = kelompokIds.length
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       ruangan: k.ruangan,
       members: (anggotaRows || [])
         .filter((a) => a.kelompok_id === k.id)
-        .map((a) => ({ name: a.nama_praktikan, nim: a.nim })),
+        .map((a) => ({ name: a.nama_praktikan, nim: a.nim, hasAccount: !!a.praktikan_id })),
     }))
 
     // Gabungkan tanggal pertemuan unik lintas kelompok (semua kelompok di kelas yg sama biasanya sejadwal sama)

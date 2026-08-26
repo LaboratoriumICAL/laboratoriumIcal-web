@@ -79,7 +79,6 @@ function PLCLadderSimulatorWidget() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-5 border-b border-[#E1EDF8]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: '#102544', fontSize: '1.25rem' }}>
               Rangkaian Latch
             </h3>
@@ -396,7 +395,7 @@ export default function PlcDetailPage({ setCurrentPage }: PlcDetailPageProps) {
       <div
         className="relative pt-24 pb-14 overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         <div className="absolute inset-0 dots-header pointer-events-none opacity-40" style={{ zIndex: 1 }} />
@@ -757,7 +756,7 @@ export default function PlcDetailPage({ setCurrentPage }: PlcDetailPageProps) {
         </section>
 
         <div
-          className="rounded-3xl p-8 text-center bg-gradient-to-r from-[#0A58BE] via-[#164E8E] to-[#102544] text-white shadow-xl flex flex-col items-center justify-center gap-4"
+          className="rounded-3xl p-8 text-center bg-gradient-to-r from-[#00142F] via-[#082F63] to-[#0284C7] text-white shadow-xl flex flex-col items-center justify-center gap-4"
         >
           <h3 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
             Siap Melaksanakan Praktikum PLC?
@@ -768,7 +767,7 @@ export default function PlcDetailPage({ setCurrentPage }: PlcDetailPageProps) {
           <div className="flex flex-wrap gap-3 mt-2">
             <button
               onClick={() => setCurrentPage('module')}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-white text-[#0A58BE] hover:bg-blue-50 transition-all shadow-md cursor-pointer"
+              className="px-6 py-3 rounded-xl font-bold text-sm bg-white text-[#00142F] hover:bg-sky-50 transition-all shadow-md cursor-pointer"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               <Icon name="download" size={16} className="inline mr-2" /> Buka Modul PLC

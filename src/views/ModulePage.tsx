@@ -20,28 +20,27 @@ const MODULE_CONFIGS: Record<
   }
 > = {
   DSK: {
-    pillBg: '#102544',
+    pillBg: '#00142F',
     title: 'Dasar Sistem Kontrol',
     subtext: 'Modul praktikum DSK',
     icon: (color) => (
       <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="4" y1="6" x2="20" y2="6" />
-        <line x1="4" y1="12" x2="20" y2="12" />
-        <line x1="4" y1="18" x2="20" y2="18" />
-        <circle cx="15" cy="6" r="2.2" fill="white" stroke={color} strokeWidth="2.2" />
-        <circle cx="9" cy="12" r="2.2" fill="white" stroke={color} strokeWidth="2.2" />
-        <circle cx="15" cy="18" r="2.2" fill="white" stroke={color} strokeWidth="2.2" />
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+        <path d="M6 6h10" />
+        <path d="M6 10h10" />
+        <path d="M6 14h6" />
       </svg>
     ),
   },
   PLC: {
-    pillBg: '#102544',
+    pillBg: '#00142F',
     title: 'Programmable Logic Controller',
     subtext: 'Modul praktikum PLC',
     icon: (color) => (
       <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="5" y="5" width="14" height="14" rx="3.5" />
-        <rect x="9" y="9" width="6" height="6" rx="1.5" strokeWidth="2" />
+        <rect x="5" y="5" width="14" height="14" rx="2" />
+        <line x1="9" y1="9" x2="15" y2="15" />
+        <line x1="15" y1="9" x2="9" y2="15" />
         <line x1="9" y1="2" x2="9" y2="5" />
         <line x1="15" y1="2" x2="15" y2="5" />
         <line x1="9" y1="19" x2="9" y2="22" />
@@ -54,7 +53,7 @@ const MODULE_CONFIGS: Record<
     ),
   },
   SKI: {
-    pillBg: '#102544',
+    pillBg: '#00142F',
     title: 'Sistem Kontrol Industri',
     subtext: 'Modul praktikum SKI',
     icon: (color) => (
@@ -68,7 +67,7 @@ const MODULE_CONFIGS: Record<
 }
 
 const DEFAULT_CONFIG = {
-  pillBg: '#102544',
+  pillBg: '#00142F',
   title: 'Modul Praktikum',
   subtext: 'Modul praktikum',
   icon: (color: string) => <Icon name="book-open" size={36} color={color} />,
@@ -107,10 +106,10 @@ export default function ModulePage() {
         <defs>
           <pattern id="nodePattern" width="280" height="280" patternUnits="userSpaceOnUse">
             <circle cx="40" cy="40" r="3" fill="#BAD6EB" />
-            <circle cx="140" cy="80" r="2.5" fill="#537AB8" />
+            <circle cx="140" cy="80" r="2.5" fill="#0284C7" />
             <circle cx="220" cy="50" r="3" fill="#BAD6EB" />
             <circle cx="90" cy="180" r="2.5" fill="#BAD6EB" />
-            <circle cx="200" cy="200" r="3" fill="#537AB8" />
+            <circle cx="200" cy="200" r="3" fill="#0284C7" />
             <line x1="40" y1="40" x2="140" y2="80" stroke="#BAD6EB" strokeWidth="0.8" strokeDasharray="3 3" />
             <line x1="140" y1="80" x2="220" y2="50" stroke="#BAD6EB" strokeWidth="0.8" />
             <line x1="140" y1="80" x2="90" y2="180" stroke="#BAD6EB" strokeWidth="0.8" strokeDasharray="2 2" />
@@ -124,7 +123,7 @@ export default function ModulePage() {
       <div
         className="relative pt-24 pb-14 overflow-hidden mb-6"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -144,7 +143,7 @@ export default function ModulePage() {
         <div
           className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)',
             zIndex: 2,
           }}
         />
@@ -157,7 +156,7 @@ export default function ModulePage() {
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
             }}
           >
             Modul Praktikum
@@ -170,17 +169,17 @@ export default function ModulePage() {
               lineHeight: 1.2,
               marginBottom: '1.1rem',
               color: 'white',
-              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+              textShadow: '0 4px 20px rgba(0, 20, 47, 0.5)',
             }}
           >
             <span className="text-white block">Modul & Panduan</span>
             <span
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #7DD3FC 70%, #38BDF8 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(56, 189, 248, 0.6))',
               }}
             >
               Praktikum ICAL
@@ -191,7 +190,7 @@ export default function ModulePage() {
             style={{
               color: '#E8F1FA',
               lineHeight: 1.7,
-              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+              textShadow: '0 2px 8px rgba(0, 20, 47, 0.4)',
             }}
           >
             Unduh modul lengkap untuk seluruh mata praktikum yang diselenggarakan di Laboratorium ICAL
@@ -247,14 +246,14 @@ export default function ModulePage() {
                     />
                     <path
                       d="M0 0 L145 0 C95 55 55 95 0 145 Z"
-                      fill="#537AB8"
+                      fill="#0284C7"
                       opacity="0.18"
                     />
                     <defs>
                       <linearGradient id="gradWaveTop" x1="0" y1="0" x2="115" y2="115" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#102544" />
-                        <stop offset="50%" stopColor="#1E4B85" />
-                        <stop offset="100%" stopColor="#537AB8" />
+                        <stop offset="0%" stopColor="#00142F" />
+                        <stop offset="50%" stopColor="#083770" />
+                        <stop offset="100%" stopColor="#0284C7" />
                       </linearGradient>
                     </defs>
                   </svg>
@@ -283,14 +282,14 @@ export default function ModulePage() {
                     />
                     <path
                       d="M160 160 L15 160 C65 105 105 65 160 15 Z"
-                      fill="#537AB8"
+                      fill="#0284C7"
                       opacity="0.18"
                     />
                     <defs>
                       <linearGradient id="gradWaveBottom" x1="160" y1="160" x2="45" y2="45" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stopColor="#102544" />
-                        <stop offset="50%" stopColor="#1E4B85" />
-                        <stop offset="100%" stopColor="#537AB8" />
+                        <stop offset="0%" stopColor="#00142F" />
+                        <stop offset="50%" stopColor="#083770" />
+                        <stop offset="100%" stopColor="#0284C7" />
                       </linearGradient>
                     </defs>
                   </svg>

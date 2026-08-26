@@ -27,14 +27,38 @@ export async function GET(req: NextRequest) {
     }
     const praktikumIds = praktikumRows.map((p) => p.id)
 
+    const onlyWithData = req.nextUrl.searchParams.get('onlyWithData') === 'true'
+
     const { data: kelas, error: eK } = await sb
       .from('kelas_praktikum')
-      .select('id, nama_kelas, periode_id')
+      .select(`
+        id,
+        nama_kelas,
+        periode_id,
+        kelompok (
+          id,
+          anggota_kelompok (id)
+        )
+      `)
       .in('praktikum_id', praktikumIds)
       .order('nama_kelas', { ascending: true })
     if (eK) throw eK
 
-    return NextResponse.json({ kelas: kelas || [] })
+    const result = (kelas || []).map((k: any) => {
+      const kelompokList = k.kelompok || []
+      const totalMahasiswa = kelompokList.reduce((acc: number, g: any) => acc + (g.anggota_kelompok?.length || 0), 0)
+      return {
+        id: k.id,
+        nama_kelas: k.nama_kelas,
+        periode_id: k.periode_id,
+        totalKelompok: kelompokList.length,
+        totalMahasiswa,
+      }
+    })
+
+    const finalKelas = onlyWithData ? result.filter((k) => k.totalMahasiswa > 0) : result
+
+    return NextResponse.json({ kelas: finalKelas })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })
   }

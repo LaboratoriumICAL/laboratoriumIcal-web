@@ -40,13 +40,13 @@ export default function AboutPage({ setCurrentPage }: AboutPageProps) {
 
   const [aboutStats, setAboutStats] = useState(defaultAboutStats)
   useEffect(() => {
-    fetch('/api/stats-publik')
+    fetch('/api/stats-publik', { cache: 'no-store' })
       .then((r) => r.json())
       .then((json) => {
         if (!json.stats) return
         setAboutStats([
           { label: 'Prodi', value: `${json.stats.totalJurusan} Prodi`, desc: 'Teknik Elektro, Sistem Tenaga, dll' },
-          { label: 'Mahasiswa / Smt', value: `${json.stats.totalPraktikan}+`, desc: 'Praktikan aktif setiap semester' },
+          { label: 'Mahasiswa / Smt', value: `${json.stats.totalPraktikan} Mahasiswa`, desc: 'Praktikan aktif setiap semester' },
           { label: 'Tim Asisten', value: `${json.stats.totalAsisten} Asisten`, desc: 'Instruktur lab berpengalaman' },
           { label: 'Software Utama', value: '4 Perangkat', desc: 'MATLAB, CX-One, NB Designer, dll' },
         ])
@@ -60,7 +60,7 @@ export default function AboutPage({ setCurrentPage }: AboutPageProps) {
       <div
         className="relative pt-24 pb-14 overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -141,25 +141,25 @@ export default function AboutPage({ setCurrentPage }: AboutPageProps) {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-16 space-y-16">
         {/* Description & Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white rounded-3xl p-6 sm:p-10 border border-[#BAD6EB] shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white rounded-3xl p-6 sm:p-10 border border-[#BED8F0] shadow-sm">
           <div className="lg:col-span-7">
             <div className="section-badge mb-3"><Icon name="clipboard-list" size={13} /> Deskripsi</div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.75rem', color: '#162D4E', marginBottom: '1rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.75rem', color: '#00142F', marginBottom: '1rem' }}>
               Tentang ICAL
             </h2>
-            <p style={{ color: '#3B577D', lineHeight: 1.8, marginBottom: '1rem', fontSize: '0.95rem' }}>
+            <p style={{ color: '#24456F', lineHeight: 1.8, marginBottom: '1rem', fontSize: '0.95rem' }}>
               <strong>Intelligent Control & Automation Laboratory (ICAL)</strong> merupakan pusat praktikum di bawah naungan Institut Teknologi PLN yang berfokus pada pengembangan kompetensi mahasiswa di bidang sistem kontrol, otomasi industri, dan instrumentasi cerdas.
             </p>
-            <p style={{ color: '#3B577D', lineHeight: 1.8, fontSize: '0.95rem' }}>
+            <p style={{ color: '#24456F', lineHeight: 1.8, fontSize: '0.95rem' }}>
               Didukung oleh {aboutStats[2].value.split(' ')[0]} asisten berpengalaman dan perangkat mutakhir, ICAL menyelenggarakan praktikum untuk tiga mata kuliah utama: <strong>Dasar Sistem Kontrol (DSK)</strong>, <strong>Programmable Logic Controller (PLC)</strong>, dan <strong>Sistem Kontrol Industri (SKI)</strong>.
             </p>
           </div>
           <div className="lg:col-span-5 grid grid-cols-2 gap-4">
             {aboutStats.map((s, i) => (
-              <div key={i} className="rounded-2xl p-4 text-center card-hover bg-[#EEF5FA] border border-[#BAD6EB]">
-                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#162D4E' }}>{s.value}</div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#537AB8', marginTop: '2px' }}>{s.label}</div>
-                <div style={{ fontSize: '0.72rem', color: '#3B577D', marginTop: '3px' }}>{s.desc}</div>
+              <div key={i} className="rounded-2xl p-4 text-center card-hover bg-[#EEF5FA] border border-[#BED8F0]">
+                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: '#00142F' }}>{s.value}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0284C7', marginTop: '2px' }}>{s.label}</div>
+                <div style={{ fontSize: '0.72rem', color: '#24456F', marginTop: '3px' }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -286,14 +286,14 @@ export default function AboutPage({ setCurrentPage }: AboutPageProps) {
         {/* Photo gallery */}
         <div>
           <div className="section-badge mb-4"><Icon name="camera" size={13} /> Dokumentasi Workshop</div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.6rem', color: '#162D4E', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.6rem', color: '#00142F', marginBottom: '1.5rem' }}>
             Galeri Foto & Dokumentasi Workshop
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {photos.map((p, i) => (
               <div
                 key={i}
-                className="group relative rounded-3xl overflow-hidden bg-white border border-[#BAD6EB] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                className="group relative rounded-3xl overflow-hidden bg-white border border-[#BED8F0] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
               >
                 <div className="relative overflow-hidden aspect-[4/3]">
                   <img
@@ -306,12 +306,12 @@ export default function AboutPage({ setCurrentPage }: AboutPageProps) {
                 <div className="p-4 flex-1 flex flex-col justify-between bg-white">
                   <div>
                     <h3
-                      className="font-bold text-sm text-[#102544] group-hover:text-[#0A58BE] transition-colors leading-snug mb-1"
+                      className="font-bold text-sm text-[#00142F] group-hover:text-[#0284C7] transition-colors leading-snug mb-1"
                       style={{ fontFamily: 'var(--font-heading)' }}
                     >
                       {p.title}
                     </h3>
-                    <p className="text-xs text-[#4B6B94] leading-relaxed line-clamp-3">
+                    <p className="text-xs text-[#24456F] leading-relaxed line-clamp-3">
                       {p.desc}
                     </p>
                   </div>

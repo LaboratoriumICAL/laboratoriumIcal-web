@@ -3,28 +3,28 @@
 
 @layer base {
   :root {
-    /* Pure Solid Palette from User's Image (No Gradients) */
-    --color-primary-navy: #162D4E;       /* Solid Deep Navy */
-    --color-primary-deep: #1A365D;
-    --color-primary-mid: #2F4D7B;
-    --color-primary-royal: #537AB8;      /* Exact Solid Blue from User Swatch */
-    --color-primary: #537AB8;            /* Exact Solid Blue from User Swatch */
-    --color-primary-rgb: 83, 122, 184;
-    --color-primary-hover: #416399;
-    --color-primary-glow: #537AB8;
-    --color-primary-light: #84A6D6;
-    --color-primary-sky: #7096D1;
+    /* Pure Solid Palette with Focus on #00142F (Deep Midnight Navy) */
+    --color-primary-navy: #00142F;       /* Exact Focus Swatch: Deep Midnight Navy */
+    --color-primary-deep: #000E22;
+    --color-primary-mid: #0A325E;
+    --color-primary-royal: #0284C7;      /* Radiant Sky / Electric Blue */
+    --color-primary: #00142F;            /* Focus Brand Color */
+    --color-primary-rgb: 0, 20, 47;
+    --color-primary-hover: #039BE5;
+    --color-primary-glow: #38BDF8;
+    --color-primary-light: #60A5FA;
+    --color-primary-sky: #38BDF8;
     --color-primary-ice: #BAD6EB;
-    --color-primary-subtle: #EEF5FA;     /* Light Solid Canvas */
-    --color-bg: #F4F8FC;                 /* Clean Solid Background Canvas */
+    --color-primary-subtle: #EEF5FA;     /* Light Crisp Canvas */
+    --color-bg: #F4F8FC;                 /* Clean, Bright, Crisp Background */
     --color-surface: #FFFFFF;
     --color-border: #BAD6EB;
     --color-border-subtle: #D8E7F5;
 
     /* High-contrast crisp typography */
-    --color-text-primary: #162D4E;
-    --color-text-secondary: #3B577D;
-    --color-text-muted: #6B87A8;
+    --color-text-primary: #00142F;       /* Crisp Deep Midnight Navy */
+    --color-text-secondary: #24456F;
+    --color-text-muted: #5D7A9E;
 
     /* Complementary Harmonic Accents */
     --accent-amber: #F59E0B;
@@ -53,7 +53,7 @@
     overflow-x: hidden;
   }
 
-  /* Custom Gradient Scrollbar */
+  /* Custom Gradient Scrollbar with #00142F theme */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -64,27 +64,27 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #537AB8 0%, #162D4E 100%);
+    background: linear-gradient(180deg, #0284C7 0%, #00142F 100%);
     border-radius: 9999px;
     border: 2px solid #EEF5FA;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #6E94D2 0%, #294D80 100%);
+    background: linear-gradient(180deg, #38BDF8 0%, #00224D 100%);
   }
 }
 
-/* Reusable Utility Classes & Rich Royal Blue Gradients */
+/* Reusable Utility Classes & Rich #00142F + Royal Blue Gradients */
 .btn-primary {
-  background: linear-gradient(135deg, #162D4E 0%, #294D80 40%, #537AB8 100%);
+  background: linear-gradient(135deg, #00142F 0%, #082F63 45%, #0284C7 100%);
   color: #FFFFFF;
   font-family: var(--font-heading);
   font-weight: 700;
   padding: 0.75rem 1.75rem;
   border-radius: 1rem;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(83, 122, 184, 0.35);
-  border: 1px solid rgba(186, 214, 235, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 20, 47, 0.3);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -94,9 +94,9 @@
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(83, 122, 184, 0.45);
-  background: linear-gradient(135deg, #203B66 0%, #355C96 50%, #6086C2 100%);
-  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.45);
+  background: linear-gradient(135deg, #001D40 0%, #0B3D7C 45%, #039BE5 100%);
+  border-color: rgba(56, 189, 248, 0.8);
 }
 
 .btn-primary:active {
@@ -104,15 +104,15 @@
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #FFFFFF 0%, #EEF5FA 100%);
-  color: #162D4E;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0F6FC 100%);
+  color: #00142F;
   font-family: var(--font-heading);
   font-weight: 600;
   padding: 0.75rem 1.75rem;
   border-radius: 1rem;
   border: 1.5px solid #BAD6EB;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(83, 122, 184, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 20, 47, 0.06);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -121,11 +121,11 @@
 }
 
 .btn-secondary:hover {
-  background: linear-gradient(135deg, #EEF5FA 0%, #BAD6EB 100%);
-  border-color: #537AB8;
-  color: #162D4E;
+  background: linear-gradient(135deg, #F0F6FC 0%, #DBEAFE 100%);
+  border-color: #0284C7;
+  color: #00142F;
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(83, 122, 184, 0.16);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.18);
 }
 
 .section-badge {
@@ -133,24 +133,24 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 1rem;
-  background: linear-gradient(135deg, #EEF5FA 0%, #BAD6EB 100%);
-  color: #162D4E;
+  background: linear-gradient(135deg, #EEF5FA 0%, #D8E7F5 100%);
+  color: #00142F;
   border-radius: 9999px;
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  border: 1.5px solid #BAD6EB;
-  box-shadow: 0 2px 8px rgba(83, 122, 184, 0.1);
+  border: 1.5px solid #BED8F0;
+  box-shadow: 0 2px 8px rgba(0, 20, 47, 0.08);
 }
 
 .input-field {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 0.875rem;
-  border: 1.5px solid #BAD6EB;
+  border: 1.5px solid #BED8F0;
   background: #FFFFFF;
-  color: #162D4E;
+  color: #00142F;
   font-size: 0.9rem;
   font-family: var(--font-body);
   transition: all 0.2s ease;
@@ -158,8 +158,8 @@
 }
 
 .input-field:focus {
-  border-color: #537AB8;
-  box-shadow: 0 0 0 3px rgba(83, 122, 184, 0.25);
+  border-color: #0284C7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.22);
 }
 
 .card-hover {
@@ -168,8 +168,16 @@
 
 .card-hover:hover {
   transform: translateY(-5px);
-  box-shadow: 0 16px 32px -8px rgba(83, 122, 184, 0.2);
-  border-color: #537AB8 !important;
+  box-shadow: 0 16px 32px -8px rgba(0, 20, 47, 0.15);
+  border-color: #0284C7 !important;
+}
+
+.gradient-hero-banner {
+  background: linear-gradient(135deg, #00142F 0%, #082F63 40%, #154C8F 75%, #0284C7 100%);
+}
+
+.gradient-card-accent {
+  background: linear-gradient(90deg, #00142F 0%, #082F63 50%, #0284C7 100%);
 }
 
 .dots-bg {

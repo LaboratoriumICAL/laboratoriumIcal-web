@@ -154,7 +154,7 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
         <div className="text-center mb-8">
           <button
             onClick={() => setCurrentPage('home')}
-            className="inline-flex items-center gap-2 text-sm text-[#2F4D7B] hover:text-[#1B3258] transition-colors mb-6 font-semibold cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm text-[#24456F] hover:text-[#00142F] transition-colors mb-6 font-semibold cursor-pointer"
             style={{ fontFamily: 'var(--font-body)' }}
           >
             ← Kembali ke Beranda
@@ -164,13 +164,13 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
               fontFamily: 'var(--font-heading)',
               fontWeight: 800,
               fontSize: '1.9rem',
-              color: '#1B3258',
+              color: '#00142F',
               lineHeight: 1.2,
             }}
           >
             Selamat Datang di ICAL
           </div>
-          <p style={{ color: '#2F4D7B', marginTop: '6px' }}>Pilih tipe akun untuk melanjutkan</p>
+          <p style={{ color: '#24456F', marginTop: '6px' }}>Pilih tipe akun untuk melanjutkan</p>
         </div>
 
         {/* Choice screen */}
@@ -185,25 +185,25 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
               onClick={() => handleChoose('student')}
               className="rounded-3xl p-8 text-center group transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer bg-white"
               style={{
-                border: '2px solid #C6DBF2',
-                boxShadow: '0 8px 36px rgba(92, 139, 200,0.1)',
+                border: '2px solid #BED8F0',
+                boxShadow: '0 8px 36px rgba(0, 20, 47, 0.08)',
               }}
             >
               <div
                 className="w-20 h-20 rounded-3xl mx-auto mb-5 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                style={{ background: '#EEF5FA', boxShadow: '0 8px 20px rgba(92, 139, 200,0.18)' }}
+                style={{ background: '#EEF5FA', boxShadow: '0 8px 20px rgba(0, 20, 47, 0.08)' }}
               >
-                <Icon name="graduation-cap" size={40} color="#2F4D7B" strokeWidth={1.5} />
+                <Icon name="graduation-cap" size={40} color="#00142F" strokeWidth={1.5} />
               </div>
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#1B3258', marginBottom: '0.5rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#00142F', marginBottom: '0.5rem' }}>
                 Praktikan
               </h2>
-              <p style={{ color: '#2F4D7B', fontSize: '0.9rem', lineHeight: 1.6 }}>
+              <p style={{ color: '#24456F', fontSize: '0.9rem', lineHeight: 1.6 }}>
                 Login sebagai mahasiswa untuk mengakses nilai, jadwal, dan absensimu
               </p>
               <div
                 className="mt-5 py-3 rounded-2xl font-semibold text-sm text-white transition-all group-hover:shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)', fontFamily: 'var(--font-heading)' }}
+                style={{ background: 'linear-gradient(135deg, #00142F 0%, #082F63 45%, #0284C7 100%)', fontFamily: 'var(--font-heading)' }}
               >
                 Masuk sebagai Praktikan →
               </div>
@@ -214,25 +214,25 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
               onClick={() => handleChoose('assistant')}
               className="rounded-3xl p-8 text-center group transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 cursor-pointer bg-white"
               style={{
-                border: '2px solid #C6DBF2',
-                boxShadow: '0 8px 36px rgba(92, 139, 200,0.1)',
+                border: '2px solid #BED8F0',
+                boxShadow: '0 8px 36px rgba(0, 20, 47, 0.08)',
               }}
             >
               <div
                 className="w-20 h-20 rounded-3xl mx-auto mb-5 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                style={{ background: '#EEF5FA', boxShadow: '0 8px 20px rgba(27, 50, 88,0.18)' }}
+                style={{ background: '#EEF5FA', boxShadow: '0 8px 20px rgba(0, 20, 47, 0.08)' }}
               >
-                <Icon name="briefcase" size={40} color="#1B3258" strokeWidth={1.5} />
+                <Icon name="briefcase" size={40} color="#00142F" strokeWidth={1.5} />
               </div>
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#1B3258', marginBottom: '0.5rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#00142F', marginBottom: '0.5rem' }}>
                 Asisten
               </h2>
-              <p style={{ color: '#2F4D7B', fontSize: '0.9rem', lineHeight: 1.6 }}>
+              <p style={{ color: '#24456F', fontSize: '0.9rem', lineHeight: 1.6 }}>
                 Akses portal khusus dan manajemen operasional tim asisten Laboratorium ICAL
               </p>
               <div
                 className="mt-5 py-3 rounded-2xl font-semibold text-sm text-white transition-all group-hover:shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)', fontFamily: 'var(--font-heading)' }}
+                style={{ background: 'linear-gradient(135deg, #00142F 0%, #082F63 45%, #0284C7 100%)', fontFamily: 'var(--font-heading)' }}
               >
                 Masuk sebagai Asisten →
               </div>
@@ -245,14 +245,14 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
           <div className="max-w-md mx-auto animate-slideIn">
             <div
               className="rounded-3xl p-8 bg-white"
-              style={{ border: '2px solid #C6DBF2', boxShadow: '0 16px 60px rgba(92, 139, 200,0.12)' }}
+              style={{ border: '2px solid #BED8F0', boxShadow: '0 16px 60px rgba(0, 20, 47, 0.08)' }}
             >
               <div className="text-center mb-6">
-                <div className="mb-3 flex justify-center"><Icon name="graduation-cap" size={44} color="#2F4D7B" strokeWidth={1.5} /></div>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#1B3258' }}>
+                <div className="mb-3 flex justify-center"><Icon name="graduation-cap" size={44} color="#00142F" strokeWidth={1.5} /></div>
+                <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#00142F' }}>
                   Login Praktikan
                 </h2>
-                <p style={{ color: '#5D789B', fontSize: '0.875rem', marginTop: '6px' }}>
+                <p style={{ color: '#24456F', fontSize: '0.875rem', marginTop: '6px' }}>
                   Silakan masukkan NIM dan kata sandi Anda untuk mengakses akun
                 </p>
               </div>

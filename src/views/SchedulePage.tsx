@@ -3,7 +3,7 @@ import { Icon } from '../components/Icon'
 
 interface PraktikumOption { id: string; kode: string; nama: string }
 interface JurusanOption { id: string; kode: string; nama: string; kelasTersedia: string[]; praktikum: PraktikumOption[] }
-interface Member { name: string; nim: string }
+interface Member { name: string; nim: string; hasAccount?: boolean }
 interface Group { id: string; shift: number | null; assistant: string; hari?: string; jamMulai?: string; jamSelesai?: string; ruangan?: string; members: Member[] }
 interface ScheduleEntry { label: string; date: string }
 
@@ -38,7 +38,44 @@ export default function SchedulePage() {
   ]
 
   const currentJurusan = jurusanList.find((j) => j.kode === selectedProgram)
-  const availableClasses = currentJurusan?.kelasTersedia || []
+
+  interface AvailableKelasItem {
+    id: string
+    nama_kelas: string
+    totalKelompok: number
+    totalMahasiswa: number
+  }
+  const [availableClasses, setAvailableClasses] = useState<AvailableKelasItem[]>([])
+  const [loadingClasses, setLoadingClasses] = useState(false)
+
+  useEffect(() => {
+    if (!selectedProgram || !selectedPracticum) {
+      setAvailableClasses([])
+      setSelectedClass('')
+      return
+    }
+
+    const currentJ = jurusanList.find((j) => j.kode === selectedProgram)
+    const isUnavail = !currentJ?.praktikum.some((p) => p.kode === selectedPracticum)
+    if (isUnavail) {
+      setAvailableClasses([])
+      setSelectedClass('')
+      return
+    }
+
+    setLoadingClasses(true)
+    fetch(`/api/kelas-praktikum?praktikum=${encodeURIComponent(selectedPracticum)}&jurusan=${encodeURIComponent(selectedProgram)}&onlyWithData=true`)
+      .then((r) => r.json())
+      .then((json) => {
+        const list = (json.kelas || []) as AvailableKelasItem[]
+        setAvailableClasses(list)
+        if (selectedClass && !list.some((k) => k.nama_kelas === selectedClass)) {
+          setSelectedClass('')
+        }
+      })
+      .catch(() => setAvailableClasses([]))
+      .finally(() => setLoadingClasses(false))
+  }, [selectedProgram, selectedPracticum, jurusanList])
 
   const practicumUnavailable =
     !!selectedProgram &&
@@ -96,12 +133,12 @@ export default function SchedulePage() {
   }, [results, memberSearchTerm])
 
   return (
-    <div className="min-h-screen" style={{ background: '#F0F5FC' }}>
+    <div className="min-h-screen" style={{ background: '#F4F8FC' }}>
       {/* Header */}
       <div
         className="relative pt-24 pb-14 overflow-hidden mb-6"
         style={{
-          background: 'linear-gradient(135deg, #162D4E 0%, #234575 45%, #537AB8 100%)',
+          background: 'linear-gradient(135deg, #00142F 0%, #062B57 40%, #0C4E9C 75%, #0284C7 100%)',
         }}
       >
         {/* Sharp Dot Matrix Background */}
@@ -121,7 +158,7 @@ export default function SchedulePage() {
         <div
           className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(83, 122, 184, 0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%)',
             zIndex: 2,
           }}
         />
@@ -134,7 +171,7 @@ export default function SchedulePage() {
               color: '#FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.4)',
               backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(22, 45, 78, 0.2)',
+              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
             }}
           >
             Jadwal Praktikum
@@ -147,17 +184,17 @@ export default function SchedulePage() {
               lineHeight: 1.2,
               marginBottom: '1.1rem',
               color: 'white',
-              textShadow: '0 4px 20px rgba(22, 45, 78, 0.5)',
+              textShadow: '0 4px 20px rgba(0, 20, 47, 0.5)',
             }}
           >
             <span className="text-white block">Jadwal Praktikum</span>
             <span
               style={{
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #BAD6EB 70%, #93C5FD 100%)',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #D8EBFF 35%, #7DD3FC 70%, #38BDF8 100%)',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 20px rgba(186, 214, 235, 0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(56, 189, 248, 0.6))',
               }}
             >
               Laboratorium ICAL
@@ -168,7 +205,7 @@ export default function SchedulePage() {
             style={{
               color: '#E8F1FA',
               lineHeight: 1.7,
-              textShadow: '0 2px 8px rgba(22, 45, 78, 0.4)',
+              textShadow: '0 2px 8px rgba(0, 20, 47, 0.4)',
             }}
           >
             Pilih program studi, jenis praktikum, dan kelas untuk menemukan jadwal dan kelompokmu secara cepat
@@ -181,16 +218,16 @@ export default function SchedulePage() {
         <div
           className="rounded-3xl p-6 sm:p-8 mb-8 bg-white"
           style={{
-            border: '1.5px solid #C6DBF2',
-            boxShadow: '0 8px 32px rgba(92, 139, 200,0.08)',
+            border: '1.5px solid #D6E4F0',
+            boxShadow: '0 8px 32px rgba(0, 20, 47, 0.06)',
           }}
         >
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
-            <Icon name="search" size={18} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Filter Pencarian
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
+            <Icon name="search" size={18} className="inline mr-1.5 align-text-bottom text-[#0260D4]" /> Filter Pencarian
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#002466', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Jurusan
               </label>
               <select
@@ -205,7 +242,7 @@ export default function SchedulePage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#002466', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Jenis Praktikum
               </label>
               <select
@@ -220,24 +257,45 @@ export default function SchedulePage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: 500, fontSize: '0.85rem', color: '#2F4D7B', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
+              <label style={{ display: 'block', fontWeight: 600, fontSize: '0.85rem', color: '#002466', marginBottom: '6px', fontFamily: 'var(--font-body)' }}>
                 Kelas
               </label>
               <select
                 className="input-field"
                 value={selectedClass}
                 onChange={(e) => { setSelectedClass(e.target.value); setResults(null); }}
-                disabled={!selectedProgram || !selectedPracticum || loadingJurusan}
+                disabled={!selectedProgram || !selectedPracticum || loadingJurusan || loadingClasses || practicumUnavailable || availableClasses.length === 0}
               >
                 <option value="">
-                  {loadingJurusan ? 'Memuat kelas...' : !selectedPracticum ? '-- Pilih Praktikum Dulu --' : availableClasses.length === 0 ? '-- Tidak Ada Kelas --' : '-- Pilih Kelas --'}
+                  {loadingJurusan || loadingClasses
+                    ? 'Memuat kelas...'
+                    : !selectedProgram
+                    ? '-- Pilih Jurusan Dulu --'
+                    : !selectedPracticum
+                    ? '-- Pilih Praktikum Dulu --'
+                    : practicumUnavailable
+                    ? '-- Praktikum Belum Dibuka --'
+                    : availableClasses.length === 0
+                    ? '-- Jadwal Belum Dirilis Asisten --'
+                    : '-- Pilih Kelas --'}
                 </option>
                 {availableClasses.map((cls) => (
-                  <option key={cls} value={cls}>Kelas {cls}</option>
+                  <option key={cls.id} value={cls.nama_kelas}>
+                    Kelas {cls.nama_kelas}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
+
+          {selectedProgram && selectedPracticum && !practicumUnavailable && !loadingClasses && availableClasses.length === 0 && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50/80 border border-amber-200/90 flex items-center gap-3 text-amber-900 shadow-2xs">
+              <Icon name="clock" size={20} className="shrink-0 text-amber-600" />
+              <div className="text-xs sm:text-sm">
+                <span className="font-bold">Jadwal Belum Dirilis:</span> Data pembagian kelompok dan jadwal untuk {selectedPracticum} di prodi ini sedang dipersiapkan oleh asisten laboratorium. Silakan cek kembali secara berkala.
+              </div>
+            </div>
+          )}
 
           <button
             onClick={handleSearch}
@@ -264,21 +322,50 @@ export default function SchedulePage() {
         {/* Schedule dates */}
         {searched && scheduleDates.length > 0 && (
           <div
-            className="rounded-3xl p-6 mb-6"
-            style={{ background: '#EEF5FA', border: '1.5px solid #C6DBF2' }}
+            className="rounded-3xl p-6 sm:p-7 mb-7 relative overflow-hidden text-white"
+            style={{
+              background: 'linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)',
+              boxShadow: '0 16px 36px -10px rgba(0, 11, 26, 0.45)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }}
           >
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', marginBottom: '0.75rem' }}>
-              <Icon name="calendar" size={16} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Jadwal Pertemuan
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            {/* Ambient Lighting & High-Tech Orbs */}
+            <div className="absolute -right-8 -bottom-8 w-60 h-60 rounded-full bg-[#0284C7]/20 blur-3xl pointer-events-none" />
+            <div className="absolute -left-8 -top-8 w-60 h-60 rounded-full bg-[#0260D4]/20 blur-3xl pointer-events-none" />
+
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <h3 className="flex items-center gap-2.5 text-white font-bold text-base sm:text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
+                <span className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#38BDF8] shadow-xs">
+                  <Icon name="calendar" size={17} />
+                </span>
+                Jadwal Pertemuan Praktikum
+              </h3>
+              <span className="text-xs text-[#BAE6FD] font-medium hidden sm:inline-block">
+                Semester Ganjil 2026/2027
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 relative z-10">
               {scheduleDates.map((s, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl p-3 text-center bg-white shadow-xs"
-                  style={{ border: '1px solid #C6DBF2' }}
+                  className="rounded-2xl p-3.5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#38BDF8]/50 group relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(8px)',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.18)',
+                  }}
                 >
-                  <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '0.8rem', color: '#2F4D7B' }}>{s.label}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#2F4D7B', marginTop: '3px' }}>{s.date}</div>
+                  <div
+                    className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                  >
+                    {s.label}
+                  </div>
+                  <div className="text-[0.7rem] text-[#BAE6FD]/85 mt-1 font-medium">
+                    {s.date}
+                  </div>
                 </div>
               ))}
             </div>
@@ -288,17 +375,17 @@ export default function SchedulePage() {
         {/* Results */}
         {searched && results !== null && !error && (
           <div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '1.2rem', marginBottom: '0.75rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '1.2rem', marginBottom: '0.75rem' }}>
               {results.length > 0
-                ? (<><Icon name="clipboard-list" size={17} className="inline mr-1.5 align-text-bottom text-[#5C8BC8]" /> Ditemukan {results.length} Kelompok — Kelas {selectedClass}</>)
-                : (<><Icon name="frown" size={17} className="inline mr-1.5 align-text-bottom" /> Tidak Ada Data</>)}
+                ? (<><Icon name="clipboard-list" size={17} className="inline mr-1.5 align-text-bottom text-[#0260D4]" /> Ditemukan {results.length} Kelompok (Kelas {selectedClass})</>)
+                : (<><Icon name="frown" size={17} className="inline mr-1.5 align-text-bottom text-[#0260D4]" /> Tidak Ada Data</>)}
             </h2>
 
             {/* Fitur Cari Nama Praktikan / NIM (Tengah & Presisi) */}
             {results.length > 0 && (
               <div className="my-6 flex flex-col items-center justify-center text-center">
                 <div className="relative w-full max-w-lg">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#537AB8]">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#0260D4]">
                     <Icon name="search" size={18} />
                   </div>
                   <input
@@ -310,29 +397,29 @@ export default function SchedulePage() {
                     style={{
                       paddingLeft: '2.85rem',
                       paddingRight: '2.85rem',
-                      borderColor: memberSearchTerm ? '#537AB8' : '#C6DBF2',
+                      borderColor: memberSearchTerm ? '#0260D4' : '#D6E4F0',
                       boxShadow: memberSearchTerm
-                        ? '0 0 0 4px rgba(83, 122, 184, 0.18), 0 4px 16px rgba(92, 139, 200, 0.1)'
-                        : '0 2px 10px rgba(92, 139, 200, 0.06)',
+                        ? '0 0 0 4px rgba(2, 96, 212, 0.15), 0 4px 16px rgba(2, 96, 212, 0.1)'
+                        : '0 2px 10px rgba(0, 20, 47, 0.05)',
                     }}
                   />
                   {memberSearchTerm && (
                     <button
                       onClick={() => setMemberSearchTerm('')}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#5D789B] hover:text-[#1B3258] transition-colors cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#64748B] hover:text-[#00142F] transition-colors cursor-pointer"
                       title="Hapus pencarian"
                     >
-                      <span className="w-5 h-5 rounded-full bg-[#E2EDF8] hover:bg-[#C6DBF2] text-[#2F4D7B] flex items-center justify-center text-xs font-bold">
+                      <span className="w-5 h-5 rounded-full bg-[#EFF6FF] hover:bg-[#D6E4F0] text-[#002466] flex items-center justify-center text-xs font-bold">
                         ✕
                       </span>
                     </button>
                   )}
                 </div>
                 {memberSearchTerm.trim() && (
-                  <div className="mt-2.5 text-xs font-semibold text-[#2F4D7B] flex items-center justify-center gap-2 animate-fadeIn">
-                    <span>Hasil pencarian untuk: <strong className="text-[#1B3258]">&ldquo;{memberSearchTerm}&rdquo;</strong></span>
+                  <div className="mt-2.5 text-xs font-semibold text-[#002466] flex items-center justify-center gap-2 animate-fadeIn">
+                    <span>Hasil pencarian untuk: <strong className="text-[#00142F]">&ldquo;{memberSearchTerm}&rdquo;</strong></span>
                     <span className="text-slate-400">•</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#EEF5FA] text-[#537AB8] border border-[#C6DBF2] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0260D4] border border-sky-200 font-bold">
                       {filteredResults.length} kelompok ditemukan
                     </span>
                   </div>
@@ -343,33 +430,33 @@ export default function SchedulePage() {
             {results.length === 0 && (
               <div
                 className="rounded-3xl p-10 text-center bg-white"
-                style={{ border: '1.5px solid #C6DBF2' }}
+                style={{ border: '1.5px solid #D6E4F0', boxShadow: '0 4px 20px rgba(0,20,47,0.05)' }}
               >
                 <div className="mb-4 flex justify-center"><Icon name="inbox" size={44} color="#94A3B8" strokeWidth={1.5} /></div>
-                <p style={{ color: '#2F4D7B' }}>Data jadwal untuk kelas ini belum tersedia. Kelompok & anggota diisi oleh asisten.</p>
+                <p style={{ color: '#002466' }}>Data jadwal untuk kelas ini belum tersedia. Kelompok & anggota diisi oleh asisten.</p>
               </div>
             )}
 
             {results.length > 0 && memberSearchTerm.trim() && filteredResults.length === 0 && (
               <div
                 className="rounded-3xl p-8 text-center bg-white mb-6"
-                style={{ border: '1.5px solid #C6DBF2' }}
+                style={{ border: '1.5px solid #D6E4F0' }}
               >
-                <div className="mb-3 flex justify-center text-[#5C8BC8]"><Icon name="search" size={36} /></div>
-                <p className="font-bold text-[#1B3258] mb-1">Praktikan Tidak Ditemukan</p>
-                <p style={{ color: '#5D789B', fontSize: '0.85rem' }}>
+                <div className="mb-3 flex justify-center text-[#0260D4]"><Icon name="search" size={36} /></div>
+                <p className="font-bold text-[#00142F] mb-1">Praktikan Tidak Ditemukan</p>
+                <p style={{ color: '#64748B', fontSize: '0.85rem' }}>
                   Tidak ada praktikan dengan nama atau NIM &ldquo;{memberSearchTerm}&rdquo; di Kelas {selectedClass}.
                 </p>
                 <button
                   onClick={() => setMemberSearchTerm('')}
-                  className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-[#2F4D7B] bg-[#EEF5FA] hover:bg-[#E2EDF8] transition-colors cursor-pointer"
+                  className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-[#002466] bg-sky-50 hover:bg-sky-100 transition-colors cursor-pointer border border-sky-200"
                 >
                   Reset Pencarian
                 </button>
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {[1, 2].map((shift) => {
                 const shiftGroups = filteredResults.filter((g) => g.shift === shift)
                 const unassigned = shift === 1 ? filteredResults.filter((g) => g.shift !== 1 && g.shift !== 2) : []
@@ -378,20 +465,24 @@ export default function SchedulePage() {
                 return (
                   <div key={shift}>
                     <div
-                      className="flex items-center gap-3 mb-3"
-                      style={{ color: '#1B3258', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
+                      className="flex items-center gap-3 mb-3.5"
+                      style={{ color: '#00142F', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
                     >
                       <span
-                        className="px-3.5 py-1 rounded-full text-white text-sm shadow-xs font-semibold"
-                        style={{ background: '#537AB8' }}
+                        className="px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-md tracking-wide"
+                        style={{
+                          background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                          boxShadow: '0 4px 14px rgba(2, 96, 212, 0.3)',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                        }}
                       >
                         Shift {shift}
                       </span>
-                      <span style={{ color: '#2F4D7B', fontWeight: 400, fontSize: '0.85rem' }}>
+                      <span style={{ color: '#002466', fontWeight: 600, fontSize: '0.85rem' }}>
                         {shift === 1 ? '08.00 – 11.00 WIB' : '13.00 – 16.00 WIB'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                       {listForShift.map((group) => {
                         const isExpanded = memberSearchTerm.trim() ? true : openGroup === group.id
                         const queryLower = memberSearchTerm.toLowerCase().trim()
@@ -399,55 +490,63 @@ export default function SchedulePage() {
                         return (
                           <div key={group.id}>
                             <div
-                              className="rounded-2xl p-4 card-hover cursor-pointer transition-all"
+                              className="rounded-2xl p-4 sm:p-5 card-hover cursor-pointer transition-all duration-300 relative overflow-hidden group"
                               style={{
-                                background: isExpanded ? '#EEF5FA' : 'white',
-                                border: `1.5px solid ${isExpanded ? '#5C8BC8' : '#C6DBF2'}`,
-                                boxShadow: '0 4px 16px rgba(92, 139, 200,0.08)',
+                                background: isExpanded ? 'linear-gradient(145deg, #FFFFFF 0%, #F0F7FF 100%)' : 'white',
+                                border: isExpanded ? '1.8px solid #0260D4' : '1.2px solid #D6E4F0',
+                                boxShadow: isExpanded
+                                  ? '0 12px 28px -6px rgba(2, 96, 212, 0.2)'
+                                  : '0 4px 18px rgba(0, 20, 47, 0.05)',
                               }}
                               onClick={() => setOpenGroup(openGroup === group.id ? null : group.id)}
                             >
-                              <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center justify-between mb-2.5">
                                 <div
-                                  className="min-w-[2.75rem] h-10 px-2.5 rounded-xl flex items-center justify-center text-center text-white font-bold shadow-xs shrink-0"
+                                  className="min-w-[3.25rem] h-10 px-3 rounded-xl flex items-center justify-center text-center text-white font-bold tracking-wider shadow-sm shrink-0 transition-transform duration-300 group-hover:scale-105"
                                   style={{
-                                    background: '#537AB8',
+                                    background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
                                     fontFamily: 'var(--font-heading)',
                                     fontSize: group.id.length > 3 ? '0.78rem' : '0.875rem',
+                                    boxShadow: '0 4px 12px rgba(2, 96, 212, 0.25)',
                                     whiteSpace: 'nowrap',
                                   }}
                                 >
                                   {group.id}
                                 </div>
-                                <span style={{ fontSize: '1.2rem', color: '#5C8BC8' }}>{isExpanded ? '▲' : '▼'}</span>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-[#0260D4] text-white shadow-xs rotate-180' : 'bg-sky-50 text-[#0260D4] group-hover:bg-[#0260D4] group-hover:text-white'}`}>
+                                  <Icon name="chevron-down" size={14} strokeWidth={2.5} />
+                                </div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#1B3258', fontSize: '0.95rem' }}>
+                              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '1rem' }} className="group-hover:text-[#0260D4] transition-colors">
                                 Kelompok {group.id}
                               </div>
-                              <div style={{ fontSize: '0.8rem', color: '#2F4D7B', marginTop: '4px' }}>
-                                <Icon name="user" size={12} className="inline mr-1 align-text-bottom text-[#5C8BC8]" /> Asisten: <strong style={{ color: '#2F4D7B' }}>{group.assistant}</strong>
+                              <div style={{ fontSize: '0.82rem', color: '#002466', marginTop: '4px' }} className="flex items-center gap-1.5">
+                                <Icon name="user" size={13} color="#0284C7" /> Asisten: <strong style={{ color: '#00142F' }}>{group.assistant}</strong>
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: '#5D789B', marginTop: '2px' }}>
-                                {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
+                              <div className="mt-2.5 flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-sky-50 text-[#0260D4] border border-sky-100">
+                                  {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
+                                </span>
                               </div>
                             </div>
 
                             {isExpanded && (
                               <div
                                 className="rounded-b-2xl -mt-2 pt-4 px-4 pb-4 animate-slideIn bg-white"
-                                style={{ border: '1.5px solid #5C8BC8', borderTop: 'none' }}
+                                style={{ border: '1.8px solid #0260D4', borderTop: 'none', boxShadow: '0 12px 28px -6px rgba(2, 96, 212, 0.15)' }}
                               >
-                                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, color: '#1B3258', fontSize: '0.85rem', marginBottom: '8px' }}>
-                                  Daftar Anggota Kelompok {group.id}
+                                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '0.85rem', marginBottom: '8px' }} className="flex items-center justify-between">
+                                  <span>Daftar Anggota Kelompok {group.id}</span>
+                                  <span className="text-xs font-normal text-[#64748B]">{group.members.length} Mahasiswa</span>
                                 </div>
                                 <div
-                                  className="text-xs mb-3 px-3 py-2 rounded-xl"
-                                  style={{ background: '#EEF4FB', color: '#2F4D7B', fontWeight: 600, border: '1px solid #C6DBF2' }}
+                                  className="text-xs mb-3 px-3.5 py-2.5 rounded-xl flex items-center gap-2"
+                                  style={{ background: 'linear-gradient(135deg, #F0F7FF 0%, #E0F2FE 100%)', color: '#002466', fontWeight: 600, border: '1px solid #BAE6FD' }}
                                 >
-                                  <Icon name="user" size={12} className="inline mr-1 align-text-bottom" /> Asisten Pendamping: {group.assistant}
+                                  <Icon name="user" size={13} color="#0260D4" /> Asisten Pendamping: <strong className="text-[#00142F]">{group.assistant}</strong>
                                 </div>
                                 {group.members.length === 0 ? (
-                                  <p style={{ fontSize: '0.8rem', color: '#5D789B' }}>Belum ada anggota untuk kelompok ini.</p>
+                                  <p style={{ fontSize: '0.8rem', color: '#64748B' }}>Belum ada anggota untuk kelompok ini.</p>
                                 ) : (
                                   <div className="space-y-2">
                                     {group.members.map((m, i) => {
@@ -459,7 +558,7 @@ export default function SchedulePage() {
                                       return (
                                         <div
                                           key={i}
-                                          className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all"
+                                          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all"
                                           style={{
                                             background: isMatch ? '#FEF9C3' : '#F8FAFC',
                                             border: isMatch ? '1.5px solid #FACC15' : '1px solid #E2E8F0',
@@ -471,16 +570,16 @@ export default function SchedulePage() {
                                             style={{
                                               background: isMatch
                                                 ? '#D97706'
-                                                : 'linear-gradient(135deg, #162D4E 0%, #294D80 45%, #537AB8 85%, #6E94D2 100%)',
+                                                : 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
                                             }}
                                           >
                                             {i + 1}
                                           </span>
                                           <div className="flex-1 min-w-0">
-                                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: isMatch ? '#78350F' : '#1B3258' }}>
+                                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: isMatch ? '#78350F' : '#00142F' }}>
                                               {m.name}
                                             </div>
-                                            <div style={{ fontSize: '0.72rem', color: isMatch ? '#B45309' : '#5D789B' }}>
+                                            <div style={{ fontSize: '0.72rem', color: isMatch ? '#B45309' : '#64748B' }}>
                                               {m.nim}
                                             </div>
                                           </div>

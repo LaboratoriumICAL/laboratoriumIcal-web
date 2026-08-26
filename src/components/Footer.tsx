@@ -18,7 +18,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
   return (
     <footer
       style={{
-        background: 'linear-gradient(135deg, #101F35 0%, #162D4E 45%, #23416C 85%, #2F558E 100%)',
+        background: 'linear-gradient(135deg, #000917 0%, #00142F 40%, #06264F 75%, #0A3A74 100%)',
         color: 'white',
       }}
     >
@@ -36,7 +36,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: 'white', fontSize: '1.15rem' }}>
                   ICAL
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: '#BAD6EB' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: '#7DD3FC' }}>
                   Intelligent Control & Automation Laboratory
                 </div>
               </div>
@@ -56,7 +56,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 <button
                   key={link.page}
                   onClick={() => setCurrentPage(link.page)}
-                  className="text-left text-sm transition-colors hover:text-[#BAD6EB] cursor-pointer"
+                  className="text-left text-sm transition-colors hover:text-[#38BDF8] cursor-pointer"
                   style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'var(--font-body)' }}
                 >
                   {link.label}
@@ -72,23 +72,23 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             </h4>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
-                <span className="text-[#BAD6EB] mt-0.5"><Icon name="map-pin" size={16} /></span>
+                <span className="text-[#38BDF8] mt-0.5"><Icon name="map-pin" size={16} /></span>
                 <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>
                   Gedung B Lantai 2, Institut Teknologi PLN, Jakarta Barat
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#BAD6EB]"><Icon name="mail" size={16} /></span>
+                <span className="text-[#38BDF8]"><Icon name="mail" size={16} /></span>
                 <a
                   href="mailto:laboratoriumsiskon@gmail.com"
-                  className="text-sm transition-colors hover:text-[#BAD6EB]"
+                  className="text-sm transition-colors hover:text-[#38BDF8]"
                   style={{ color: 'rgba(255,255,255,0.85)' }}
                 >
                   laboratoriumsiskon@gmail.com
                 </a>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[#BAD6EB]"><Icon name="phone" size={16} /></span>
+                <span className="text-[#38BDF8]"><Icon name="phone" size={16} /></span>
                 <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem' }}>+62 81283020758</span>
               </div>
             </div>

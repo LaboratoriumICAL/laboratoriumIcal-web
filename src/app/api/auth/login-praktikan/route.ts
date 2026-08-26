@@ -50,6 +50,23 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Sinkronisasi otomatis: Jika akun sebelumnya terdaftar dengan nama panggilan,
+    // koreksi ke nama resmi yang ada di tabel anggota_kelompok
+    let currentNama = profile.nama_lengkap
+    const { data: anggotaCheck } = await admin
+      .from('anggota_kelompok')
+      .select('nama_praktikan')
+      .eq('nim', nim)
+      .limit(1)
+
+    if (anggotaCheck && anggotaCheck.length > 0) {
+      const officialNama = (anggotaCheck[0].nama_praktikan || '').trim()
+      if (officialNama && officialNama !== profile.nama_lengkap) {
+        await admin.from('profiles').update({ nama_lengkap: officialNama }).eq('id', profile.id)
+        currentNama = officialNama
+      }
+    }
+
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (!url || !anonKey) {
@@ -78,7 +95,7 @@ export async function POST(req: NextRequest) {
       profile: {
         id: profile.id,
         role: profile.role,
-        nama_lengkap: profile.nama_lengkap,
+        nama_lengkap: currentNama,
         nim: profile.nim,
       },
     })

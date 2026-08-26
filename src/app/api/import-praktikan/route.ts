@@ -208,14 +208,73 @@ export async function POST(req: NextRequest) {
 
       for (let i = 0; i < info.members.length; i++) {
         const m = info.members[i]
-        const { error: eAnggota } = await sb
-          .from('anggota_kelompok')
-          .upsert(
-            { kelompok_id: kelompokId, nama_praktikan: m.nama.trim(), nim: m.nim.trim(), nomor_urut: i + 1 },
-            { onConflict: 'kelompok_id,nim' }
-          )
+        const nimTrimmed = m.nim.trim()
+        const namaTrimmed = m.nama.trim()
+
+        // SOLUSI 1 (OTOMATIS PINDAH KELOMPOK):
+        // Cek apakah mahasiswa dengan NIM ini sudah pernah ada di kelompok lain pada kelas praktikum yang sama.
+        // Jika sebelumnya ada di kelompok A1, dan di Excel baru dimasukkan ke A2,
+        // sistem otomatis memindahkan kelompoknya ke A2 tanpa membuat duplikat di A1.
+        let eAnggota: any = null
+
+        // Ambil daftar kelompok di kelas ini untuk validasi perpindahan
+        const { data: allKelompokInKelas } = await sb
+          .from('kelompok')
+          .select('id')
+          .eq('kelas_praktikum_id', kelasId)
+        const kelompokIdsInKelas = (allKelompokInKelas || []).map((k) => k.id)
+
+        if (kelompokIdsInKelas.length > 0) {
+          const { data: existingInKelas } = await sb
+            .from('anggota_kelompok')
+            .select('id, kelompok_id')
+            .eq('nim', nimTrimmed)
+            .in('kelompok_id', kelompokIdsInKelas)
+            .limit(1)
+
+          if (existingInKelas && existingInKelas.length > 0) {
+            const currentRecord = existingInKelas[0]
+            // Update kelompok_id ke kelompok baru beserta nama & nomor_urut terbaru
+            const { error: errUpdate } = await sb
+              .from('anggota_kelompok')
+              .update({
+                kelompok_id: kelompokId,
+                nama_praktikan: namaTrimmed,
+                nomor_urut: i + 1,
+              })
+              .eq('id', currentRecord.id)
+
+            eAnggota = errUpdate
+
+            // Bersihkan baris duplikat lain jika ada lebih dari satu di kelas ini
+            await sb
+              .from('anggota_kelompok')
+              .delete()
+              .eq('nim', nimTrimmed)
+              .neq('id', currentRecord.id)
+              .in('kelompok_id', kelompokIdsInKelas)
+          } else {
+            // Mahasiswa baru, masukkan via upsert
+            const { error: errUpsert } = await sb
+              .from('anggota_kelompok')
+              .upsert(
+                { kelompok_id: kelompokId, nama_praktikan: namaTrimmed, nim: nimTrimmed, nomor_urut: i + 1 },
+                { onConflict: 'kelompok_id,nim' }
+              )
+            eAnggota = errUpsert
+          }
+        } else {
+          const { error: errUpsert } = await sb
+            .from('anggota_kelompok')
+            .upsert(
+              { kelompok_id: kelompokId, nama_praktikan: namaTrimmed, nim: nimTrimmed, nomor_urut: i + 1 },
+              { onConflict: 'kelompok_id,nim' }
+            )
+          eAnggota = errUpsert
+        }
+
         if (eAnggota) {
-          errors.push(`${m.nama} (${m.nim}): ${eAnggota.message}`)
+          errors.push(`${namaTrimmed} (${nimTrimmed}): ${eAnggota.message}`)
         } else {
           anggotaCount++
         }
