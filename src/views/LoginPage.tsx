@@ -13,6 +13,7 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
   const [namaLengkap, setNamaLengkap] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [failedAttempts, setFailedAttempts] = useState(0)
   const [transitioning, setTransitioning] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -52,6 +53,14 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
         })
         if (eSetSession) throw new Error('Login gagal.')
 
+        if (typeof window !== 'undefined') {
+          if (rememberMe) {
+            localStorage.setItem('ical_remember_me', 'true')
+          } else {
+            localStorage.removeItem('ical_remember_me')
+          }
+        }
+
         onLogin({
           role: 'asisten',
           name: result.profile.nama_lengkap,
@@ -80,6 +89,14 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
         refresh_token: result.session.refresh_token,
       })
       if (eSetSession) throw new Error('Login gagal.')
+
+      if (typeof window !== 'undefined') {
+        if (rememberMe) {
+          localStorage.setItem('ical_remember_me', 'true')
+        } else {
+          localStorage.removeItem('ical_remember_me')
+        }
+      }
 
       onLogin({
         role: 'praktikan',
@@ -256,13 +273,18 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                   Silakan masukkan NIM dan kata sandi Anda untuk mengakses akun
                 </p>
               </div>
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} method="POST" action="#" className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-[#2F4D7B] mb-1.5 text-left">
+                  <label htmlFor="student-nim" className="block text-xs font-semibold text-[#2F4D7B] mb-1.5 text-left">
                     Nomor Induk Mahasiswa (NIM)
                   </label>
                   <input
+                    id="student-nim"
+                    name="username"
                     type="text"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
                     className="input-field"
                     placeholder="Contoh: 202311005"
                     value={nim}
@@ -275,22 +297,16 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-semibold text-[#2F4D7B] text-left">
+                    <label htmlFor="student-password" className="block text-xs font-semibold text-[#2F4D7B] text-left">
                       Kata Sandi
                     </label>
-                    {failedAttempts >= 3 && (
-                      <button
-                        type="button"
-                        onClick={() => setCurrentPage('forgot-password')}
-                        className="text-xs text-[#DC2626] hover:text-[#991b1b] font-bold transition-colors cursor-pointer"
-                      >
-                        Reset kata sandi?
-                      </button>
-                    )}
                   </div>
                   <div className="relative">
                     <input
+                      id="student-password"
+                      name="password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       className="input-field pr-10"
                       placeholder="Masukkan kata sandi Anda"
                       value={password}
@@ -310,6 +326,27 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                       <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
                     </button>
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <label className="flex items-center gap-2 text-[#2F4D7B] font-medium cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-[#0260D4] focus:ring-[#0260D4] cursor-pointer"
+                    />
+                    <span>Ingat saya</span>
+                  </label>
+                  {failedAttempts >= 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage('forgot-password')}
+                      className="text-xs text-[#DC2626] hover:text-[#991b1b] font-bold transition-colors cursor-pointer"
+                    >
+                      Reset kata sandi?
+                    </button>
+                  )}
                 </div>
 
                 {error && (
@@ -369,10 +406,18 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                   Login Asisten
                 </h2>
               </div>
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} method="POST" action="#" className="space-y-4">
                 <div>
+                  <label htmlFor="asisten-nama" className="block text-xs font-semibold text-[#1B3258] mb-1.5 text-left">
+                    Nama Lengkap Asisten
+                  </label>
                   <input
+                    id="asisten-nama"
+                    name="username"
                     type="text"
+                    autoComplete="username"
+                    autoCapitalize="words"
+                    placeholder="Masukkan nama lengkap asisten"
                     className="input-field"
                     value={namaLengkap}
                     onChange={(e) => {
@@ -383,8 +428,15 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                   />
                 </div>
                 <div>
+                  <label htmlFor="asisten-password" className="block text-xs font-semibold text-[#1B3258] mb-1.5 text-left">
+                    Kata Sandi
+                  </label>
                   <input
+                    id="asisten-password"
+                    name="password"
                     type="password"
+                    autoComplete="current-password"
+                    placeholder="Masukkan kata sandi asisten"
                     className="input-field"
                     value={password}
                     onChange={(e) => {
@@ -393,6 +445,18 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                     }}
                     required
                   />
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <label className="flex items-center gap-2 text-[#1B3258] font-medium cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-[#0260D4] focus:ring-[#0260D4] cursor-pointer"
+                    />
+                    <span>Ingat saya di perangkat ini</span>
+                  </label>
                 </div>
 
                 {error && (

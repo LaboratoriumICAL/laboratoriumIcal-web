@@ -382,6 +382,8 @@ export default function RegisterPage({ setCurrentPage }: RegisterPageProps) {
                 </label>
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   className="input-field"
                   placeholder="Contoh: nama@itpln.ac.id"
                   value={form.email}
@@ -407,6 +409,8 @@ export default function RegisterPage({ setCurrentPage }: RegisterPageProps) {
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      name="new-password"
+                      autoComplete="new-password"
                       className="input-field pr-9"
                       placeholder="Min. 8 karakter"
                       value={form.password}
@@ -439,6 +443,8 @@ export default function RegisterPage({ setCurrentPage }: RegisterPageProps) {
                   <div className="relative">
                     <input
                       type={showConfirm ? 'text' : 'password'}
+                      name="confirm-password"
+                      autoComplete="new-password"
                       className="input-field pr-9"
                       placeholder="Ulangi password"
                       value={form.confirm}
