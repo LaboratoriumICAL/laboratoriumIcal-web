@@ -724,22 +724,15 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
             Siap Memulai Praktikummu?
           </h2>
           <p style={{ color: 'rgba(255,255,255,0.92)', marginBottom: '2rem', lineHeight: 1.7 }}>
-            Daftar sekarang dan akses jadwal, nilai, serta materi praktikum dari mana saja.
+            Masuk dengan akun ITPLN Anda untuk mengakses jadwal, nilai, serta materi praktikum dari mana saja.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() => setCurrentPage('register')}
-              className="bg-white text-[#00142F] font-bold px-8 py-3.5 rounded-2xl transition-all hover:shadow-2xl hover:-translate-y-1 shadow-lg cursor-pointer hover:bg-sky-50"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Daftar Sekarang
-            </button>
+          <div className="flex justify-center">
             <button
               onClick={() => setCurrentPage('login')}
-              className="border-2 border-white text-white font-semibold px-8 py-3.5 rounded-2xl transition-all hover:bg-white hover:text-[#00142F] cursor-pointer"
+              className="bg-white text-[#00142F] font-bold px-9 py-3.5 rounded-2xl transition-all hover:shadow-2xl hover:-translate-y-1 shadow-lg cursor-pointer hover:bg-sky-50 text-base"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
-              Sudah Punya Akun
+              Masuk Akun
             </button>
           </div>
         </div>
