@@ -452,24 +452,7 @@ export default function DskDetailPage({ setCurrentPage }: DskDetailPageProps) {
                 Buku panduan lengkap praktikum DSK Institut Teknologi PLN: 5 Modul Pembelajaran MATLAB & Simulink, Tata Tertib Resmi, Penilaian, dan Simulasi PID Loop Tertutup.
               </p>
 
-              {/* Action Buttons in Banner */}
-              <div className="flex flex-wrap gap-3 mt-6">
-                <button
-                  onClick={() => setShowPdfModal(true)}
-                  className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white text-[#00142F] hover:bg-sky-50 transition-all shadow-md flex items-center gap-2 cursor-pointer"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  <Icon name="eye" size={16} color="#00142F" /> Baca Dokumen PDF Modul
-                </button>
-                <a
-                  href="/modul/MODUL DASAR SISTEM KONTROL.pdf?download=1"
-                  download
-                  className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-white/20 hover:bg-white/30 text-white border border-white/40 transition-all flex items-center gap-2 cursor-pointer"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  <Icon name="download" size={16} /> Unduh PDF Modul (3.9 MB)
-                </a>
-              </div>
+
             </div>
 
             {/* Quick Badge Box */}
