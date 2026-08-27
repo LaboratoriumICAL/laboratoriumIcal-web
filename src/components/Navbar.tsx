@@ -123,14 +123,12 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
                   </button>
                 </>
               ) : (
-                <>
-                  <button onClick={() => setCurrentPage('login')} className="btn-secondary text-sm py-2 px-4">
-                    Masuk
-                  </button>
-                  <button onClick={() => setCurrentPage('register')} className="btn-primary text-sm py-2 px-4">
-                    Daftar
-                  </button>
-                </>
+                <button
+                  onClick={() => setCurrentPage('login')}
+                  className="btn-primary text-sm py-2 px-5 font-semibold flex items-center gap-1.5"
+                >
+                  Masuk
+                </button>
               )}
             </div>
 
@@ -189,14 +187,12 @@ export default function Navbar({ currentPage, setCurrentPage, user, onLogout }: 
                   </button>
                 </>
               ) : (
-                <>
-                  <button onClick={() => { setCurrentPage('login'); setMenuOpen(false); }} className="btn-secondary text-sm">
-                    Masuk
-                  </button>
-                  <button onClick={() => { setCurrentPage('register'); setMenuOpen(false); }} className="btn-primary text-sm">
-                    Daftar
-                  </button>
-                </>
+                <button
+                  onClick={() => { setCurrentPage('login'); setMenuOpen(false); }}
+                  className="btn-primary text-sm w-full py-2.5"
+                >
+                  Masuk
+                </button>
               )}
             </div>
           </div>

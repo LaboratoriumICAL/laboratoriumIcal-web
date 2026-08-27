@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
+import AzureLoginButton from '../components/AzureLoginButton'
 
 interface ModulItem {
   id: string
@@ -8,6 +9,11 @@ interface ModulItem {
   deskripsi: string | null
   file_path: string | null
   urutan: number
+}
+
+interface ModulePageProps {
+  user?: { role: string; name: string; email?: string; nim?: string } | null
+  setCurrentPage?: (page: string) => void
 }
 
 const MODULE_CONFIGS: Record<
@@ -73,7 +79,7 @@ const DEFAULT_CONFIG = {
   icon: (color: string) => <Icon name="book-open" size={36} color={color} />,
 }
 
-export default function ModulePage() {
+export default function ModulePage({ user, setCurrentPage }: ModulePageProps) {
   const [modules, setModules] = useState<ModulItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -98,6 +104,8 @@ export default function ModulePage() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
+
+  const isAuthenticated = !!user
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#F4F8FC' }}>
@@ -149,18 +157,21 @@ export default function ModulePage() {
         />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-8 text-center" style={{ zIndex: 10 }}>
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5 shadow-sm"
-            style={{
-              background: 'rgba(255, 255, 255, 0.18)',
-              color: '#FFFFFF',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
-            }}
-          >
-            Modul Praktikum
-          </div>
+          {true && (
+            <div
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-5 shadow-sm"
+              style={{
+                background: 'rgba(255, 255, 255, 0.18)',
+                color: '#FFFFFF',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 16px rgba(0, 20, 47, 0.2)',
+              }}
+            >
+              Modul Praktikum
+            </div>
+          )}
+
           <h1
             style={{
               fontFamily: 'var(--font-heading)',
@@ -198,19 +209,91 @@ export default function ModulePage() {
         </div>
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-16" style={{ zIndex: 10 }}>
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12" style={{ zIndex: 10 }}>
+        {/* Unauthenticated Auth Lock Gate */}
+        {!isAuthenticated && (
+          <div className="mb-14 max-w-2xl mx-auto">
+            <div
+              className="rounded-3xl p-7 sm:p-9 bg-white relative overflow-hidden text-center"
+              style={{
+                border: '2px solid #BED8F0',
+                boxShadow: '0 16px 48px rgba(0, 20, 47, 0.1)',
+              }}
+            >
+              {/* Background gradient decorative glow */}
+              <div
+                className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none opacity-20"
+                style={{ background: 'radial-gradient(circle, #0284C7 0%, transparent 70%)' }}
+              />
+
+              <div
+                className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-md"
+                style={{
+                  background: 'linear-gradient(135deg, #00142F 0%, #082F63 45%, #0284C7 100%)',
+                  color: '#FFFFFF',
+                }}
+              >
+                <Icon name="lock" size={28} />
+              </div>
+
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 text-[#0284C7] bg-[#E0F2FE]"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                <Icon name="shield" size={14} /> Akses Terproteksi Civitas ITPLN
+              </div>
+
+              <h2
+                className="text-xl sm:text-2xl font-extrabold text-[#00142F] mb-2"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                Masuk untuk Mengakses Modul
+              </h2>
+
+              <p className="text-sm text-[#24456F] max-w-lg mx-auto mb-7 leading-relaxed">
+                Modul praktikum Laboratorium ICAL dapat diakses dan diunduh oleh seluruh mahasiswa ITPLN menggunakan akun Microsoft 365 institusi (<strong>@itpln.ac.id</strong>).
+              </p>
+
+              {/* Primary OAuth Button */}
+              <div className="max-w-md mx-auto mb-4">
+                <AzureLoginButton
+                  returnTo="module"
+                  size="lg"
+                  label="Masuk dengan Akun ITPLN"
+                />
+              </div>
+
+              {/* Reset Password Help */}
+              <div className="pt-4 border-t border-slate-100 text-xs text-[#24456F]">
+                Lupa kata sandi Microsoft 365?{' '}
+                <a
+                  href="https://passwordreset.microsoftonline.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-[#0284C7] hover:text-[#00142F] underline transition-colors"
+                >
+                  Reset Sandi Akun Kampus ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Spinner */}
         {loading && (
           <div className="text-center py-10" style={{ color: '#2F4D7B' }}>
             <Icon name="loader" size={22} className="inline animate-spin text-[#5C8BC8]" />
           </div>
         )}
 
+        {/* Error Alert */}
         {!loading && error && (
           <div className="rounded-2xl px-4 py-3 text-sm mb-6" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
             <Icon name="warning" size={15} className="inline mr-1 align-text-bottom" /> {error}
           </div>
         )}
 
+        {/* Empty State */}
         {!loading && !error && modules.length === 0 && (
           <div className="rounded-3xl p-10 text-center bg-white" style={{ border: '1.5px solid #BAD6EB' }}>
             <div className="mb-4 flex justify-center"><Icon name="inbox" size={44} color="#94A3B8" strokeWidth={1.5} /></div>
@@ -218,8 +301,9 @@ export default function ModulePage() {
           </div>
         )}
 
+        {/* Modules Grid */}
         {!loading && !error && modules.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 ${!isAuthenticated ? 'opacity-70 pointer-events-none select-none filter blur-[1px]' : ''}`}>
             {modules.map((mod) => {
               const config = MODULE_CONFIGS[mod.kode_singkat] || DEFAULT_CONFIG
               const belumAda = !mod.file_path
@@ -359,7 +443,7 @@ export default function ModulePage() {
 
                   {/* Action Buttons Row */}
                   <div className="relative z-10 flex items-center gap-3 w-full pt-1">
-                    {belumAda ? (
+                    {belumAda || !isAuthenticated ? (
                       <button
                         disabled
                         className="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5"
@@ -383,7 +467,7 @@ export default function ModulePage() {
                       </button>
                     )}
 
-                    {belumAda ? (
+                    {belumAda || !isAuthenticated ? (
                       <button
                         disabled
                         className="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5"
@@ -431,14 +515,14 @@ export default function ModulePage() {
       </div>
 
       {/* In-App PDF Preview Box / Modal */}
-      {previewModul && (
+      {previewModul && isAuthenticated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-fadeInUp">
           <div
             className="relative w-full max-w-5xl h-[88vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-[#C6DBF2]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-5 py-4 flex items-center justify-between border-b border-[#C6DBF2] bg-[#537AB8]  ">
+            <div className="px-5 py-4 flex items-center justify-between border-b border-[#C6DBF2] bg-[#537AB8]">
               <div className="flex items-center gap-3 min-w-0">
                 <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-[#2F4D7B] uppercase tracking-wider shrink-0">
                   {previewModul.kode_singkat}

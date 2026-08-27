@@ -13,29 +13,30 @@ import ContactPage from './views/ContactPage'
 import DskDetailPage from './views/DskDetailPage'
 import PlcDetailPage from './views/PlcDetailPage'
 import LoginPage from './views/LoginPage'
-import RegisterPage from './views/RegisterPage'
-import RegisterAsistenPage from './views/RegisterAsistenPage'
 import ForgotPasswordPage from './views/ForgotPasswordPage'
 import ResetPasswordPage from './views/ResetPasswordPage'
 import DashboardStudent from './views/DashboardStudent'
 import DashboardAssistant from './views/DashboardAssistant'
-import { getSupabaseBrowser } from './lib/supabaseClient'
+import { getSupabaseBrowser, extractNimFromItplnEmail } from './lib/supabaseClient'
+import { Icon } from './components/Icon'
 
-interface User {
+export interface User {
   role: string
   name: string
   nim?: string
   id?: string
+  email?: string
+  isItplnAccount?: boolean
+  isEnrolledPraktikan?: boolean
 }
 
 const NO_FOOTER_PAGES = [
   'login',
-  'register',
-  'register-asisten',
   'forgot-password',
   'reset-password',
   'dashboard-student',
   'dashboard-assistant',
+  'unregistered-praktikan',
 ]
 
 export default function App() {
@@ -60,6 +61,10 @@ export default function App() {
         return 'forgot-password'
       }
 
+      if (path === '/modul' || path.startsWith('/modul/') || path === '/module' || path.startsWith('/module/')) {
+        return 'module'
+      }
+
       const searchParams = new URLSearchParams(search)
       const pageParam = searchParams.get('page')
       if (pageParam) {
@@ -71,7 +76,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [checkingSession, setCheckingSession] = useState(true)
 
-  // Cek sesi login Supabase Auth yang sudah ada (mis. setelah refresh halaman)
+  // Cek sesi login Supabase Auth yang sudah ada (mis. setelah refresh halaman atau redirect OAuth Microsoft)
   useEffect(() => {
     let cancelled = false
     let authSubscription: { unsubscribe: () => void } | null = null
@@ -84,7 +89,7 @@ export default function App() {
     try {
       const sb = getSupabaseBrowser()
 
-      // Deteksi event auth realtime, khususnya event PASSWORD_RECOVERY dari Supabase
+      // Deteksi event auth realtime
       const { data } = sb.auth.onAuthStateChange(async (event, session) => {
         if (event === 'PASSWORD_RECOVERY') {
           if (!cancelled) {
@@ -96,9 +101,9 @@ export default function App() {
         if (event === 'SIGNED_OUT') {
           if (!cancelled) {
             setUser(null)
-            setCurrentPage('home')
             setCheckingSession(false)
           }
+          return
         }
       })
       authSubscription = data.subscription
@@ -128,29 +133,142 @@ export default function App() {
               return
             }
 
-            const { data: profileRaw, error: profileError } = await sb
-              .from('profiles')
-              .select('role, nama_lengkap, nim')
-              .eq('id', session.user.id)
-              .maybeSingle()
+            // 1. Cek profil pengguna di database Supabase (jika ada)
+            let profile: { role: string; nama_lengkap: string; nim: string | null } | null = null
+            try {
+              const { data: profileRaw, error: profileError } = await sb
+                .from('profiles')
+                .select('role, nama_lengkap, nim')
+                .eq('id', session.user.id)
+                .maybeSingle()
 
-            if (profileError) {
-              console.warn('Gagal memuat profil pengguna:', profileError.message)
+              if (!profileError && profileRaw) {
+                profile = profileRaw as { role: string; nama_lengkap: string; nim: string | null }
+              }
+            } catch (pErr) {
+              console.warn('Info query profiles:', pErr)
             }
 
-            const profile = profileRaw as { role: string; nama_lengkap: string; nim: string | null } | null
-            if (!cancelled && profile) {
-              setUser({
-                role: profile.role as string,
-                name: profile.nama_lengkap as string,
-                nim: (profile.nim as string) || undefined,
+            const email = session.user.email || ''
+
+            // JIKA ROLE ASISTEN: Langsung beri akses penuh asisten
+            if (profile?.role === 'asisten') {
+              const asistenUser: User = {
+                role: 'asisten',
+                name: profile.nama_lengkap,
+                nim: profile.nim || undefined,
                 id: session.user.id,
-              })
-              // Hanya redirect otomatis ke dashboard jika pengguna tidak sedang membuka halaman spesifik via URL (mis. ?page=template)
-              const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-              const explicitPage = urlParams?.get('page')
-              if (!explicitPage) {
-                setCurrentPage(profile.role === 'asisten' ? 'dashboard-assistant' : 'dashboard-student')
+                email,
+                isItplnAccount: true,
+                isEnrolledPraktikan: true,
+              }
+              if (!cancelled) {
+                setUser(asistenUser)
+                const savedRedirect = typeof window !== 'undefined' ? localStorage.getItem('ical_redirect_after_login') : null
+                if (savedRedirect) {
+                  localStorage.removeItem('ical_redirect_after_login')
+                  setCurrentPage(savedRedirect)
+                } else {
+                  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+                  const explicitPage = urlParams?.get('page')
+                  if (!explicitPage) {
+                    setCurrentPage('dashboard-assistant')
+                  }
+                }
+              }
+              return
+            }
+
+            // 2. JIKA MAHASISWA (Login Akun ITPLN): Ekstrak NIM dari email
+            const extractedNim = extractNimFromItplnEmail(email) || profile?.nim || undefined
+
+            // Cek apakah mahasiswa terdaftar di kelompok praktikum semester ini
+            let enrolledData: { id: string; nama_praktikan: string } | null = null
+            if (extractedNim) {
+              try {
+                const { data: akRaw } = await sb
+                  .from('anggota_kelompok')
+                  .select('id, nama_praktikan')
+                  .eq('nim', extractedNim)
+                  .limit(1)
+
+                const akList = akRaw as Array<{ id: string; nama_praktikan: string }> | null
+                if (akList && akList.length > 0) {
+                  enrolledData = {
+                    id: akList[0].id,
+                    nama_praktikan: akList[0].nama_praktikan,
+                  }
+                }
+              } catch (akErr) {
+                console.warn('Gagal cek anggota kelompok:', akErr)
+              }
+            }
+
+            // Deteksi target halaman:
+            // 1. Cek savedRedirect di localStorage
+            // 2. Cek parameter URL ?page=...
+            // 3. Cek pathname (/modul atau /module)
+            const savedRedirect = typeof window !== 'undefined' ? localStorage.getItem('ical_redirect_after_login') : null
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('ical_redirect_after_login')
+            }
+
+            const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+            const pathName = typeof window !== 'undefined' ? window.location.pathname : ''
+            const urlPageParam = urlParams?.get('page')
+            const isModuleTarget =
+              savedRedirect === 'module' ||
+              urlPageParam === 'module' ||
+              urlPageParam === 'modul' ||
+              pathName.startsWith('/modul') ||
+              pathName.startsWith('/module')
+
+            const displayName =
+              enrolledData?.nama_praktikan ||
+              profile?.nama_lengkap ||
+              session.user.user_metadata?.full_name ||
+              session.user.user_metadata?.name ||
+              (email ? email.split('@')[0] : 'Mahasiswa ITPLN')
+
+            const isEnrolled = !!(enrolledData && extractedNim)
+
+            // Sinkronkan profil ke Supabase jika praktikan terdaftar
+            if (isEnrolled) {
+              try {
+                await (sb.from('profiles') as any).upsert({
+                  id: session.user.id,
+                  role: 'praktikan',
+                  nim: extractedNim,
+                  nama_lengkap: displayName,
+                  email,
+                })
+              } catch (uErr) {
+                console.warn('Notice profile upsert:', uErr)
+              }
+            }
+
+            const currentUserObj: User = {
+              role: isEnrolled ? 'praktikan' : 'mahasiswa_itpln',
+              name: displayName,
+              nim: extractedNim,
+              id: session.user.id,
+              email,
+              isItplnAccount: true,
+              isEnrolledPraktikan: isEnrolled,
+            }
+
+            if (!cancelled) {
+              setUser(currentUserObj)
+
+              if (isModuleTarget) {
+                // ✅ JALUR MODUL: Semua Mahasiswa ITPLN (@itpln.ac.id) langsung bisa melihat modul!
+                setCurrentPage('module')
+              } else if (isEnrolled) {
+                // ✅ JALUR DASHBOARD (NIM Terdaftar): Masuk ke Dashboard Praktikan
+                setCurrentPage('dashboard-student')
+              } else {
+                // ❌ JALUR DASHBOARD (NIM Tidak Terdaftar): Tampilkan layar Belum Terdaftar
+                setCurrentPage('unregistered-praktikan')
               }
             }
           } catch (innerErr) {
@@ -175,7 +293,15 @@ export default function App() {
     }
   }, [])
 
-  const handleLogin = (newUser: User) => setUser(newUser)
+  const handleLogin = (newUser: User) => {
+    setUser(newUser)
+    const savedRedirect = typeof window !== 'undefined' ? localStorage.getItem('ical_redirect_after_login') : null
+    if (savedRedirect) {
+      localStorage.removeItem('ical_redirect_after_login')
+      setCurrentPage(savedRedirect)
+    }
+  }
+
   const handleLogout = () => {
     try {
       getSupabaseBrowser().auth.signOut()
@@ -195,7 +321,7 @@ export default function App() {
       case 'schedule':
         return <SchedulePage />
       case 'module':
-        return <ModulePage />
+        return <ModulePage user={user} setCurrentPage={setCurrentPage} />
       case 'dsk':
       case 'dsk-detail':
       case 'modul-dsk':
@@ -212,20 +338,91 @@ export default function App() {
         return <ContactPage />
       case 'login':
         return <LoginPage setCurrentPage={setCurrentPage} onLogin={handleLogin} />
-      case 'register':
-        return <RegisterPage setCurrentPage={setCurrentPage} />
-      case 'register-asisten':
-        return <RegisterAsistenPage setCurrentPage={setCurrentPage} />
       case 'forgot-password':
         return <ForgotPasswordPage setCurrentPage={setCurrentPage} />
       case 'reset-password':
         return <ResetPasswordPage setCurrentPage={setCurrentPage} />
-      case 'dashboard-student':
-        return user ? (
-          <DashboardStudent user={user} setCurrentPage={setCurrentPage} onLogout={handleLogout} />
-        ) : (
-          <LoginPage setCurrentPage={setCurrentPage} onLogin={handleLogin} />
+      case 'unregistered-praktikan':
+        return (
+          <div className="min-h-[85vh] flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#F4F8FC' }}>
+            <div className="absolute inset-0 dots-bg opacity-30 pointer-events-none" />
+            <div
+              className="relative z-10 max-w-lg w-full rounded-3xl p-8 sm:p-10 bg-white text-center"
+              style={{
+                border: '2px solid #FED7AA',
+                boxShadow: '0 20px 50px rgba(0, 20, 47, 0.08)',
+              }}
+            >
+              <h2
+                className="text-2xl font-extrabold text-[#00142F] mb-3 leading-tight"
+                style={{ fontFamily: 'var(--font-heading)' }}
+              >
+                Akun Belum Terdaftar
+              </h2>
+              <p className="text-base text-[#24456F] mb-8 leading-relaxed">
+                Akun Anda belum terdaftar sebagai praktikan. Silakan hubungi asisten lab untuk didaftarkan terlebih dahulu.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage('module')}
+                  className="btn-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Icon name="book-open" size={16} /> Lihat Modul Praktikum →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage('contact')}
+                  className="btn-secondary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Icon name="phone" size={16} /> Hubungi Asisten Lab
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage('home')}
+                  className="text-xs text-[#24456F] hover:text-[#00142F] font-semibold transition-colors mt-2 cursor-pointer"
+                >
+                  ← Kembali ke Beranda
+                </button>
+              </div>
+            </div>
+          </div>
         )
+      case 'dashboard-student':
+        if (!user) {
+          return <LoginPage setCurrentPage={setCurrentPage} onLogin={handleLogin} />
+        }
+        if (!user.isEnrolledPraktikan && user.role !== 'asisten') {
+          // Mahasiswa ITPLN yang tidak terdaftar sebagai praktikan aktif
+          return (
+            <div className="min-h-[85vh] flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#F4F8FC' }}>
+              <div className="absolute inset-0 dots-bg opacity-30 pointer-events-none" />
+              <div
+                className="relative z-10 max-w-lg w-full rounded-3xl p-8 sm:p-10 bg-white text-center"
+                style={{ border: '2px solid #FED7AA', boxShadow: '0 20px 50px rgba(0, 20, 47, 0.08)' }}
+              >
+                <h2 className="text-2xl font-extrabold text-[#00142F] mb-3 leading-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                  Akun Belum Terdaftar
+                </h2>
+                <p className="text-base text-[#24456F] mb-8 leading-relaxed">
+                  Akun Anda belum terdaftar sebagai praktikan. Silakan hubungi asisten lab untuk didaftarkan terlebih dahulu.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button type="button" onClick={() => setCurrentPage('module')} className="btn-primary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-md">
+                    <Icon name="book-open" size={16} /> Lihat Modul Praktikum
+                  </button>
+                  <button type="button" onClick={() => setCurrentPage('contact')} className="btn-secondary w-full py-3 text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer">
+                    <Icon name="phone" size={16} /> Hubungi Asisten Lab
+                  </button>
+                  <button type="button" onClick={() => setCurrentPage('home')} className="text-xs text-[#24456F] hover:text-[#00142F] font-semibold transition-colors mt-2 cursor-pointer">
+                    ← Kembali ke Beranda
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return <DashboardStudent user={user} setCurrentPage={setCurrentPage} onLogout={handleLogout} />
       case 'dashboard-assistant':
         return user ? (
           <DashboardAssistant user={user} setCurrentPage={setCurrentPage} onLogout={handleLogout} />

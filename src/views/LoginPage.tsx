@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { getSupabaseBrowser } from '../lib/supabaseClient'
+import AzureLoginButton from '../components/AzureLoginButton'
 
 interface LoginPageProps {
   setCurrentPage: (page: string) => void
@@ -261,131 +262,43 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
         {choice === 'student' && (
           <div className="max-w-md mx-auto animate-slideIn">
             <div
-              className="rounded-3xl p-8 bg-white"
+              className="rounded-3xl p-8 sm:p-10 bg-white text-center"
               style={{ border: '2px solid #BED8F0', boxShadow: '0 16px 60px rgba(0, 20, 47, 0.08)' }}
             >
-              <div className="text-center mb-6">
-                <div className="mb-3 flex justify-center"><Icon name="graduation-cap" size={44} color="#00142F" strokeWidth={1.5} /></div>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.4rem', color: '#00142F' }}>
-                  Login Praktikan
-                </h2>
-                <p style={{ color: '#24456F', fontSize: '0.875rem', marginTop: '6px' }}>
-                  Silakan masukkan NIM dan kata sandi Anda untuk mengakses akun
-                </p>
+              <div className="mb-4 flex justify-center">
+                <Icon name="graduation-cap" size={48} color="#00142F" strokeWidth={1.5} />
               </div>
-              <form onSubmit={handleLogin} method="POST" action="#" className="space-y-4">
-                <div>
-                  <label htmlFor="student-nim" className="block text-xs font-semibold text-[#2F4D7B] mb-1.5 text-left">
-                    Nomor Induk Mahasiswa (NIM)
-                  </label>
-                  <input
-                    id="student-nim"
-                    name="username"
-                    type="text"
-                    autoComplete="username"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    className="input-field"
-                    placeholder="Contoh: 202311005"
-                    value={nim}
-                    onChange={(e) => {
-                      setNim(e.target.value)
-                      if (error) setError('')
-                    }}
-                    required
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="student-password" className="block text-xs font-semibold text-[#2F4D7B] text-left">
-                      Kata Sandi
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <input
-                      id="student-password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      className="input-field pr-10"
-                      placeholder="Masukkan kata sandi Anda"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value)
-                        if (error) setError('')
-                      }}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#2F4D7B] transition-colors p-1 cursor-pointer"
-                      aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
-                      title={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
-                    >
-                      <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
-                    </button>
-                  </div>
-                </div>
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1.5rem', color: '#00142F' }}>
+                Login Praktikan
+              </h2>
+              <p style={{ color: '#24456F', fontSize: '0.875rem', marginTop: '6px', marginBottom: '24px', lineHeight: 1.6 }}>
+                Gunakan akun Microsoft 365 resmi Institut Teknologi PLN (<strong>@itpln.ac.id</strong>) untuk masuk ke portal praktikum Anda.
+              </p>
 
-                <div className="flex items-center justify-between text-xs pt-0.5">
-                  <label className="flex items-center gap-2 text-[#2F4D7B] font-medium cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-[#0260D4] focus:ring-[#0260D4] cursor-pointer"
-                    />
-                    <span>Ingat saya</span>
-                  </label>
-                  {failedAttempts >= 3 && (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentPage('forgot-password')}
-                      className="text-xs text-[#DC2626] hover:text-[#991b1b] font-bold transition-colors cursor-pointer"
-                    >
-                      Reset kata sandi?
-                    </button>
-                  )}
-                </div>
+              {/* Tombol Login Azure OAuth ITPLN */}
+              <div className="mb-6">
+                <AzureLoginButton
+                  returnTo="dashboard-student"
+                  size="lg"
+                  label="Masuk dengan Akun ITPLN"
+                />
+              </div>
 
-                {error && (
-                  <div className="rounded-2xl px-4 py-3 text-sm space-y-2" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
-                    <div className="flex items-start gap-1.5">
-                      <Icon name="warning" size={16} className="mt-0.5 flex-shrink-0" />
-                      <span>{error}</span>
-                    </div>
-                    {failedAttempts >= 3 && (
-                      <div className="pt-2 border-t border-red-200 text-xs flex items-center justify-between">
-                        <span style={{ color: '#7f1d1d' }}>Salah kata sandi sebanyak 3x?</span>
-                        <button
-                          type="button"
-                          onClick={() => setCurrentPage('forgot-password')}
-                          className="font-bold text-[#1B3258] hover:text-[#2F4D7B] underline transition-colors ml-2 cursor-pointer"
-                        >
-                          Klik di sini untuk Reset Sandi →
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <button type="submit" className="btn-primary w-full text-center cursor-pointer" disabled={loading}>
-                  {loading ? (<><Icon name="loader" size={16} className="inline mr-1.5 align-text-bottom animate-spin" /> Masuk...</>) : 'Masuk'}
-                </button>
-                <div className="text-center text-sm" style={{ color: '#2F4D7B' }}>
-                  Belum punya akun?{' '}
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage('register')}
-                    className="font-semibold text-[#2F4D7B] hover:text-[#1B3258] cursor-pointer"
-                  >
-                    Daftar sekarang
-                  </button>
-                </div>
-              </form>
+              {/* Bantuan Lupa Sandi Microsoft 365 */}
+              <div className="pt-5 border-t border-slate-100 text-xs" style={{ color: '#24456F' }}>
+                Lupa kata sandi akun kampus?{' '}
+                <a
+                  href="https://passwordreset.microsoftonline.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-[#0284C7] hover:text-[#00142F] underline transition-colors"
+                >
+                  Reset Sandi Microsoft ITPLN ↗
+                </a>
+              </div>
             </div>
-            <div className="text-center mt-4">
+
+            <div className="text-center mt-5">
               <button onClick={() => setChoice('select')} className="text-sm text-[#2F4D7B] hover:text-[#1B3258] font-semibold cursor-pointer">
                 ← Ganti tipe akun
               </button>
@@ -417,7 +330,6 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                     type="text"
                     autoComplete="username"
                     autoCapitalize="words"
-                    placeholder="Masukkan nama lengkap asisten"
                     className="input-field"
                     value={namaLengkap}
                     onChange={(e) => {
@@ -436,7 +348,6 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                     name="password"
                     type="password"
                     autoComplete="current-password"
-                    placeholder="Masukkan kata sandi asisten"
                     className="input-field"
                     value={password}
                     onChange={(e) => {
