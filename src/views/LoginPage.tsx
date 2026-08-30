@@ -321,15 +321,13 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
               </div>
               <form onSubmit={handleLogin} method="POST" action="#" className="space-y-4">
                 <div>
-                  <label htmlFor="asisten-nama" className="block text-xs font-semibold text-[#1B3258] mb-1.5 text-left">
-                    Nama Lengkap Asisten
-                  </label>
                   <input
                     id="asisten-nama"
                     name="username"
                     type="text"
                     autoComplete="username"
                     autoCapitalize="words"
+                    aria-label="Nama Lengkap Asisten"
                     className="input-field"
                     value={namaLengkap}
                     onChange={(e) => {
@@ -340,14 +338,12 @@ export default function LoginPage({ setCurrentPage, onLogin }: LoginPageProps) {
                   />
                 </div>
                 <div>
-                  <label htmlFor="asisten-password" className="block text-xs font-semibold text-[#1B3258] mb-1.5 text-left">
-                    Kata Sandi
-                  </label>
                   <input
                     id="asisten-password"
                     name="password"
                     type="password"
                     autoComplete="current-password"
+                    aria-label="Kata Sandi"
                     className="input-field"
                     value={password}
                     onChange={(e) => {
