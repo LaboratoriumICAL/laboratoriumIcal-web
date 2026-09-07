@@ -6,7 +6,9 @@ export const metadata: Metadata = {
   description: 'Website resmi Laboratorium Intelligent Control & Automation (ICAL) Institut Teknologi PLN. Informasi praktikum DSK, PLC, dan SKI.',
   keywords: ['ICAL', 'ITPLN', 'Sistem Kontrol', 'PLC', 'Laboratorium ITPLN', 'Dasar Sistem Kontrol', 'Sistem Kontrol Industri'],
   icons: {
-    icon: '/logo.png',
+    icon: '/icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
   },
 }
 
