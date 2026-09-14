@@ -562,16 +562,7 @@ export default function SchedulePage() {
                                   <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-sky-50 text-[#0260D4] border border-sky-100">
                                     {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
                                   </span>
-                                  {group.hari && (
-                                    <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-slate-50 text-slate-600 border border-slate-200">
-                                      {group.hari}
-                                    </span>
-                                  )}
-                                  {group.jamMulai && (
-                                    <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                      {formatJamRange(group.jamMulai, group.jamSelesai, group.shift || 1)}
-                                    </span>
-                                  )}
+
                                 </div>
                               </div>
 
