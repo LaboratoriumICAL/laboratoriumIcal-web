@@ -76,20 +76,34 @@ export async function GET(req: NextRequest) {
         .map((a) => ({ name: a.nama_praktikan, nim: a.nim, hasAccount: !!a.praktikan_id })),
     }))
 
-    // Gabungkan tanggal pertemuan unik lintas kelompok (semua kelompok di kelas yg sama biasanya sejadwal sama)
-    const dateMap = new Map<string, { label: string; date: string }>()
+    // Buat map kelompokId -> shift untuk grouping tanggal per shift
+    const kelompokShiftMap = new Map<string, number>()
+    for (const k of kelompokRows || []) {
+      if (k.shift != null) kelompokShiftMap.set(k.id, Number(k.shift))
+    }
+
+    // Kelompokkan tanggal pertemuan per shift (deduped per shift)
+    const scheduleDatesByShift: Record<number, { label: string; date: string; urutan: number }[]> = {}
     for (const p of pertemuanRows || []) {
+      const shift = kelompokShiftMap.get(p.kelompok_id) ?? 0
+      if (!scheduleDatesByShift[shift]) scheduleDatesByShift[shift] = []
       const label = p.keterangan || (p.jenis === 'pengarahan' ? 'Pengarahan' : p.jenis === 'uap' ? 'UAP' : `Pertemuan ${p.urutan_ke}`)
-      const key = `${p.urutan_ke}-${label}`
-      if (!dateMap.has(key)) {
-        dateMap.set(key, {
+      const key = `${p.jenis}-${p.urutan_ke}-${p.tanggal}`
+      const alreadyAdded = scheduleDatesByShift[shift].some((x) => x.label === label && x.date === new Date(p.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }))
+      if (!alreadyAdded) {
+        scheduleDatesByShift[shift].push({
           label,
+          urutan: p.jenis === 'pengarahan' ? -1 : p.jenis === 'uap' ? 9999 : (p.urutan_ke ?? 0),
           date: new Date(p.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }),
         })
       }
     }
+    // Urutkan tiap shift: pengarahan dulu, lalu pertemuan 1,2,3,..., UAP terakhir
+    for (const shiftKey of Object.keys(scheduleDatesByShift)) {
+      scheduleDatesByShift[Number(shiftKey)].sort((a, b) => a.urutan - b.urutan)
+    }
 
-    return NextResponse.json({ groups, scheduleDates: Array.from(dateMap.values()) })
+    return NextResponse.json({ groups, scheduleDatesByShift })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })
   }

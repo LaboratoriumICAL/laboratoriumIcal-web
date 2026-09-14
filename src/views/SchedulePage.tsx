@@ -5,7 +5,7 @@ interface PraktikumOption { id: string; kode: string; nama: string }
 interface JurusanOption { id: string; kode: string; nama: string; kelasTersedia: string[]; praktikum: PraktikumOption[] }
 interface Member { name: string; nim: string; hasAccount?: boolean }
 interface Group { id: string; shift: number | null; assistant: string; hari?: string; jamMulai?: string; jamSelesai?: string; ruangan?: string; members: Member[] }
-interface ScheduleEntry { label: string; date: string }
+interface ScheduleEntry { label: string; date: string; urutan?: number }
 
 function formatJamRange(jamMulai?: string | null, jamSelesai?: string | null, fallbackShift = 1): string {
   if (jamMulai) {
@@ -28,7 +28,7 @@ export default function SchedulePage() {
   const [selectedClass, setSelectedClass] = useState('')
 
   const [results, setResults] = useState<Group[] | null>(null)
-  const [scheduleDates, setScheduleDates] = useState<ScheduleEntry[]>([])
+  const [scheduleDatesByShift, setScheduleDatesByShift] = useState<Record<number, ScheduleEntry[]>>({})
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [memberSearchTerm, setMemberSearchTerm] = useState('')
   const [searched, setSearched] = useState(false)
@@ -110,7 +110,7 @@ export default function SchedulePage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal memuat jadwal')
       setResults(json.groups || [])
-      setScheduleDates(json.scheduleDates || [])
+      setScheduleDatesByShift(json.scheduleDatesByShift || {})
       setSearched(true)
       setOpenGroup(null)
       setMemberSearchTerm('')
@@ -128,7 +128,7 @@ export default function SchedulePage() {
     setSelectedPracticum('')
     setSelectedClass('')
     setResults(null)
-    setScheduleDates([])
+    setScheduleDatesByShift({})
     setSearched(false)
     setOpenGroup(null)
     setMemberSearchTerm('')
@@ -337,57 +337,7 @@ export default function SchedulePage() {
         )}
 
         {/* Schedule dates */}
-        {searched && scheduleDates.length > 0 && (
-          <div
-            className="rounded-3xl p-6 sm:p-7 mb-7 relative overflow-hidden text-white"
-            style={{
-              background: 'linear-gradient(135deg, #000B1A 0%, #00183F 45%, #002B66 100%)',
-              boxShadow: '0 16px 36px -10px rgba(0, 11, 26, 0.45)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-            }}
-          >
-            {/* Ambient Lighting & High-Tech Orbs */}
-            <div className="absolute -right-8 -bottom-8 w-60 h-60 rounded-full bg-[#0284C7]/20 blur-3xl pointer-events-none" />
-            <div className="absolute -left-8 -top-8 w-60 h-60 rounded-full bg-[#0260D4]/20 blur-3xl pointer-events-none" />
 
-            <div className="flex items-center justify-between mb-4 relative z-10">
-              <h3 className="flex items-center gap-2.5 text-white font-bold text-base sm:text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
-                <span className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-[#38BDF8] shadow-xs">
-                  <Icon name="calendar" size={17} />
-                </span>
-                Jadwal Pertemuan Praktikum
-              </h3>
-              <span className="text-xs text-[#BAE6FD] font-medium hidden sm:inline-block">
-                Semester Ganjil 2026/2027
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 relative z-10">
-              {scheduleDates.map((s, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl p-3.5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#38BDF8]/50 group relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.18)',
-                  }}
-                >
-                  <div
-                    className="text-xs font-bold text-white group-hover:text-[#38BDF8] transition-colors"
-                    style={{ fontFamily: 'var(--font-heading)' }}
-                  >
-                    {s.label}
-                  </div>
-                  <div className="text-[0.7rem] text-[#BAE6FD]/85 mt-1 font-medium">
-                    {s.date}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Results */}
         {searched && results !== null && !error && (
@@ -517,6 +467,49 @@ export default function SchedulePage() {
                           {sample?.hari ? `${sample.hari}, ${timeText}` : timeText}
                         </span>
                       </div>
+
+                      {/* Tanggal pertemuan untuk shift ini */}
+                      {scheduleDatesByShift[shift] && scheduleDatesByShift[shift].length > 0 && (
+                        <div
+                          className="rounded-2xl p-4 mb-4 relative overflow-hidden"
+                          style={{
+                            background: 'linear-gradient(135deg, #000B1A 0%, #00183F 50%, #002B66 100%)',
+                            border: '1px solid rgba(255,255,255,0.10)',
+                            boxShadow: '0 8px 24px -6px rgba(0,11,26,0.35)',
+                          }}
+                        >
+                          <div className="absolute -right-6 -bottom-6 w-40 h-40 rounded-full bg-[#0284C7]/15 blur-3xl pointer-events-none" />
+                          <div className="flex items-center gap-2 mb-3 relative z-10">
+                            <span className="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-[#38BDF8]">
+                              <Icon name="calendar" size={13} />
+                            </span>
+                            <span className="text-white font-bold text-xs sm:text-sm" style={{ fontFamily: 'var(--font-heading)' }}>
+                              Jadwal Pertemuan — Shift {shift}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 relative z-10">
+                            {scheduleDatesByShift[shift].map((s, i) => (
+                              <div
+                                key={i}
+                                className="rounded-xl p-2.5 text-center transition-all duration-200 hover:-translate-y-0.5"
+                                style={{
+                                  background: 'linear-gradient(145deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%)',
+                                  border: '1px solid rgba(255,255,255,0.13)',
+                                  backdropFilter: 'blur(8px)',
+                                }}
+                              >
+                                <div className="text-[0.65rem] font-bold text-[#38BDF8] uppercase tracking-wider mb-0.5">
+                                  {s.label}
+                                </div>
+                                <div className="text-[0.62rem] text-[#BAE6FD]/85 font-medium leading-tight">
+                                  {s.date}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                         {listForShift.map((group) => {
                           const isExpanded = memberSearchTerm.trim() ? true : openGroup === group.id
