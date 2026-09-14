@@ -779,12 +779,50 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   }
   // Ambil tanggal "1 April 2026" (boleh ada teks tambahan setelahnya, mis. "Modul 1")
   // dari sebuah sel, lalu ubah jadi format ISO "2026-04-01". Return '' kalau tidak ketemu pola tanggal.
-  const parseIndoDate = (raw: string): string => {
-    const m = raw.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/)
-    if (!m) return ''
-    const bulan = BULAN_ID[m[2].toLowerCase()]
-    if (!bulan) return ''
-    return `${m[3]}-${bulan}-${m[1].padStart(2, '0')}`
+  const parseIndoDate = (raw: any): string => {
+    // 1. JavaScript Date object (dari XLSX cellDates:true)
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      const y = raw.getFullYear()
+      const m = String(raw.getMonth() + 1).padStart(2, '0')
+      const d = String(raw.getDate()).padStart(2, '0')
+      return `${y}-${m}-${d}`
+    }
+    const s = String(raw ?? '').trim()
+    if (!s) return ''
+    // 2. Excel serial number (angka, mis. 46748)
+    const serial = Number(s)
+    if (!isNaN(serial) && serial > 40000 && serial < 80000) {
+      // Excel serial: Jan 1 1900 = 1, dengan bug leap-year 1900
+      const d = new Date(Date.UTC(1899, 11, 30) + serial * 86400000)
+      if (!isNaN(d.getTime())) {
+        const y = d.getUTCFullYear()
+        const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
+        const dy = String(d.getUTCDate()).padStart(2, '0')
+        return `${y}-${mo}-${dy}`
+      }
+    }
+    // 3. Format '1-Oct-26' atau '24-Sep-26' (D-MMM-YY)
+    const BULAN_EN: Record<string, string> = {
+      jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+      jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+    }
+    const mEn = s.match(/^(\d{1,2})[-/](\w{3,4})[-/](\d{2,4})$/i)
+    if (mEn) {
+      const bulanCode = mEn[2].toLowerCase().slice(0, 3)
+      const bulanNum = BULAN_EN[bulanCode]
+      if (bulanNum) {
+        const yearRaw = mEn[3]
+        const year = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw
+        return `${year}-${bulanNum}-${mEn[1].padStart(2, '0')}`
+      }
+    }
+    // 4. Format '1 April 2026' atau '24 September 2026' (bahasa Indonesia)
+    const mId = s.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/)
+    if (mId) {
+      const bulan = BULAN_ID[mId[2].toLowerCase()]
+      if (bulan) return `${mId[3]}-${bulan}-${mId[1].padStart(2, '0')}`
+    }
+    return ''
   }
 
   // Parse 1 sheet (1 kelas) dari struktur "raw" (hasil sheet_to_json header:1) menjadi
@@ -885,7 +923,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
           else if (c === 'PENGARAHAN') col.pengarahan = idx
           else if (c === 'UAP') col.uap = idx
           else {
-            const m = c.match(/^PERTEMUAN\s+(\d+)$/)
+            const m = c.match(/^PERTEMUAN\s*(\d+)$/)
             if (m) pertemuanCols.push({ urutan: parseInt(m[1], 10), idx })
           }
         })
@@ -901,9 +939,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     let lastKelompok = ''
     let lastAsisten = ''
     let lastShift = ''
-    let pengarahanRaw = ''
-    const pertemuanRawMap = new Map<number, string>(pertemuanCols.map((p) => [p.urutan, '']))
-    let uapRaw = ''
+    let pengarahanRaw: any = ''
+    const pertemuanRawMap = new Map<number, any>(pertemuanCols.map((p) => [p.urutan, '']))
+    let uapRaw: any = ''
     const parsed: ImportRow[] = []
     for (let i = headerRowIdx + 1; i < raw.length; i++) {
       const r = raw[i]
@@ -923,14 +961,14 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         const hjCell = String(r[col.hariJam] ?? '').trim()
         if (hjCell) hariJamRaw = hjCell
       }
-      if (!pengarahanRaw && col.pengarahan !== undefined) pengarahanRaw = String(r[col.pengarahan] ?? '').trim()
+      if (!pengarahanRaw && col.pengarahan !== undefined) pengarahanRaw = r[col.pengarahan] ?? ''
       for (const p of pertemuanCols) {
         if (!pertemuanRawMap.get(p.urutan)) {
-          const v = String(r[p.idx] ?? '').trim()
+          const v = r[p.idx] ?? ''
           if (v) pertemuanRawMap.set(p.urutan, v)
         }
       }
-      if (!uapRaw && col.uap !== undefined) uapRaw = String(r[col.uap] ?? '').trim()
+      if (!uapRaw && col.uap !== undefined) uapRaw = r[col.uap] ?? ''
 
       if (!nim || !nama) continue
       parsed.push({ nama, nim, kelompok: lastKelompok, shift: lastShift, asisten: lastAsisten })
@@ -1010,7 +1048,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     reader.onload = (e) => {
       try {
         const data = e.target?.result
-        const wb = XLSX.read(data, { type: 'binary' })
+        const wb = XLSX.read(data, { type: 'binary', cellDates: true })
         const sheets: ImportSheet[] = wb.SheetNames.map((name) => {
           const raw: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' })
           return extractSheetData(raw, name)
