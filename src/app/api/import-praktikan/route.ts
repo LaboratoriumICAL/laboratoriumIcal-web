@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
     const kelasNama = String(body.kelasNama || '').trim()
     const rows: ImportRow[] = Array.isArray(body.rows) ? body.rows : []
     const jadwal: ImportJadwal | null = body.jadwal || null
+    const jadwalByShift: Record<string, ImportJadwal> | null = body.jadwalByShift || null
 
     if (!praktikumKode || !kelasNama) {
       return NextResponse.json({ error: 'Pilih Praktikum dan Kelas tujuan import terlebih dahulu.' }, { status: 400 })
@@ -156,9 +157,13 @@ export async function POST(req: NextRequest) {
         .maybeSingle()
 
       let kelompokId: string
-      const hariValue = normalizeHari(jadwal?.hari)
-      const jamMulaiValue = jadwal?.jamMulai || null
-      const jamSelesaiValue = jadwal?.jamSelesai || null
+      // Ambil jadwal khusus untuk shift kelompok ini (jika tersedia), fallback ke jadwal umum
+      const shiftKey = shiftValue || String(info.shift || '').trim() || '1'
+      const shiftJadwal = (jadwalByShift && (jadwalByShift[shiftKey] || jadwalByShift[String(shiftValue)])) || jadwal
+
+      const hariValue = normalizeHari(shiftJadwal?.hari || jadwal?.hari)
+      const jamMulaiValue = shiftJadwal?.jamMulai || jadwal?.jamMulai || null
+      const jamSelesaiValue = shiftJadwal?.jamSelesai || jadwal?.jamSelesai || null
 
       if (existingKelompok) {
         kelompokId = existingKelompok.id
@@ -197,13 +202,14 @@ export async function POST(req: NextRequest) {
 
       // Simpan tanggal pertemuan (Pengarahan, Pertemuan ke-N sebanyak apapun, UAP) untuk kelompok ini,
       // kalau terdeteksi dari file Excel yang diupload. Jumlah pertemuan tidak dibatasi (bisa 4, 5, 8, dst).
-      if (jadwal) {
+      const activeJadwal = shiftJadwal || jadwal
+      if (activeJadwal) {
         const pertemuanEntries: { jenis: string; urutan_ke: number; tanggal: string }[] = []
-        if (jadwal.pengarahan) pertemuanEntries.push({ jenis: 'pengarahan', urutan_ke: 0, tanggal: jadwal.pengarahan })
-        for (const p of jadwal.pertemuan || []) {
+        if (activeJadwal.pengarahan) pertemuanEntries.push({ jenis: 'pengarahan', urutan_ke: 0, tanggal: activeJadwal.pengarahan })
+        for (const p of activeJadwal.pertemuan || []) {
           if (p.tanggal) pertemuanEntries.push({ jenis: 'pertemuan', urutan_ke: p.urutan, tanggal: p.tanggal })
         }
-        if (jadwal.uap) pertemuanEntries.push({ jenis: 'uap', urutan_ke: 999, tanggal: jadwal.uap })
+        if (activeJadwal.uap) pertemuanEntries.push({ jenis: 'uap', urutan_ke: 999, tanggal: activeJadwal.uap })
 
         for (const pe of pertemuanEntries) {
           const { error: ePertemuan } = await sb

@@ -678,7 +678,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   // ---- Import Praktikan (upload Excel/CSV sungguhan, mendukung banyak sheet/kelas dalam 1 file) ----
   interface ImportRow { nama: string; nim: string; kelompok: string; shift: string; asisten: string }
   interface ImportJadwal { hari: string; jamMulai: string; jamSelesai: string; pengarahan: string; pertemuan: { urutan: number; tanggal: string }[]; uap: string }
-  interface ImportSheet { sheetName: string; kelasNama: string; rows: ImportRow[]; jadwal: ImportJadwal | null; error: string | null; included: boolean }
+  interface ImportSheet { sheetName: string; kelasNama: string; rows: ImportRow[]; jadwal: ImportJadwal | null; jadwalByShift?: Record<string, ImportJadwal>; error: string | null; included: boolean }
   const [importFilter, setImportFilter] = useState({ jurusan: '', practicum: '' })
   const [importSheets, setImportSheets] = useState<ImportSheet[]>([])
   const [importFileName, setImportFileName] = useState('')
@@ -767,20 +767,26 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   // Ambil tanggal "1 April 2026" (boleh ada teks tambahan setelahnya, mis. "Modul 1")
   // dari sebuah sel, lalu ubah jadi format ISO "2026-04-01". Return '' kalau tidak ketemu pola tanggal.
   const parseIndoDate = (raw: any): string => {
-    // 1. JavaScript Date object (dari XLSX cellDates:true)
+    if (raw === undefined || raw === null) return ''
+    // 1. JavaScript Date object
     if (raw instanceof Date && !isNaN(raw.getTime())) {
-      const y = raw.getFullYear()
-      const m = String(raw.getMonth() + 1).padStart(2, '0')
-      const d = String(raw.getDate()).padStart(2, '0')
+      // Offset 12 jam agar tidak bergeser mundur karena UTC midnight / timezone
+      const adjusted = new Date(raw.getTime() + 12 * 3600 * 1000)
+      const y = adjusted.getUTCFullYear()
+      const m = String(adjusted.getUTCMonth() + 1).padStart(2, '0')
+      const d = String(adjusted.getUTCDate()).padStart(2, '0')
       return `${y}-${m}-${d}`
     }
     const s = String(raw ?? '').trim()
     if (!s) return ''
-    // 2. Excel serial number (angka, mis. 46748)
+    // 2. Format ISO 'YYYY-MM-DD'
+    const mIso = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    if (mIso) return `${mIso[1]}-${mIso[2]}-${mIso[3]}`
+    // 3. Excel serial number (angka, mis. 46748)
     const serial = Number(s)
     if (!isNaN(serial) && serial > 40000 && serial < 80000) {
-      // Excel serial: Jan 1 1900 = 1, dengan bug leap-year 1900
-      const d = new Date(Date.UTC(1899, 11, 30) + serial * 86400000)
+      // Excel serial: Jan 1 1900 = 1, tambah 12 jam agar tidak bergeser tanggal
+      const d = new Date(Date.UTC(1899, 11, 30) + serial * 86400000 + 12 * 3600000)
       if (!isNaN(d.getTime())) {
         const y = d.getUTCFullYear()
         const mo = String(d.getUTCMonth() + 1).padStart(2, '0')
@@ -788,7 +794,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         return `${y}-${mo}-${dy}`
       }
     }
-    // 3. Format '1-Oct-26' atau '24-Sep-26' (D-MMM-YY)
+    // 4. Format '1-Oct-26', '24-Sep-26', '24-Sep-2026', '1/Oct/26' (D-MMM-YY)
     const BULAN_EN: Record<string, string> = {
       jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
       jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
@@ -796,17 +802,17 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const mEn = s.match(/^(\d{1,2})[-/](\w{3,4})[-/](\d{2,4})$/i)
     if (mEn) {
       const bulanCode = mEn[2].toLowerCase().slice(0, 3)
-      const bulanNum = BULAN_EN[bulanCode]
+      const bulanNum = BULAN_EN[bulanCode] || BULAN_ID[bulanCode]
       if (bulanNum) {
         const yearRaw = mEn[3]
         const year = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw
         return `${year}-${bulanNum}-${mEn[1].padStart(2, '0')}`
       }
     }
-    // 4. Format '1 April 2026' atau '24 September 2026' (bahasa Indonesia)
+    // 5. Format '1 April 2026' atau '24 September 2026' (bahasa Indonesia)
     const mId = s.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/)
     if (mId) {
-      const bulan = BULAN_ID[mId[2].toLowerCase()]
+      const bulan = BULAN_ID[mId[2].toLowerCase()] || BULAN_EN[mId[2].toLowerCase().slice(0, 3)]
       if (bulan) return `${mId[3]}-${bulan}-${mId[1].padStart(2, '0')}`
     }
     return ''
@@ -926,9 +932,27 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     let lastKelompok = ''
     let lastAsisten = ''
     let lastShift = ''
-    let pengarahanRaw: any = ''
-    const pertemuanRawMap = new Map<number, any>(pertemuanCols.map((p) => [p.urutan, '']))
-    let uapRaw: any = ''
+    let commonPengarahanRaw: any = ''
+    let commonUapRaw: any = ''
+    const shiftDataMap = new Map<string, {
+      pengarahanRaw: any
+      pertemuanRawMap: Map<number, any>
+      uapRaw: any
+    }>()
+
+    const getOrCreateShiftData = (shiftKey: string) => {
+      let data = shiftDataMap.get(shiftKey)
+      if (!data) {
+        data = {
+          pengarahanRaw: '',
+          pertemuanRawMap: new Map<number, any>(pertemuanCols.map((p) => [p.urutan, ''])),
+          uapRaw: '',
+        }
+        shiftDataMap.set(shiftKey, data)
+      }
+      return data
+    }
+
     const parsed: ImportRow[] = []
     for (let i = headerRowIdx + 1; i < raw.length; i++) {
       const r = raw[i]
@@ -948,14 +972,30 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         const hjCell = String(r[col.hariJam] ?? '').trim()
         if (hjCell) hariJamRaw = hjCell
       }
-      if (!pengarahanRaw && col.pengarahan !== undefined) pengarahanRaw = r[col.pengarahan] ?? ''
-      for (const p of pertemuanCols) {
-        if (!pertemuanRawMap.get(p.urutan)) {
-          const v = r[p.idx] ?? ''
-          if (v) pertemuanRawMap.set(p.urutan, v)
+
+      // Deteksi tanggal pengarahan (bisa digabung untuk semua shift atau per baris)
+      if (col.pengarahan !== undefined && r[col.pengarahan] != null && String(r[col.pengarahan]).trim() !== '') {
+        if (!commonPengarahanRaw) commonPengarahanRaw = r[col.pengarahan]
+        if (lastShift) {
+          const sData = getOrCreateShiftData(lastShift)
+          if (!sData.pengarahanRaw) sData.pengarahanRaw = r[col.pengarahan]
         }
       }
-      if (!uapRaw && col.uap !== undefined) uapRaw = r[col.uap] ?? ''
+
+      // Deteksi tanggal pertemuan per shift
+      const currentShiftKey = lastShift || '1'
+      const sData = getOrCreateShiftData(currentShiftKey)
+      for (const p of pertemuanCols) {
+        if (r[p.idx] != null && String(r[p.idx]).trim() !== '') {
+          sData.pertemuanRawMap.set(p.urutan, r[p.idx])
+        }
+      }
+
+      // Deteksi tanggal UAP per shift
+      if (col.uap !== undefined && r[col.uap] != null && String(r[col.uap]).trim() !== '') {
+        if (!commonUapRaw) commonUapRaw = r[col.uap]
+        sData.uapRaw = r[col.uap]
+      }
 
       if (!nim || !nama) continue
       parsed.push({ nama, nim, kelompok: lastKelompok, shift: lastShift, asisten: lastAsisten })
@@ -998,9 +1038,26 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       parsedJamSelesai = `${String(jamMatches[1][1]).padStart(2, '0')}:${jamMatches[1][2]}`
     }
 
-    const pertemuanParsed = pertemuanCols
-      .map((p) => ({ urutan: p.urutan, tanggal: parseIndoDate(pertemuanRawMap.get(p.urutan) || '') }))
-      .filter((p) => p.tanggal)
+    // 3. Susun jadwal per shift
+    const jadwalByShift: Record<string, ImportJadwal> = {}
+    for (const [sKey, sData] of shiftDataMap.entries()) {
+      const pRaw = sData.pengarahanRaw || commonPengarahanRaw
+      const uRaw = sData.uapRaw || commonUapRaw
+      const pParsed = pertemuanCols
+        .map((p) => ({ urutan: p.urutan, tanggal: parseIndoDate(sData.pertemuanRawMap.get(p.urutan) || '') }))
+        .filter((p) => p.tanggal)
+
+      jadwalByShift[sKey] = {
+        hari: parsedHari,
+        jamMulai: parsedJamMulai,
+        jamSelesai: parsedJamSelesai,
+        pengarahan: parseIndoDate(pRaw),
+        pertemuan: pParsed,
+        uap: parseIndoDate(uRaw),
+      }
+    }
+
+    const defaultJadwal = jadwalByShift['1'] || Object.values(jadwalByShift)[0] || null
 
     // Nama kelas: utamakan dari metadata "KELAS : ..."; kalau tidak ada, pakai nama tab sheet-nya.
     // Ambil huruf terakhir saja kalau formatnya "TE A" -> "A" (biar cocok dengan kelasTersedia di jurusan, mis. ['A','B','C','D']).
@@ -1012,14 +1069,8 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       sheetName,
       kelasNama,
       rows: parsed,
-      jadwal: {
-        hari: parsedHari,
-        jamMulai: parsedJamMulai,
-        jamSelesai: parsedJamSelesai,
-        pengarahan: parseIndoDate(pengarahanRaw),
-        pertemuan: pertemuanParsed,
-        uap: parseIndoDate(uapRaw),
-      },
+      jadwal: defaultJadwal,
+      jadwalByShift,
       error: null,
       included: true,
     }
@@ -1035,9 +1086,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     reader.onload = (e) => {
       try {
         const data = e.target?.result
-        const wb = XLSX.read(data, { type: 'binary', cellDates: true })
+        const wb = XLSX.read(data, { type: 'binary', cellDates: false })
         const sheets: ImportSheet[] = wb.SheetNames.map((name) => {
-          const raw: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: '' })
+          const raw: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, defval: '' })
           return extractSheetData(raw, name)
         })
         setImportSheets(sheets)
@@ -1076,7 +1127,14 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         const res = await fetch('/api/import-praktikan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ praktikumKode: importFilter.practicum, jurusanKode: importFilter.jurusan, kelasNama: sheet.kelasNama, rows: sheet.rows, jadwal: sheet.jadwal }),
+          body: JSON.stringify({
+            praktikumKode: importFilter.practicum,
+            jurusanKode: importFilter.jurusan,
+            kelasNama: sheet.kelasNama,
+            rows: sheet.rows,
+            jadwal: sheet.jadwal,
+            jadwalByShift: sheet.jadwalByShift,
+          }),
         })
         const json = await res.json()
         if (!res.ok) {
@@ -3168,7 +3226,22 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                                     <div className="text-xs text-slate-500 mt-1">
                                       {sheet.rows.length} praktikan terdeteksi
                                     </div>
-                                    {sheet.jadwal && (
+                                    {sheet.jadwalByShift && Object.keys(sheet.jadwalByShift).length > 1 ? (
+                                      <div className="text-xs space-y-1.5 mt-2 text-slate-600">
+                                        {Object.entries(sheet.jadwalByShift).map(([sKey, sJadwal]) => (
+                                          <div key={sKey} className="flex flex-wrap gap-x-3 gap-y-1 items-center bg-slate-50 p-2 rounded-xl border border-slate-200/60">
+                                            <span className="font-bold text-[#00142F] px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[11px]">
+                                              Shift {sKey}
+                                            </span>
+                                            {sJadwal.pengarahan && <span>Pengarahan: {sJadwal.pengarahan}</span>}
+                                            {sJadwal.pertemuan.map((p) => (
+                                              <span key={p.urutan}>P{p.urutan}: {p.tanggal}</span>
+                                            ))}
+                                            {sJadwal.uap && <span>UAP: {sJadwal.uap}</span>}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : sheet.jadwal ? (
                                       <div className="text-xs flex flex-wrap gap-x-3 gap-y-1 mt-2 text-slate-600">
                                         <span>
                                           Hari/Jam:{' '}
@@ -3186,7 +3259,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                                         ))}
                                         <span>UAP: {sheet.jadwal.uap || '-'}</span>
                                       </div>
-                                    )}
+                                    ) : null}
                                   </>
                                 )}
                               </div>

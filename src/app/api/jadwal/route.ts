@@ -82,19 +82,32 @@ export async function GET(req: NextRequest) {
       if (k.shift != null) kelompokShiftMap.set(k.id, Number(k.shift))
     }
 
+function formatIndoDateStr(dateStr: string): string {
+  if (!dateStr) return ''
+  const parts = String(dateStr).split('T')[0].split('-').map(Number)
+  if (parts.length < 3) return dateStr
+  const [y, m, d] = parts
+  const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+  const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+  const hari = HARI[dateObj.getUTCDay()]
+  const bulan = BULAN[m - 1]
+  return `${hari}, ${d} ${bulan} ${y}`
+}
+
     // Kelompokkan tanggal pertemuan per shift (deduped per shift)
     const scheduleDatesByShift: Record<number, { label: string; date: string; urutan: number }[]> = {}
     for (const p of pertemuanRows || []) {
       const shift = kelompokShiftMap.get(p.kelompok_id) ?? 0
       if (!scheduleDatesByShift[shift]) scheduleDatesByShift[shift] = []
       const label = p.keterangan || (p.jenis === 'pengarahan' ? 'Pengarahan' : p.jenis === 'uap' ? 'UAP' : `Pertemuan ${p.urutan_ke}`)
-      const key = `${p.jenis}-${p.urutan_ke}-${p.tanggal}`
-      const alreadyAdded = scheduleDatesByShift[shift].some((x) => x.label === label && x.date === new Date(p.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }))
+      const formattedDate = formatIndoDateStr(p.tanggal)
+      const alreadyAdded = scheduleDatesByShift[shift].some((x) => x.label === label && x.date === formattedDate)
       if (!alreadyAdded) {
         scheduleDatesByShift[shift].push({
           label,
           urutan: p.jenis === 'pengarahan' ? -1 : p.jenis === 'uap' ? 9999 : (p.urutan_ke ?? 0),
-          date: new Date(p.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }),
+          date: formattedDate,
         })
       }
     }

@@ -76,10 +76,23 @@ export async function GET(req: NextRequest) {
             .eq('kelompok_id', k.id)
             .order('urutan_ke', { ascending: true })
 
+function formatIndoDateStr(dateStr: string): string {
+  if (!dateStr) return ''
+  const parts = String(dateStr).split('T')[0].split('-').map(Number)
+  if (parts.length < 3) return dateStr
+  const [y, m, d] = parts
+  const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+  const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
+  const hari = HARI[dateObj.getUTCDay()]
+  const bulan = BULAN[m - 1]
+  return `${hari}, ${d} ${bulan} ${y}`
+}
+
           meetings = (pertemuanData || []).map((m: any) => ({
             id: m.id,
             label: m.keterangan || (m.jenis === 'uap' ? 'UAP' : m.jenis === 'pengarahan' ? 'Pengarahan' : `Pertemuan ${m.urutan_ke}`),
-            date: m.tanggal ? new Date(m.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) : 'Jadwal belum ditentukan',
+            date: m.tanggal ? formatIndoDateStr(m.tanggal) : 'Jadwal belum ditentukan',
             tanggalRaw: m.tanggal || null,
             jenis: m.jenis,
             urutan_ke: m.urutan_ke,
