@@ -101,7 +101,12 @@ export default function SchedulePage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/jadwal?praktikum=${encodeURIComponent(selectedPracticum)}&kelas=${encodeURIComponent(selectedClass)}&jurusan=${encodeURIComponent(selectedProgram)}`)
+      const res = await fetch(
+        `/api/jadwal?praktikum=${encodeURIComponent(selectedPracticum)}&kelas=${encodeURIComponent(
+          selectedClass
+        )}&jurusan=${encodeURIComponent(selectedProgram)}&_t=${Date.now()}`,
+        { cache: 'no-store' }
+      )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal memuat jadwal')
       setResults(json.groups || [])

@@ -803,29 +803,63 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     for (let i = 0; i < raw.length; i++) {
       const row = raw[i].map(norm)
 
-      // Deteksi baris metadata "KELAS" & "HARI/JAM" sebelum ketemu header (kolom A = label, kolom B = nilai)
+      // Deteksi baris metadata "KELAS" & "HARI/JAM" sebelum ketemu header (kolom A = label, kolom B = nilai / sel gabungan)
       if (headerRowIdx === -1) {
         if (!kelasFromMeta) {
-          const kelasIdx = row.findIndex((c) => c === 'KELAS')
-          if (kelasIdx !== -1) {
-            const rawVal = String(raw[i][kelasIdx + 1] ?? '').trim()
-            kelasFromMeta = rawVal.replace(/^:\s*/, '').trim()
+          for (let colIdx = 0; colIdx < raw[i].length; colIdx++) {
+            const cellNorm = norm(raw[i][colIdx])
+            const cellRaw = String(raw[i][colIdx] ?? '').trim()
+            if (cellNorm === 'KELAS' || cellNorm.startsWith('KELAS :') || cellNorm.startsWith('KELAS:')) {
+              const afterColon = cellRaw.replace(/^KELAS\s*[:=]\s*/i, '').trim()
+              if (afterColon && afterColon !== cellRaw) {
+                kelasFromMeta = afterColon
+                break
+              }
+              for (let nextIdx = colIdx + 1; nextIdx < raw[i].length; nextIdx++) {
+                const nextVal = String(raw[i][nextIdx] ?? '').trim().replace(/^:\s*/, '').trim()
+                if (nextVal && nextVal !== ':') {
+                  kelasFromMeta = nextVal
+                  break
+                }
+              }
+              if (kelasFromMeta) break
+            }
           }
         }
         if (!hariJamRaw) {
-          const hjIdx = row.findIndex(
-            (c) =>
-              c === 'HARI/JAM' ||
-              c === 'HARI / JAM' ||
-              c === 'HARI /JAM' ||
-              c === 'HARI/ JAM' ||
-              c === 'HARI' ||
-              c === 'WAKTU' ||
-              c === 'JADWAL'
-          )
-          if (hjIdx !== -1) {
-            const rawVal = String(raw[i][hjIdx + 1] ?? '').trim()
-            hariJamRaw = rawVal.replace(/^:\s*/, '').trim()
+          for (let colIdx = 0; colIdx < raw[i].length; colIdx++) {
+            const cellNorm = norm(raw[i][colIdx])
+            const cellRaw = String(raw[i][colIdx] ?? '').trim()
+            if (
+              cellNorm.includes('HARI') ||
+              cellNorm.includes('WAKTU') ||
+              cellNorm.includes('JADWAL') ||
+              cellNorm.startsWith('JAM')
+            ) {
+              const afterColon = cellRaw.replace(/^(HARI\/JAM|HARI \/ JAM|HARI|WAKTU|JADWAL|JAM)\s*[:=]\s*/i, '').trim()
+              if (afterColon && afterColon !== cellRaw) {
+                hariJamRaw = afterColon
+                break
+              }
+              for (let nextIdx = colIdx + 1; nextIdx < raw[i].length; nextIdx++) {
+                const nextVal = String(raw[i][nextIdx] ?? '').trim().replace(/^:\s*/, '').trim()
+                if (nextVal && nextVal !== ':') {
+                  hariJamRaw = nextVal
+                  break
+                }
+              }
+              if (hariJamRaw) break
+            }
+          }
+          // Fallback: deteksi baris yang memuat nama hari dan jam sekaligus
+          if (!hariJamRaw) {
+            const rowText = raw[i].map((c) => String(c ?? '').trim()).filter(Boolean).join(' ')
+            if (
+              /(Senin|Selasa|Rabu|Kamis|Jumat|Jum'?at|Sabtu|Minggu)/i.test(rowText) &&
+              /\d{1,2}[.:]\d{2}/.test(rowText)
+            ) {
+              hariJamRaw = rowText.replace(/^(HARI\/JAM|HARI \/ JAM|HARI|WAKTU|JADWAL|JAM)\s*[:=]\s*/i, '').trim()
+            }
           }
         }
       }
