@@ -831,16 +831,14 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
             const cellNorm = norm(raw[i][colIdx])
             const cellRaw = String(raw[i][colIdx] ?? '').trim()
             if (
-              cellNorm.includes('HARI') ||
-              cellNorm.includes('WAKTU') ||
-              cellNorm.includes('JADWAL') ||
+              cellNorm === 'HARI/JAM' ||
+              cellNorm === 'HARI / JAM' ||
+              cellNorm === 'HARI' ||
+              cellNorm === 'WAKTU' ||
+              cellNorm === 'JADWAL' ||
               cellNorm.startsWith('JAM')
             ) {
-              const afterColon = cellRaw.replace(/^(HARI\/JAM|HARI \/ JAM|HARI|WAKTU|JADWAL|JAM)\s*[:=]\s*/i, '').trim()
-              if (afterColon && afterColon !== cellRaw) {
-                hariJamRaw = afterColon
-                break
-              }
+              // Cek apakah nilai ada di kolom BERIKUTNYA
               for (let nextIdx = colIdx + 1; nextIdx < raw[i].length; nextIdx++) {
                 const nextVal = String(raw[i][nextIdx] ?? '').trim().replace(/^:\s*/, '').trim()
                 if (nextVal && nextVal !== ':') {
@@ -850,8 +848,16 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
               }
               if (hariJamRaw) break
             }
+            // Tangkap sel yang berisi ': Kamis/16.00 ...' atau 'Kamis/16.00 ...' langsung
+            if (
+              /^:?\s*(Senin|Selasa|Rabu|Kamis|Jumat|Jum'?at|Sabtu|Minggu)/i.test(cellRaw) &&
+              /\d{1,2}[.:]\d{2}/.test(cellRaw)
+            ) {
+              hariJamRaw = cellRaw.replace(/^:\s*/, '').trim()
+              break
+            }
           }
-          // Fallback: deteksi baris yang memuat nama hari dan jam sekaligus
+          // Fallback: gabungkan seluruh isi baris, cari teks yang memuat hari + jam
           if (!hariJamRaw) {
             const rowText = raw[i].map((c) => String(c ?? '').trim()).filter(Boolean).join(' ')
             if (
@@ -952,15 +958,19 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       parsedHari = HARI_MAP[hLower] || hariMatch[1]
     }
 
-    // 2. Ekstrak Jam Mulai & Jam Selesai (cocokkan format 16.00, 17.40, 08:00, 11:00, dll)
-    const jamMatches = Array.from(hariJamRaw.matchAll(/(\d{1,2})[.:](\d{2})/g))
+    // 2. Ekstrak Jam Mulai & Jam Selesai
+    // Normalisasi dulu: ganti em-dash (–) & karakter aneh dengan tanda minus biasa
+    const hariJamNorm = hariJamRaw
+      .replace(/[\u2013\u2014\u2012]/g, '-') // em-dash / en-dash -> minus
+      .replace(/\s+/g, ' ')
+    const jamMatches = Array.from(hariJamNorm.matchAll(/(\d{1,2})[.:]?(\d{2})/g))
     let parsedJamMulai = ''
     let parsedJamSelesai = ''
     if (jamMatches.length >= 1) {
-      parsedJamMulai = `${jamMatches[0][1].padStart(2, '0')}:${jamMatches[0][2]}`
+      parsedJamMulai = `${String(jamMatches[0][1]).padStart(2, '0')}:${jamMatches[0][2]}`
     }
     if (jamMatches.length >= 2) {
-      parsedJamSelesai = `${jamMatches[1][1].padStart(2, '0')}:${jamMatches[1][2]}`
+      parsedJamSelesai = `${String(jamMatches[1][1]).padStart(2, '0')}:${jamMatches[1][2]}`
     }
 
     const pertemuanParsed = pertemuanCols
