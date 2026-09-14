@@ -11,6 +11,7 @@ interface ImportRow {
 interface ImportJadwal {
   hari?: string
   jamMulai?: string
+  jamSelesai?: string
   pengarahan?: string | null
   pertemuan?: { urutan: number; tanggal: string }[]
   uap?: string | null
@@ -156,12 +157,20 @@ export async function POST(req: NextRequest) {
 
       let kelompokId: string
       const hariValue = normalizeHari(jadwal?.hari)
-      const jamValue = jadwal?.jamMulai || null
+      const jamMulaiValue = jadwal?.jamMulai || null
+      const jamSelesaiValue = jadwal?.jamSelesai || null
+
       if (existingKelompok) {
         kelompokId = existingKelompok.id
         await sb
           .from('kelompok')
-          .update({ shift: shiftValue, asisten_id: findAsistenId(info.asisten), hari: hariValue, jam_mulai: jamValue })
+          .update({
+            shift: shiftValue,
+            asisten_id: findAsistenId(info.asisten),
+            hari: hariValue,
+            jam_mulai: jamMulaiValue,
+            jam_selesai: jamSelesaiValue,
+          })
           .eq('id', kelompokId)
       } else {
         const { data: newKelompok, error: eKelompok } = await sb
@@ -173,7 +182,8 @@ export async function POST(req: NextRequest) {
             shift: shiftValue,
             asisten_id: findAsistenId(info.asisten),
             hari: hariValue,
-            jam_mulai: jamValue,
+            jam_mulai: jamMulaiValue,
+            jam_selesai: jamSelesaiValue,
           })
           .select('id')
           .single()

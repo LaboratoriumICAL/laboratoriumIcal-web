@@ -690,7 +690,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
 
   // ---- Import Praktikan (upload Excel/CSV sungguhan, mendukung banyak sheet/kelas dalam 1 file) ----
   interface ImportRow { nama: string; nim: string; kelompok: string; shift: string; asisten: string }
-  interface ImportJadwal { hari: string; jamMulai: string; pengarahan: string; pertemuan: { urutan: number; tanggal: string }[]; uap: string }
+  interface ImportJadwal { hari: string; jamMulai: string; jamSelesai: string; pengarahan: string; pertemuan: { urutan: number; tanggal: string }[]; uap: string }
   interface ImportSheet { sheetName: string; kelasNama: string; rows: ImportRow[]; jadwal: ImportJadwal | null; error: string | null; included: boolean }
   const [importFilter, setImportFilter] = useState({ jurusan: '', practicum: '' })
   const [importSheets, setImportSheets] = useState<ImportSheet[]>([])
@@ -792,8 +792,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const extractSheetData = (raw: any[][], sheetName: string): ImportSheet => {
     const norm = (v: any) => String(v ?? '').trim().toUpperCase()
 
-    // Cari nama kelas dari blok metadata di atas (baris "KELAS : TE A" dsb), sebelum baris header ditemukan.
+    // Cari nama kelas dan baris metadata Hari/Jam di atas sebelum baris header ditemukan.
     let kelasFromMeta = ''
+    let hariJamRaw = ''
 
     // Cari baris header sungguhan: baris yang punya sel "NIM" DAN "NAMA" DAN "KELOMPOK".
     let headerRowIdx = -1
@@ -802,12 +803,30 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     for (let i = 0; i < raw.length; i++) {
       const row = raw[i].map(norm)
 
-      // Deteksi baris metadata "KELAS" sebelum ketemu header (kolom A = label, kolom B = nilai)
-      if (headerRowIdx === -1 && !kelasFromMeta) {
-        const kelasIdx = row.findIndex((c) => c === 'KELAS')
-        if (kelasIdx !== -1) {
-          const rawVal = String(raw[i][kelasIdx + 1] ?? '').trim()
-          kelasFromMeta = rawVal.replace(/^:\s*/, '').trim()
+      // Deteksi baris metadata "KELAS" & "HARI/JAM" sebelum ketemu header (kolom A = label, kolom B = nilai)
+      if (headerRowIdx === -1) {
+        if (!kelasFromMeta) {
+          const kelasIdx = row.findIndex((c) => c === 'KELAS')
+          if (kelasIdx !== -1) {
+            const rawVal = String(raw[i][kelasIdx + 1] ?? '').trim()
+            kelasFromMeta = rawVal.replace(/^:\s*/, '').trim()
+          }
+        }
+        if (!hariJamRaw) {
+          const hjIdx = row.findIndex(
+            (c) =>
+              c === 'HARI/JAM' ||
+              c === 'HARI / JAM' ||
+              c === 'HARI /JAM' ||
+              c === 'HARI/ JAM' ||
+              c === 'HARI' ||
+              c === 'WAKTU' ||
+              c === 'JADWAL'
+          )
+          if (hjIdx !== -1) {
+            const rawVal = String(raw[i][hjIdx + 1] ?? '').trim()
+            hariJamRaw = rawVal.replace(/^:\s*/, '').trim()
+          }
         }
       }
 
@@ -822,7 +841,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
           else if (c === 'KELOMPOK') col.kelompok = idx
           else if (c === 'ASISTEN') col.asisten = idx
           else if (c === 'SHIFT') col.shift = idx
-          else if (c === 'HARI/JAM' || c === 'HARI / JAM') col.hariJam = idx
+          else if (c === 'HARI/JAM' || c === 'HARI / JAM' || c === 'HARI' || c === 'JAM' || c === 'WAKTU') col.hariJam = idx
           else if (c === 'PENGARAHAN') col.pengarahan = idx
           else if (c === 'UAP') col.uap = idx
           else {
@@ -842,7 +861,6 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     let lastKelompok = ''
     let lastAsisten = ''
     let lastShift = ''
-    let hariJamRaw = ''
     let pengarahanRaw = ''
     const pertemuanRawMap = new Map<number, string>(pertemuanCols.map((p) => [p.urutan, '']))
     let uapRaw = ''
@@ -861,7 +879,10 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       if (asistenCell) lastAsisten = asistenCell
       if (shiftCell) lastShift = shiftCell
 
-      if (!hariJamRaw && col.hariJam !== undefined) hariJamRaw = String(r[col.hariJam] ?? '').trim()
+      if (!hariJamRaw && col.hariJam !== undefined) {
+        const hjCell = String(r[col.hariJam] ?? '').trim()
+        if (hjCell) hariJamRaw = hjCell
+      }
       if (!pengarahanRaw && col.pengarahan !== undefined) pengarahanRaw = String(r[col.pengarahan] ?? '').trim()
       for (const p of pertemuanCols) {
         if (!pertemuanRawMap.get(p.urutan)) {
@@ -879,8 +900,35 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       return { sheetName, kelasNama: kelasFromMeta || sheetName, rows: [], jadwal: null, error: 'Tidak ada baris praktikan valid di sheet ini — dilewati.', included: false }
     }
 
-    const hariMatch = hariJamRaw.match(/^([A-Za-z]+)/)
-    const jamMatch = hariJamRaw.match(/(\d{1,2})[.:](\d{2})/)
+    // 1. Ekstrak nama hari dari string hariJamRaw (mis. "Kamis/16.00 - 17.40", "Senin, 08.00 - 11.00 WIB", dll)
+    const hariRegex = /(Senin|Selasa|Rabu|Kamis|Jumat|Jum'?at|Sabtu|Minggu)/i
+    const hariMatch = hariJamRaw.match(hariRegex)
+    let parsedHari = ''
+    if (hariMatch) {
+      const hLower = hariMatch[1].toLowerCase().replace("'", '')
+      const HARI_MAP: Record<string, string> = {
+        senin: 'Senin',
+        selasa: 'Selasa',
+        rabu: 'Rabu',
+        kamis: 'Kamis',
+        jumat: 'Jumat',
+        sabtu: 'Sabtu',
+        minggu: 'Minggu',
+      }
+      parsedHari = HARI_MAP[hLower] || hariMatch[1]
+    }
+
+    // 2. Ekstrak Jam Mulai & Jam Selesai (cocokkan format 16.00, 17.40, 08:00, 11:00, dll)
+    const jamMatches = Array.from(hariJamRaw.matchAll(/(\d{1,2})[.:](\d{2})/g))
+    let parsedJamMulai = ''
+    let parsedJamSelesai = ''
+    if (jamMatches.length >= 1) {
+      parsedJamMulai = `${jamMatches[0][1].padStart(2, '0')}:${jamMatches[0][2]}`
+    }
+    if (jamMatches.length >= 2) {
+      parsedJamSelesai = `${jamMatches[1][1].padStart(2, '0')}:${jamMatches[1][2]}`
+    }
+
     const pertemuanParsed = pertemuanCols
       .map((p) => ({ urutan: p.urutan, tanggal: parseIndoDate(pertemuanRawMap.get(p.urutan) || '') }))
       .filter((p) => p.tanggal)
@@ -896,8 +944,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       kelasNama,
       rows: parsed,
       jadwal: {
-        hari: hariMatch ? hariMatch[1] : '',
-        jamMulai: jamMatch ? `${jamMatch[1].padStart(2, '0')}:${jamMatch[2]}` : '',
+        hari: parsedHari,
+        jamMulai: parsedJamMulai,
+        jamSelesai: parsedJamSelesai,
         pengarahan: parseIndoDate(pengarahanRaw),
         pertemuan: pertemuanParsed,
         uap: parseIndoDate(uapRaw),
@@ -3564,7 +3613,16 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                                     </div>
                                     {sheet.jadwal && (
                                       <div className="text-xs flex flex-wrap gap-x-3 gap-y-1 mt-2 text-slate-600">
-                                        <span>Hari/Jam: {sheet.jadwal.hari && sheet.jadwal.jamMulai ? `${sheet.jadwal.hari}, ${sheet.jadwal.jamMulai}` : '-'}</span>
+                                        <span>
+                                          Hari/Jam:{' '}
+                                          {sheet.jadwal.hari || sheet.jadwal.jamMulai
+                                            ? `${sheet.jadwal.hari ? sheet.jadwal.hari : ''}${
+                                                sheet.jadwal.hari && sheet.jadwal.jamMulai ? ', ' : ''
+                                              }${sheet.jadwal.jamMulai ? sheet.jadwal.jamMulai : ''}${
+                                                sheet.jadwal.jamSelesai ? ` - ${sheet.jadwal.jamSelesai}` : ''
+                                              } WIB`
+                                            : '-'}
+                                        </span>
                                         <span>Pengarahan: {sheet.jadwal.pengarahan || '-'}</span>
                                         {sheet.jadwal.pertemuan.map((p) => (
                                           <span key={p.urutan}>P{p.urutan}: {p.tanggal}</span>

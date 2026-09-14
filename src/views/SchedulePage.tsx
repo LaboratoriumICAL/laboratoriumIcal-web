@@ -7,6 +7,18 @@ interface Member { name: string; nim: string; hasAccount?: boolean }
 interface Group { id: string; shift: number | null; assistant: string; hari?: string; jamMulai?: string; jamSelesai?: string; ruangan?: string; members: Member[] }
 interface ScheduleEntry { label: string; date: string }
 
+function formatJamRange(jamMulai?: string | null, jamSelesai?: string | null, fallbackShift = 1): string {
+  if (jamMulai) {
+    const start = String(jamMulai).slice(0, 5).replace(':', '.')
+    if (jamSelesai) {
+      const end = String(jamSelesai).slice(0, 5).replace(':', '.')
+      return `${start} – ${end} WIB`
+    }
+    return `${start} WIB`
+  }
+  return fallbackShift === 1 ? '08.00 – 11.00 WIB' : '13.00 – 16.00 WIB'
+}
+
 export default function SchedulePage() {
   const [jurusanList, setJurusanList] = useState<JurusanOption[]>([])
   const [loadingJurusan, setLoadingJurusan] = useState(true)
@@ -456,79 +468,107 @@ export default function SchedulePage() {
               </div>
             )}
 
-            <div className="space-y-4">
-              {[1, 2].map((shift) => {
-                const shiftGroups = filteredResults.filter((g) => g.shift === shift)
-                const unassigned = shift === 1 ? filteredResults.filter((g) => g.shift !== 1 && g.shift !== 2) : []
-                const listForShift = shift === 1 ? [...shiftGroups, ...unassigned] : shiftGroups
-                if (!listForShift.length) return null
-                return (
-                  <div key={shift}>
-                    <div
-                      className="flex items-center gap-3 mb-3.5"
-                      style={{ color: '#00142F', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
-                    >
-                      <span
-                        className="px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-md tracking-wide"
-                        style={{
-                          background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
-                          boxShadow: '0 4px 14px rgba(2, 96, 212, 0.3)',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                        }}
-                      >
-                        Shift {shift}
-                      </span>
-                      <span style={{ color: '#002466', fontWeight: 600, fontSize: '0.85rem' }}>
-                        {shift === 1 ? '08.00 – 11.00 WIB' : '13.00 – 16.00 WIB'}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                      {listForShift.map((group) => {
-                        const isExpanded = memberSearchTerm.trim() ? true : openGroup === group.id
-                        const queryLower = memberSearchTerm.toLowerCase().trim()
+            <div className="space-y-6">
+              {(() => {
+                const distinctShifts = Array.from(
+                  new Set(
+                    filteredResults
+                      .map((g) => g.shift)
+                      .filter((s): s is number => s !== null && s !== undefined && !isNaN(Number(s)))
+                  )
+                ).sort((a, b) => a - b)
 
-                        return (
-                          <div key={group.id}>
-                            <div
-                              className="rounded-2xl p-4 sm:p-5 card-hover cursor-pointer transition-all duration-300 relative overflow-hidden group"
-                              style={{
-                                background: isExpanded ? 'linear-gradient(145deg, #FFFFFF 0%, #F0F7FF 100%)' : 'white',
-                                border: isExpanded ? '1.8px solid #0260D4' : '1.2px solid #D6E4F0',
-                                boxShadow: isExpanded
-                                  ? '0 12px 28px -6px rgba(2, 96, 212, 0.2)'
-                                  : '0 4px 18px rgba(0, 20, 47, 0.05)',
-                              }}
-                              onClick={() => setOpenGroup(openGroup === group.id ? null : group.id)}
-                            >
-                              <div className="flex items-center justify-between mb-2.5">
-                                <div
-                                  className="min-w-[3.25rem] h-10 px-3 rounded-xl flex items-center justify-center text-center text-white font-bold tracking-wider shadow-sm shrink-0 transition-transform duration-300 group-hover:scale-105"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
-                                    fontFamily: 'var(--font-heading)',
-                                    fontSize: group.id.length > 3 ? '0.78rem' : '0.875rem',
-                                    boxShadow: '0 4px 12px rgba(2, 96, 212, 0.25)',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {group.id}
+                const shiftsToRender = distinctShifts.length > 0 ? distinctShifts : [1]
+
+                return shiftsToRender.map((shift) => {
+                  const shiftGroups = filteredResults.filter((g) => g.shift === shift)
+                  const unassigned =
+                    shift === shiftsToRender[0]
+                      ? filteredResults.filter((g) => !g.shift || !shiftsToRender.includes(g.shift))
+                      : []
+                  const listForShift = [...shiftGroups, ...unassigned]
+                  if (!listForShift.length) return null
+
+                  const sample = listForShift.find((g) => g.jamMulai || g.hari)
+                  const timeText = formatJamRange(sample?.jamMulai, sample?.jamSelesai, shift)
+
+                  return (
+                    <div key={shift}>
+                      <div
+                        className="flex items-center gap-3 mb-3.5 flex-wrap"
+                        style={{ color: '#00142F', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '1rem' }}
+                      >
+                        <span
+                          className="px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-md tracking-wide"
+                          style={{
+                            background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                            boxShadow: '0 4px 14px rgba(2, 96, 212, 0.3)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                          }}
+                        >
+                          {shiftGroups.length > 0 ? `Shift ${shift}` : 'Jadwal Praktikum'}
+                        </span>
+                        <span style={{ color: '#002466', fontWeight: 600, fontSize: '0.85rem' }}>
+                          {sample?.hari ? `${sample.hari}, ${timeText}` : timeText}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        {listForShift.map((group) => {
+                          const isExpanded = memberSearchTerm.trim() ? true : openGroup === group.id
+                          const queryLower = memberSearchTerm.toLowerCase().trim()
+
+                          return (
+                            <div key={group.id}>
+                              <div
+                                className="rounded-2xl p-4 sm:p-5 card-hover cursor-pointer transition-all duration-300 relative overflow-hidden group"
+                                style={{
+                                  background: isExpanded ? 'linear-gradient(145deg, #FFFFFF 0%, #F0F7FF 100%)' : 'white',
+                                  border: isExpanded ? '1.8px solid #0260D4' : '1.2px solid #D6E4F0',
+                                  boxShadow: isExpanded
+                                    ? '0 12px 28px -6px rgba(2, 96, 212, 0.2)'
+                                    : '0 4px 18px rgba(0, 20, 47, 0.05)',
+                                }}
+                                onClick={() => setOpenGroup(openGroup === group.id ? null : group.id)}
+                              >
+                                <div className="flex items-center justify-between mb-2.5">
+                                  <div
+                                    className="min-w-[3.25rem] h-10 px-3 rounded-xl flex items-center justify-center text-center text-white font-bold tracking-wider shadow-sm shrink-0 transition-transform duration-300 group-hover:scale-105"
+                                    style={{
+                                      background: 'linear-gradient(135deg, #00142F 0%, #002466 45%, #0260D4 100%)',
+                                      fontFamily: 'var(--font-heading)',
+                                      fontSize: group.id.length > 3 ? '0.78rem' : '0.875rem',
+                                      boxShadow: '0 4px 12px rgba(2, 96, 212, 0.25)',
+                                      whiteSpace: 'nowrap',
+                                    }}
+                                  >
+                                    {group.id}
+                                  </div>
+                                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-[#0260D4] text-white shadow-xs rotate-180' : 'bg-sky-50 text-[#0260D4] group-hover:bg-[#0260D4] group-hover:text-white'}`}>
+                                    <Icon name="chevron-down" size={14} strokeWidth={2.5} />
+                                  </div>
                                 </div>
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${isExpanded ? 'bg-[#0260D4] text-white shadow-xs rotate-180' : 'bg-sky-50 text-[#0260D4] group-hover:bg-[#0260D4] group-hover:text-white'}`}>
-                                  <Icon name="chevron-down" size={14} strokeWidth={2.5} />
+                                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '1rem' }} className="group-hover:text-[#0260D4] transition-colors">
+                                  Kelompok {group.id}
+                                </div>
+                                <div style={{ fontSize: '0.82rem', color: '#002466', marginTop: '4px' }} className="flex items-center gap-1.5">
+                                  <Icon name="user" size={13} color="#0284C7" /> Asisten: <strong style={{ color: '#00142F' }}>{group.assistant}</strong>
+                                </div>
+                                <div className="mt-2.5 flex items-center flex-wrap gap-2">
+                                  <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-sky-50 text-[#0260D4] border border-sky-100">
+                                    {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
+                                  </span>
+                                  {group.hari && (
+                                    <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-slate-50 text-slate-600 border border-slate-200">
+                                      {group.hari}
+                                    </span>
+                                  )}
+                                  {group.jamMulai && (
+                                    <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                      {formatJamRange(group.jamMulai, group.jamSelesai, group.shift || 1)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, color: '#00142F', fontSize: '1rem' }} className="group-hover:text-[#0260D4] transition-colors">
-                                Kelompok {group.id}
-                              </div>
-                              <div style={{ fontSize: '0.82rem', color: '#002466', marginTop: '4px' }} className="flex items-center gap-1.5">
-                                <Icon name="user" size={13} color="#0284C7" /> Asisten: <strong style={{ color: '#00142F' }}>{group.assistant}</strong>
-                              </div>
-                              <div className="mt-2.5 flex items-center gap-2">
-                                <span className="px-2.5 py-0.5 rounded-full text-[0.72rem] font-semibold bg-sky-50 text-[#0260D4] border border-sky-100">
-                                  {group.members.length} praktikan{group.ruangan ? ` · ${group.ruangan}` : ''}
-                                </span>
-                              </div>
-                            </div>
 
                             {isExpanded && (
                               <div
@@ -601,8 +641,9 @@ export default function SchedulePage() {
                     </div>
                   </div>
                 )
-              })}
-            </div>
+              })
+            })()}
+          </div>
           </div>
         )}
       </div>
