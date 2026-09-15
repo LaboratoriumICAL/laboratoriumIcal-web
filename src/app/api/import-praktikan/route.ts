@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { resetKelasData } from '../../../lib/classReset'
 
 interface ImportRow {
   nama: string
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
     const praktikumKode = String(body.praktikumKode || '').trim()
     const jurusanKode = String(body.jurusanKode || '').trim()
     const kelasNama = String(body.kelasNama || '').trim()
+    const replaceExisting = Boolean(body.replaceExisting)
     const rows: ImportRow[] = Array.isArray(body.rows) ? body.rows : []
     const jadwal: ImportJadwal | null = body.jadwal || null
     const jadwalByShift: Record<string, ImportJadwal> | null = body.jadwalByShift || null
@@ -97,6 +99,11 @@ export async function POST(req: NextRequest) {
       kelas = newKelas
     }
     const kelasId = kelas!.id
+
+    // Jika mode Timpa Bersih (replaceExisting) diaktifkan, kosongkan kelompok lama di kelas ini terlebih dahulu
+    if (replaceExisting) {
+      await resetKelasData(sb, { kelasId })
+    }
 
     // Ambil daftar asisten yang sudah punya akun, untuk mencocokkan nama asisten di file -> asisten_id.
     // File Excel biasanya cuma pakai nama panggilan singkat (mis. "HAKIIMI"), bukan nama lengkap persis,

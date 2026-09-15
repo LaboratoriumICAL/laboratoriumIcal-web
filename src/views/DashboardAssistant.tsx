@@ -686,6 +686,15 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const [importSubmitting, setImportSubmitting] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [importResult, setImportResult] = useState<{ kelasCount: number; kelompokCount: number; anggotaCount: number; errors: string[] } | null>(null)
+  const [importCleanReplace, setImportCleanReplace] = useState(true)
+
+  // ---- Kelola & Reset Data Kelas ----
+  const [resetFilter, setResetFilter] = useState({ jurusan: '', practicum: '', kelas: '', scope: 'only_numbers' })
+  const [resetKelasOptions, setResetKelasOptions] = useState<{ id: string; nama_kelas: string }[]>([])
+  const [resetKelasLoading, setResetKelasLoading] = useState(false)
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
+  const [resetSubmitting, setResetSubmitting] = useState(false)
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // ---- Profile Asisten (WhatsApp & Instagram tersambung ke ContactPage & Supabase) ----
   const [profileWa, setProfileWa] = useState('')
@@ -1131,6 +1140,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
             praktikumKode: importFilter.practicum,
             jurusanKode: importFilter.jurusan,
             kelasNama: sheet.kelasNama,
+            replaceExisting: importCleanReplace,
             rows: sheet.rows,
             jadwal: sheet.jadwal,
             jadwalByShift: sheet.jadwalByShift,
@@ -1152,6 +1162,45 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       setImportError(err.message)
     } finally {
       setImportSubmitting(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!resetFilter.practicum || !resetFilter.jurusan) {
+      setResetKelasOptions([])
+      return
+    }
+    setResetKelasLoading(true)
+    fetch(`/api/kelas-praktikum?praktikum=${encodeURIComponent(resetFilter.practicum)}&jurusan=${encodeURIComponent(resetFilter.jurusan)}`)
+      .then((r) => r.json())
+      .then((json) => setResetKelasOptions(json.kelas || []))
+      .catch(() => setResetKelasOptions([]))
+      .finally(() => setResetKelasLoading(false))
+  }, [resetFilter.practicum, resetFilter.jurusan])
+
+  const handleExecuteReset = async () => {
+    if (!resetFilter.jurusan || !resetFilter.practicum || !resetFilter.kelas) return
+    setResetSubmitting(true)
+    setResetMessage(null)
+    try {
+      const res = await fetch('/api/kelas-praktikum/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jurusanKode: resetFilter.jurusan,
+          praktikumKode: resetFilter.practicum,
+          kelasNama: resetFilter.kelas,
+          scope: resetFilter.scope,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Gagal mereset kelas.')
+      setResetMessage({ type: 'success', text: json.message || 'Pembersihan kelas berhasil.' })
+      setResetConfirmOpen(false)
+    } catch (err: any) {
+      setResetMessage({ type: 'error', text: err.message || 'Terjadi kesalahan saat mereset kelas.' })
+    } finally {
+      setResetSubmitting(false)
     }
   }
 
@@ -3268,10 +3317,25 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                         ))}
                       </div>
 
+                      {/* Opsi Timpa Bersih (Clean Replace) */}
+                      <div className="rounded-2xl p-4 bg-sky-50 border border-sky-200 mb-4 flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="clean-replace-toggle"
+                          checked={importCleanReplace}
+                          onChange={(e) => setImportCleanReplace(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded text-[#0260D4] focus:ring-[#0260D4] cursor-pointer"
+                        />
+                        <label htmlFor="clean-replace-toggle" className="text-xs text-slate-700 cursor-pointer select-none">
+                          <strong className="text-[#00142F] block mb-0.5">Timpa Bersih Data Lama (Clean Replace) — Disarankan</strong>
+                          Otomatis mengosongkan kelompok & jadwal lama di kelas ini sebelum mengimport data baru dari file Excel. Mencegah kelompok atau praktikan lama bercampur jika ada pembaruan file atau salah upload.
+                        </label>
+                      </div>
+
                       <button
                         onClick={handleSubmitImport}
                         disabled={importSubmitting || importSheets.filter((s) => s.included && !s.error).length === 0}
-                        className="w-full py-3 px-6 rounded-2xl font-bold text-white bg-[#0260D4]    hover:shadow-md transition cursor-pointer shadow-xs disabled:opacity-50 text-sm"
+                        className="w-full py-3 px-6 rounded-2xl font-bold text-white bg-[#0260D4] hover:bg-[#002466] hover:shadow-md transition cursor-pointer shadow-xs disabled:opacity-50 text-sm"
                         style={{ fontFamily: 'var(--font-heading)' }}
                       >
                         {importSubmitting ? (
@@ -3291,6 +3355,190 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                       <p className="text-xs sm:text-sm text-emerald-700">
                         {importResult.kelasCount} kelas diproses, {importResult.kelompokCount} kelompok, {importResult.anggotaCount} praktikan berhasil disimpan ke database.
                       </p>
+                    </div>
+                  )}
+
+                  {/* ================= SEKSI: KELOLA & RESET KELAS ================= */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#D6E4F0] shadow-xs mt-8">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-200">
+                        <Icon name="trash" size={20} />
+                      </div>
+                      <div>
+                        <h3
+                          className="font-bold text-[#00142F] text-base sm:text-lg"
+                          style={{ fontFamily: 'var(--font-heading)' }}
+                        >
+                          Kelola & Reset Data Kelas Praktikum
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Gunakan fitur ini jika terjadi salah upload file Excel atau ingin membersihkan data sisa kelompok di suatu kelas.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-5">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Jurusan
+                        </label>
+                        <select
+                          className="input-field rounded-2xl text-xs sm:text-sm"
+                          value={resetFilter.jurusan}
+                          onChange={(e) => setResetFilter((prev) => ({ ...prev, jurusan: e.target.value, kelas: '' }))}
+                        >
+                          <option value="">-- Pilih Jurusan --</option>
+                          {jurusanList.map((j) => (
+                            <option key={j.id} value={j.kode}>{j.nama}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Praktikum
+                        </label>
+                        <select
+                          className="input-field rounded-2xl text-xs sm:text-sm"
+                          value={resetFilter.practicum}
+                          onChange={(e) => setResetFilter((prev) => ({ ...prev, practicum: e.target.value, kelas: '' }))}
+                          disabled={!resetFilter.jurusan}
+                        >
+                          <option value="">-- Pilih Praktikum --</option>
+                          {JENIS_PRAKTIKUM_TETAP.map((p) => (
+                            <option key={p.kode} value={p.kode}>{p.nama}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Kelas
+                        </label>
+                        <select
+                          className="input-field rounded-2xl text-xs sm:text-sm"
+                          value={resetFilter.kelas}
+                          onChange={(e) => setResetFilter((prev) => ({ ...prev, kelas: e.target.value }))}
+                          disabled={!resetFilter.practicum || resetKelasLoading}
+                        >
+                          <option value="">{resetKelasLoading ? 'Memuat kelas...' : '-- Pilih Kelas --'}</option>
+                          {resetKelasOptions.map((k) => (
+                            <option key={k.id} value={k.nama_kelas}>Kelas {k.nama_kelas}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {resetFilter.kelas && (
+                      <div className="mt-5 p-4 rounded-2xl bg-amber-50/70 border border-amber-200">
+                        <label className="block text-xs font-bold text-amber-900 mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Pilih Tindakan Pembersihan:
+                        </label>
+                        <div className="space-y-2.5">
+                          <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="reset-scope"
+                              value="only_numbers"
+                              checked={resetFilter.scope === 'only_numbers'}
+                              onChange={() => setResetFilter((prev) => ({ ...prev, scope: 'only_numbers' }))}
+                              className="mt-0.5 text-[#0260D4]"
+                            />
+                            <div>
+                              <strong className="text-slate-900">Hanya bersihkan sisa kelompok angka (&quot;1, 2, 3...&quot;)</strong>
+                              <p className="text-slate-500 text-[11px] mt-0.5">
+                                Solusi terbaik untuk kasus salah import TSE: menghapus kelompok angka sisa TSE tanpa mengganggu kelompok resmi ({resetFilter.kelas}1, {resetFilter.kelas}2, dst).
+                              </p>
+                            </div>
+                          </label>
+                          <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="reset-scope"
+                              value="all"
+                              checked={resetFilter.scope === 'all'}
+                              onChange={() => setResetFilter((prev) => ({ ...prev, scope: 'all' }))}
+                              className="mt-0.5 text-red-600"
+                            />
+                            <div>
+                              <strong className="text-red-700">Kosongkan seluruh data di Kelas {resetFilter.kelas} (Reset Penuh)</strong>
+                              <p className="text-slate-500 text-[11px] mt-0.5">
+                                Menghapus semua kelompok, mahasiswa, dan jadwal pertemuan di kelas ini agar bisa di-import ulang dari awal secara bersih.
+                              </p>
+                            </div>
+                          </label>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-amber-200/80 flex items-center justify-between flex-wrap gap-3">
+                          <div className="text-[11px] text-amber-800 flex items-center gap-1.5">
+                            <Icon name="warning" size={14} className="shrink-0" />
+                            Data yang dihapus tidak dapat dipulihkan kembali.
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setResetConfirmOpen(true)}
+                            className="py-2 px-5 rounded-xl font-bold text-xs text-white bg-red-600 hover:bg-red-700 transition cursor-pointer shadow-xs"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
+                            {resetFilter.scope === 'only_numbers'
+                              ? `Bersihkan Kelompok Angka di Kelas ${resetFilter.kelas}`
+                              : `Reset Total Kelas ${resetFilter.kelas}`}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {resetMessage && (
+                      <div className={`mt-4 rounded-2xl p-4 text-xs font-semibold flex items-center gap-2 ${
+                        resetMessage.type === 'success'
+                          ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                          : 'bg-red-50 border border-red-200 text-red-800'
+                      }`}>
+                        <Icon name={resetMessage.type === 'success' ? 'check-circle' : 'warning'} size={16} />
+                        {resetMessage.text}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Modal Konfirmasi Keamanan Reset Kelas */}
+                  {resetConfirmOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+                      <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-red-100 animate-scaleUp">
+                        <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mb-4 mx-auto">
+                          <Icon name="warning" size={24} />
+                        </div>
+                        <h4 className="font-bold text-[#00142F] text-center text-lg mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Konfirmasi Pembersihan Data
+                        </h4>
+                        <p className="text-xs text-slate-600 text-center leading-relaxed mb-5">
+                          Apakah Anda yakin ingin melakukan{' '}
+                          <strong className="text-red-600">
+                            {resetFilter.scope === 'only_numbers' ? 'pembersihan kelompok angka sisa' : 'reset total seluruh kelompok'}
+                          </strong>{' '}
+                          untuk <strong>Jurusan {resetFilter.jurusan} - Praktikum {resetFilter.practicum} - Kelas {resetFilter.kelas}</strong>?
+                        </p>
+
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setResetConfirmOpen(false)}
+                            disabled={resetSubmitting}
+                            className="flex-1 py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs cursor-pointer"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleExecuteReset}
+                            disabled={resetSubmitting}
+                            className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+                          >
+                            {resetSubmitting ? (
+                              <><Icon name="loader" size={14} className="animate-spin" /> Memproses...</>
+                            ) : (
+                              'Ya, Bersihkan Sekarang'
+                            )}
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
