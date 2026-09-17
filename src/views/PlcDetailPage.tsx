@@ -755,33 +755,6 @@ export default function PlcDetailPage({ setCurrentPage }: PlcDetailPageProps) {
           <PLCLadderSimulatorWidget />
         </section>
 
-        <div
-          className="rounded-3xl p-8 text-center bg-gradient-to-r from-[#00142F] via-[#082F63] to-[#0284C7] text-white shadow-xl flex flex-col items-center justify-center gap-4"
-        >
-          <h3 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
-            Siap Melaksanakan Praktikum PLC?
-          </h3>
-          <p className="text-blue-100 text-sm max-w-xl">
-            Unduh modul resmi dan software pendukung CX-One & NB Designer untuk mempersiapkan praktikum PLC semester ini.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <button
-              onClick={() => setCurrentPage('module')}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-white text-[#00142F] hover:bg-sky-50 transition-all shadow-md cursor-pointer"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              <Icon name="download" size={16} className="inline mr-2" /> Buka Modul PLC
-            </button>
-            <button
-              onClick={() => setCurrentPage('software')}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-white/20 hover:bg-white/30 text-white border border-white/40 transition-all cursor-pointer"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              <Icon name="laptop" size={16} className="inline mr-2" /> Unduh CX-One & NB Designer
-            </button>
-          </div>
-        </div>
-
       </div>
     </div>
   )

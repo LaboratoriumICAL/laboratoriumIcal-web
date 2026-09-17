@@ -46,14 +46,18 @@ export async function resetKelasData(sb: SupabaseClient, options: ResetKelasOpti
   if (eP) throw eP
   const pertemuanIds = (pertemuanList || []).map((p) => p.id)
 
-  // 4. Hapus data turunan yang merujuk ke anggota_kelompok (nilai, absensi)
+  // 4. Hapus data turunan yang merujuk ke anggota_kelompok (nilai_komponen, absensi, pengumpulan_tugas)
   if (anggotaIds.length > 0) {
     try {
-      await sb.from('nilai').delete().in('anggota_kelompok_id', anggotaIds)
+      await sb.from('nilai_komponen').delete().in('anggota_kelompok_id', anggotaIds)
     } catch (_) {}
 
     try {
       await sb.from('absensi').delete().in('anggota_kelompok_id', anggotaIds)
+    } catch (_) {}
+
+    try {
+      await sb.from('pengumpulan_tugas').delete().in('anggota_kelompok_id', anggotaIds)
     } catch (_) {}
 
     const { error: errDelAnggota } = await sb
@@ -65,6 +69,22 @@ export async function resetKelasData(sb: SupabaseClient, options: ResetKelasOpti
 
   // 5. Hapus data turunan yang merujuk ke pertemuan
   if (pertemuanIds.length > 0) {
+    try {
+      await sb.from('nilai_komponen').delete().in('pertemuan_id', pertemuanIds)
+    } catch (_) {}
+
+    try {
+      await sb.from('absensi').delete().in('pertemuan_id', pertemuanIds)
+    } catch (_) {}
+
+    try {
+      await sb.from('pengumpulan_tugas').delete().in('pertemuan_id', pertemuanIds)
+    } catch (_) {}
+
+    try {
+      await sb.from('deadline_tugas').delete().in('pertemuan_id', pertemuanIds)
+    } catch (_) {}
+
     try {
       await sb.from('kehadiran_asisten').delete().in('pertemuan_id', pertemuanIds)
     } catch (_) {}

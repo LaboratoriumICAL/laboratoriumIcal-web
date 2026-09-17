@@ -441,7 +441,9 @@ export default function SchedulePage() {
                     shift === shiftsToRender[0]
                       ? filteredResults.filter((g) => !g.shift || !shiftsToRender.includes(g.shift))
                       : []
-                  const listForShift = [...shiftGroups, ...unassigned]
+                  const listForShift = [...shiftGroups, ...unassigned].sort((a, b) =>
+                    a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
+                  )
                   if (!listForShift.length) return null
 
                   const sample = listForShift.find((g) => g.jamMulai || g.hari)

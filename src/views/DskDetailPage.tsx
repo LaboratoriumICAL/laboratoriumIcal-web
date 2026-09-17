@@ -382,8 +382,6 @@ const TATA_TERTIB_RESMI = [
 ]
 
 export default function DskDetailPage({ setCurrentPage }: DskDetailPageProps) {
-  const [showPdfModal, setShowPdfModal] = useState(false)
-
   const bobotPenilaian = [
     { label: 'Kehadiran', bobot: '10%', desc: 'Presensi dan kedisiplinan praktikan tepat waktu (Hadir 15 mnt sebelum mulai)', color: '#102544', bg: '#EEF5FA', icon: 'check-circle' },
     { label: 'Tugas Rumah / Pre-Test', bobot: '15%', desc: 'Tugas persiapan via MS Teams & kuis awal via KAHOOT!', color: '#0A58BE', bg: '#EBF4FE', icon: 'file-text' },
@@ -616,84 +614,7 @@ export default function DskDetailPage({ setCurrentPage }: DskDetailPageProps) {
 
 
 
-        {/* Bottom CTA Card */}
-        <div
-          className="rounded-3xl p-8 text-center bg-gradient-to-r from-[#00142F] via-[#082F63] to-[#0284C7] text-white shadow-xl flex flex-col items-center justify-center gap-4"
-        >
-          <h3 className="text-xl sm:text-2xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
-            Siap Melaksanakan Praktikum DSK?
-          </h3>
-          <p className="text-blue-100 text-sm max-w-xl">
-            Pelajari modul secara mandiri, unduh template laporan resmi, dan instal MATLAB pada laptop sebelum sesi praktikum dimulai.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-2">
-            <button
-              onClick={() => setShowPdfModal(true)}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-white text-[#00142F] hover:bg-sky-50 transition-all shadow-md cursor-pointer flex items-center gap-2"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              <Icon name="book-open" size={16} /> Buka PDF Modul
-            </button>
-            <button
-              onClick={() => setCurrentPage('template')}
-              className="px-6 py-3 rounded-xl font-bold text-sm bg-white/20 hover:bg-white/30 text-white border border-white/40 transition-all cursor-pointer flex items-center gap-2"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              <Icon name="file-text" size={16} /> Unduh Format Laporan DSK
-            </button>
-          </div>
-        </div>
-
       </div>
-
-      {/* Direct In-App PDF Reader Modal */}
-      {showPdfModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-fadeInUp">
-          <div
-            className="relative w-full max-w-5xl h-[90vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-[#C6DBF2]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="px-5 py-4 flex items-center justify-between border-b border-[#BAD6EB] bg-[#102544] text-white">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="px-3 py-1 rounded-full text-xs font-bold text-white bg-[#1E4B85] uppercase tracking-wider shrink-0">
-                  DSK PDF
-                </span>
-                <h3 className="font-bold text-base sm:text-lg truncate" style={{ fontFamily: 'var(--font-heading)' }}>
-                  MODUL PRAKTIKUM DASAR SISTEM KONTROL - IT PLN
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <a
-                  href="/modul/MODUL DASAR SISTEM KONTROL.pdf?download=1"
-                  download
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-semibold text-xs text-white bg-[#1E4B85] hover:bg-[#2563EB] transition-colors shadow-xs"
-                >
-                  <Icon name="download" size={14} /> Unduh PDF
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setShowPdfModal(false)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
-                  title="Tutup (Esc)"
-                >
-                  <Icon name="x" size={20} />
-                </button>
-              </div>
-            </div>
-
-            {/* Modal PDF Iframe */}
-            <div className="flex-1 w-full h-full bg-slate-100 relative">
-              <iframe
-                src="/modul/MODUL DASAR SISTEM KONTROL.pdf#toolbar=0&navpanes=0&scrollbar=1&view=FitH"
-                className="w-full h-full border-0"
-                title="Modul Praktikum Dasar Sistem Kontrol"
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
