@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireRole } from '../../../lib/apiAuth'
 
 // Warna avatar deterministik dari NIM, dipertahankan sama urutannya seperti data lama
 // supaya kartu kontak yang sudah pernah tampil tidak berubah warna.
@@ -35,14 +36,16 @@ function mapProfileToAssistant(p: any) {
 }
 
 // GET /api/asisten -> Ambil daftar asisten (atau cari by id/nim/name)
+// Endpoint ini sengaja PUBLIK (tidak perlu auth) karena dipakai di halaman Kontak yang bisa diakses
+// siapa saja. Data yang dikembalikan hanya nama, NIM, WA, IG, foto (bukan data sensitif).
 export async function GET(req: NextRequest) {
   try {
     const id = req.nextUrl.searchParams.get('id')
     const nim = req.nextUrl.searchParams.get('nim')
     const name = req.nextUrl.searchParams.get('name')
+    const PUBLIC_ASISTEN_COLUMNS = 'id, nama_lengkap, nip_nim_asisten, nim, no_whatsapp, instagram, is_koordinator, foto_url'
     const sb = getSupabaseAdmin()
-
-    let query = sb.from('profiles').select('*').eq('role', 'asisten')
+    let query = sb.from('profiles').select(PUBLIC_ASISTEN_COLUMNS).eq('role', 'asisten')
 
     if (id) {
       query = query.eq('id', id)
@@ -84,15 +87,26 @@ export async function GET(req: NextRequest) {
 // POST /api/asisten -> Asisten baru dibuat lewat alur pendaftaran (/api/auth/register-asisten),
 // karena profiles.id wajib mengacu ke auth.users(id). Endpoint ini sengaja tidak melakukan insert
 // langsung supaya tidak membuat baris profiles yatim tanpa akun auth.
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   return NextResponse.json(
-    { error: 'Pendaftaran asisten baru dilakukan lewat /api/auth/register-asisten, bukan endpoint ini.' },
+    { error: 'Pendaftaran asisten baru dilakukan lewat admin dashboard, bukan endpoint ini.' },
     { status: 405 },
   )
 }
 
 // PATCH /api/asisten -> Update kontak / profil asisten (bisa by id, nim, atau nama)
 export async function PATCH(req: NextRequest) {
+  // Hanya role asisten yang berhak mengedit data asisten
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const id = body.id ? String(body.id) : null
@@ -132,6 +146,12 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/asisten?id=xxx -> Hapus asisten
 export async function DELETE(req: NextRequest) {
+  // Hanya role asisten yang berhak menghapus akun asisten
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const id = req.nextUrl.searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'ID asisten wajib diisi' }, { status: 400 })

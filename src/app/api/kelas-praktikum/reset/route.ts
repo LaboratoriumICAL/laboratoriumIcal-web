@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
 import { resetKelasData } from '../../../../lib/classReset'
+import { requireRole } from '../../../../lib/apiAuth'
 
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh mereset data kelas praktikum
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const praktikumKode = String(body.praktikumKode || '').trim()

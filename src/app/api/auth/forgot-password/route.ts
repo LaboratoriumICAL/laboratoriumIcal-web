@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit } from '../../../../lib/rateLimit'
 
 function maskEmail(email: string): string {
   const [user, domain] = email.split('@')
@@ -16,6 +17,15 @@ function maskEmail(email: string): string {
 // POST /api/auth/forgot-password
 // Body: { identifier: string, origin?: string }
 export async function POST(req: NextRequest) {
+  // Rate limiting: maksimal 3 request per IP per 10 menit untuk mencegah spam email reset
+  const limit = checkRateLimit(req, { key: 'forgot-password', max: 3, windowMs: 10 * 60 * 1000 })
+  if (!limit.success) {
+    return NextResponse.json(
+      { ok: false, error: 'Terlalu banyak permintaan reset password. Coba lagi dalam beberapa menit.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const body = await req.json()
     const identifier = String(body.identifier || '').trim()

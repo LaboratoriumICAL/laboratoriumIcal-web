@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
 import { resetKelasData } from '../../../lib/classReset'
+import { requireRole } from '../../../lib/apiAuth'
 
 interface ImportRow {
   nama: string
@@ -32,6 +33,12 @@ function normalizeHari(hari?: string | null): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh mengimport data praktikan
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const praktikumKode = String(body.praktikumKode || '').trim()

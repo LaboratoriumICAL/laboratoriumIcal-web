@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireRole } from '../../../lib/apiAuth'
 
 // GET /api/software -> Ambil daftar software praktikum dari database Supabase
 export async function GET() {
@@ -35,6 +36,12 @@ export async function GET() {
 
 // POST /api/software -> Tambah software baru
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh menambah software baru
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const nama = String(body.name || body.nama || '').trim()
@@ -81,6 +88,12 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/software -> Update software
 export async function PATCH(req: NextRequest) {
+  // Hanya role asisten yang boleh mengedit data software
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const id = String(body.id || '')
@@ -111,6 +124,12 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/software?id=xxx -> Hapus software
 export async function DELETE(req: NextRequest) {
+  // Hanya role asisten yang boleh menghapus software
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const id = req.nextUrl.searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'ID software wajib diisi' }, { status: 400 })

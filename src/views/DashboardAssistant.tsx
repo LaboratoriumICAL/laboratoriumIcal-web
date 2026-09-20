@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx'
 import XLSXStyle from 'xlsx-js-style'
 import { Icon } from '../components/Icon'
 import QRScannerOverlay, { ScanResultData } from '../components/QRScannerOverlay'
+import { apiFetch } from '../lib/apiClient'
 
 interface DashboardAssistantProps {
   user: { role: string; name: string; id?: string; nim?: string }
@@ -709,7 +710,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setProfileLoading(true)
     setProfileSuccess('')
     setProfileError('')
-    fetch(`/api/asisten?id=${encodeURIComponent(user.id || '')}&nim=${encodeURIComponent(user.nim || '')}&name=${encodeURIComponent(user.name || '')}`)
+    apiFetch(`/api/asisten?id=${encodeURIComponent(user.id || '')}&nim=${encodeURIComponent(user.nim || '')}&name=${encodeURIComponent(user.name || '')}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.assistant) {
@@ -727,7 +728,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setProfileSuccess('')
     setProfileError('')
     try {
-      const res = await fetch('/api/asisten', {
+      const res = await apiFetch('/api/asisten', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1133,7 +1134,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       let anggotaCount = 0
       const errors: string[] = []
       for (const sheet of toImport) {
-        const res = await fetch('/api/import-praktikan', {
+        const res = await apiFetch('/api/import-praktikan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1183,7 +1184,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setResetSubmitting(true)
     setResetMessage(null)
     try {
-      const res = await fetch('/api/kelas-praktikum/reset', {
+      const res = await apiFetch('/api/kelas-praktikum/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1250,7 +1251,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       const qs = new URLSearchParams({ praktikum: praktikumKode })
       if (kelasNama) qs.set('kelas', kelasNama)
       if (jurusanKode) qs.set('jurusan', jurusanKode)
-      const res = await fetch(`/api/nilai?${qs.toString()}`)
+      const res = await apiFetch(`/api/nilai?${qs.toString()}`)
       const json = await res.json()
       if (json.anggota) {
         json.anggota.sort((a: any, b: any) =>
@@ -1291,7 +1292,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         setNilaiSaving(false)
         return
       }
-      const res = await fetch('/api/nilai', {
+      const res = await apiFetch('/api/nilai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ updates }),
@@ -1788,7 +1789,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const fetchBeritaList = useCallback(async () => {
     setBeritaLoading(true)
     try {
-      const res = await fetch('/api/berita?scope=all')
+      const res = await apiFetch('/api/berita?scope=all')
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal memuat daftar berita')
       setBeritaList(json.berita || [])
@@ -1808,7 +1809,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setAnnouncementSaving(true)
     setAnnouncementError(null)
     try {
-      const res = await fetch('/api/berita', {
+      const res = await apiFetch('/api/berita', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1834,7 +1835,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const handleTogglePublish = async (row: BeritaRow) => {
     setBeritaList((prev) => prev.map((b) => (b.id === row.id ? { ...b, is_published: !b.is_published } : b)))
     try {
-      const res = await fetch('/api/berita', {
+      const res = await apiFetch('/api/berita', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: row.id, is_published: !row.is_published }),
@@ -1849,7 +1850,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     if (!confirm(`Hapus berita "${row.judul}"?`)) return
     setBeritaList((prev) => prev.filter((b) => b.id !== row.id))
     try {
-      const res = await fetch(`/api/berita?id=${row.id}`, { method: 'DELETE' })
+      const res = await apiFetch(`/api/berita?id=${row.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
     } catch {
       fetchBeritaList()
@@ -1914,7 +1915,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       if (scanFilter.jurusan) qs.set('jurusan', scanFilter.jurusan)
       if (selectedJadwal.urutan_ke !== null) qs.set('urutan_ke', String(selectedJadwal.urutan_ke))
       if (scanKelas) qs.set('kelas_praktikum_id', scanKelas)
-      const res = await fetch(`/api/absensi?${qs.toString()}`)
+      const res = await apiFetch(`/api/absensi?${qs.toString()}`)
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal memuat data absensi')
       setAttendanceRoster(json.roster || [])
@@ -1942,7 +1943,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setSavingAttendanceIds((prev) => new Set(prev).add(row.anggota_kelompok_id))
     setAttendanceRoster((prev) => prev.map((r) => (r.anggota_kelompok_id === row.anggota_kelompok_id ? { ...r, status } : r)))
     try {
-      const res = await fetch('/api/absensi', {
+      const res = await apiFetch('/api/absensi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode: 'manual', anggota_kelompok_id: row.anggota_kelompok_id, pertemuan_id: row.pertemuan_id, status }),
@@ -1975,7 +1976,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       const qs = new URLSearchParams({ mode: 'full', praktikum: scanFilter.practicum })
       if (scanFilter.jurusan) qs.set('jurusan', scanFilter.jurusan)
       if (scanKelas) qs.set('kelas_praktikum_id', scanKelas)
-      const res = await fetch(`/api/absensi?${qs.toString()}`)
+      const res = await apiFetch(`/api/absensi?${qs.toString()}`)
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal memuat rekap absensi')
 
@@ -2083,7 +2084,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   })
   useEffect(() => {
     if (!user.id) return
-    fetch(`/api/asisten-stats?id=${encodeURIComponent(user.id)}`)
+    apiFetch(`/api/asisten-stats?id=${encodeURIComponent(user.id)}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.stats) setHomeStats(json.stats)
@@ -2114,7 +2115,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     }
     setScanTaskError(null)
     try {
-      const res = await fetch('/api/absensi', {
+      const res = await apiFetch('/api/absensi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

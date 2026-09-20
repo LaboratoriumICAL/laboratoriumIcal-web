@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { requireRole } from '../../../../lib/apiAuth'
 
 // GET /api/asisten/praktikan?jurusan=SITE&praktikum=PLC&kelas=A
 export async function GET(req: NextRequest) {
+  // Hanya role asisten yang boleh melihat daftar praktikan
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const { searchParams } = new URL(req.url)
     const jurusanKode = String(searchParams.get('jurusan') || '').trim()
@@ -144,6 +151,12 @@ export async function GET(req: NextRequest) {
 // DELETE /api/asisten/praktikan
 // Body: { jurusan: string, praktikum: string, kelas?: string }
 export async function DELETE(req: NextRequest) {
+  // Hanya role asisten yang boleh menghapus data praktikan
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const jurusanKode = String(body.jurusan || '').trim()

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
 import { verifyQrAttendToken } from '../../../lib/qrAttendance'
+import { requireRole } from '../../../lib/apiAuth'
 
 // Menyamakan urutan_ke '' (query string kosong, dipakai untuk jenis tanpa nomor urut
 // seperti 'presentasi') menjadi null supaya cocok dengan kolom pertemuan.urutan_ke.
@@ -49,6 +50,12 @@ async function resolveKelompokScope(
 const JENIS_ORDER: Record<string, number> = { pengarahan: 0, pertemuan: 1, presentasi: 2, uap: 3 }
 
 export async function GET(req: NextRequest) {
+  // Hanya role asisten yang boleh melihat data/rekap absensi
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const praktikumKode = req.nextUrl.searchParams.get('praktikum')
     const jurusanKode = req.nextUrl.searchParams.get('jurusan')
@@ -196,6 +203,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh mencatat absensi (baik scan QR maupun manual)
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const sb = getSupabaseAdmin()

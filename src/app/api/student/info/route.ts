@@ -1,23 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { requireAuth } from '../../../../lib/apiAuth'
 
-// GET /api/student/info?nim=2022110001
+// GET /api/student/info -> Ambil info praktikum milik pengguna yang sedang login
 export async function GET(req: NextRequest) {
+  // Wajib login: verifikasi token pengguna
+  const auth = await requireAuth(req)
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
-    const nim = req.nextUrl.searchParams.get('nim')
-    if (!nim) {
-      return NextResponse.json({ error: 'NIM wajib diisi' }, { status: 400 })
-    }
-
     const sb = getSupabaseAdmin()
+    const user = auth.user
+    const profile = auth.profile
 
-    // 1. Cari data anggota kelompok berdasarkan NIM
-    const { data: anggotaList, error: eAnggota } = await sb
+    // 1. Cari data anggota kelompok milik user yang login (cocokkan praktikan_id dengan user.id, atau fallback nim)
+    let anggotaQuery = sb
       .from('anggota_kelompok')
       .select(`
         id,
         nama_praktikan,
         nim,
+        praktikan_id,
         kelompok_id,
         kelompok:kelompok_id (
           id,
@@ -46,9 +51,25 @@ export async function GET(req: NextRequest) {
           )
         )
       `)
-      .eq('nim', nim)
+
+    if (profile.nim) {
+      anggotaQuery = anggotaQuery.or(`praktikan_id.eq.${user.id},nim.eq.${profile.nim}`)
+    } else {
+      anggotaQuery = anggotaQuery.eq('praktikan_id', user.id)
+    }
+
+    const { data: anggotaList, error: eAnggota } = await anggotaQuery
 
     if (eAnggota) throw eAnggota
+
+    // Sinkronisasi praktikan_id jika ada baris yang belum tertaut
+    if (anggotaList && anggotaList.length > 0) {
+      for (const item of anggotaList) {
+        if (!item.praktikan_id) {
+          await sb.from('anggota_kelompok').update({ praktikan_id: user.id }).eq('id', item.id)
+        }
+      }
+    }
 
     if (!anggotaList || anggotaList.length === 0) {
       return NextResponse.json({

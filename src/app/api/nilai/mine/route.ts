@@ -1,20 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { requireAuth } from '../../../../lib/apiAuth'
 
 const VISIBLE_KOMPONEN = ['TR', 'TA', 'P'] // sesuai kebijakan: praktikan tidak melihat komponen Laporan (LP)
 
 export async function GET(req: NextRequest) {
+  // Wajib login: praktikan maupun asisten dapat melihat nilai miliknya sendiri
+  const auth = await requireAuth(req)
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
-    const nim = req.nextUrl.searchParams.get('nim')
     const praktikumKode = req.nextUrl.searchParams.get('praktikum')
-    if (!nim) return NextResponse.json({ error: 'Parameter nim wajib diisi' }, { status: 400 })
-
     const sb = getSupabaseAdmin()
+    const user = auth.user
+    const profile = auth.profile
 
-    let anggotaQuery = sb.from('anggota_kelompok').select('id, kelompok_id, nim').eq('nim', nim)
+    // Batasi query HANYA untuk praktikan yang bersangkutan (berdasarkan user.id / praktikan_id dan NIM profil)
+    let anggotaQuery = sb
+      .from('anggota_kelompok')
+      .select('id, kelompok_id, nim, praktikan_id')
+
+    if (profile.nim) {
+      anggotaQuery = anggotaQuery.or(`praktikan_id.eq.${user.id},nim.eq.${profile.nim}`)
+    } else {
+      anggotaQuery = anggotaQuery.eq('praktikan_id', user.id)
+    }
+
     const { data: anggotaRows, error: eA } = await anggotaQuery
     if (eA) throw eA
     if (!anggotaRows || anggotaRows.length === 0) return NextResponse.json({ pertemuan: [], nilai: [] })
+
+    // Sinkronisasi praktikan_id jika ada baris yang belum tertaut ke user.id
+    for (const a of anggotaRows) {
+      if (!a.praktikan_id) {
+        await sb.from('anggota_kelompok').update({ praktikan_id: user.id }).eq('id', a.id)
+      }
+    }
 
     let anggota = anggotaRows[0]
     if (praktikumKode && anggotaRows.length > 1) {

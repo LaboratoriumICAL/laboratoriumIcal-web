@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireAuth } from '../../../lib/apiAuth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+function maskNim(nim?: string | null): string {
+  if (!nim) return ''
+  const str = nim.trim()
+  if (str.length <= 4) return '****'
+  return `${str.slice(0, 4)}***${str.slice(-2)}`
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -63,6 +71,10 @@ export async function GET(req: NextRequest) {
       ? await sb.from('pertemuan').select('kelompok_id, jenis, urutan_ke, tanggal, keterangan').in('kelompok_id', kelompokIds).order('urutan_ke')
       : { data: [] as any[] }
 
+    // Cek apakah pengunjung sudah login. Jika belum login, sembunyikan sebagian digit NIM mahasiswa
+    const auth = await requireAuth(req)
+    const isLoggedIn = auth.ok
+
     const groups = (kelompokRows || []).map((k: any) => ({
       id: k.nama_kelompok,
       shift: k.shift ? Number(k.shift) : null,
@@ -73,7 +85,11 @@ export async function GET(req: NextRequest) {
       ruangan: k.ruangan,
       members: (anggotaRows || [])
         .filter((a) => a.kelompok_id === k.id)
-        .map((a) => ({ name: a.nama_praktikan, nim: a.nim, hasAccount: !!a.praktikan_id })),
+        .map((a) => ({
+          name: a.nama_praktikan,
+          nim: isLoggedIn ? a.nim : maskNim(a.nim),
+          hasAccount: !!a.praktikan_id,
+        })),
     }))
 
     // Buat map kelompokId -> shift untuk grouping tanggal per shift

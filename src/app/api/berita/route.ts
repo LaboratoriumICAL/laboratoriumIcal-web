@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireRole } from '../../../lib/apiAuth'
 
 // GET /api/berita?scope=public   -> hanya yang is_published=true, dipakai halaman publik (Home)
 // GET /api/berita?scope=all      -> semua (termasuk draft), dipakai Dashboard Asisten utk kelola
 export async function GET(req: NextRequest) {
   try {
     const scope = req.nextUrl.searchParams.get('scope') || 'public'
+
+    // Jika scope=all (melihat semua berita termasuk draft), wajib role asisten
+    if (scope === 'all') {
+      const auth = await requireRole(req, 'asisten')
+      if (!auth.ok) {
+        return NextResponse.json({ error: auth.error }, { status: auth.status })
+      }
+    }
     const sb = getSupabaseAdmin()
 
     let query = sb
@@ -39,6 +48,12 @@ export async function GET(req: NextRequest) {
 
 // POST /api/berita -> buat berita baru
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh membuat berita baru
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const judul = String(body.judul || '').trim()
@@ -78,6 +93,12 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/berita -> toggle publish/draft, atau edit judul/isi
 export async function PATCH(req: NextRequest) {
+  // Hanya role asisten yang boleh mengubah status/konten berita
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const id = String(body.id || '')
@@ -105,6 +126,12 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/berita?id=xxx -> hapus berita
 export async function DELETE(req: NextRequest) {
+  // Hanya role asisten yang boleh menghapus berita
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const id = req.nextUrl.searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'id wajib diisi' }, { status: 400 })

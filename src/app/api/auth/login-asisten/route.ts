@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { isRateLimited, recordRateLimitHit, resetRateLimit } from '../../../../lib/rateLimit'
 
 /**
  * Login khusus Asisten memakai NAMA LENGKAP (bukan email).
@@ -14,6 +15,15 @@ import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
  * 4. Kembalikan session (access_token, refresh_token) supaya browser bisa setSession().
  */
 export async function POST(req: NextRequest) {
+  // Cek rate limiting: maksimal 5 percobaan login gagal per IP dalam 5 menit
+  const RATE_LIMIT_CONFIG = { key: 'login-asisten', max: 5, windowMs: 5 * 60 * 1000 }
+  if (isRateLimited(req, RATE_LIMIT_CONFIG)) {
+    return NextResponse.json(
+      { error: 'Terlalu banyak percobaan login. Coba lagi dalam beberapa menit.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const body = await req.json()
     const namaLengkap = String(body.namaLengkap || '').trim()
@@ -34,6 +44,7 @@ export async function POST(req: NextRequest) {
     if (eFind) throw eFind
 
     if (!matches || matches.length === 0) {
+      recordRateLimitHit(req, 'login-asisten')
       return NextResponse.json({ error: 'Nama lengkap atau password salah.' }, { status: 400 })
     }
     if (matches.length > 1) {
@@ -64,8 +75,12 @@ export async function POST(req: NextRequest) {
     })
 
     if (eSignIn || !signInData.session) {
+      recordRateLimitHit(req, 'login-asisten')
       return NextResponse.json({ error: 'Nama lengkap atau password salah.' }, { status: 400 })
     }
+
+    // Login sukses: reset hitungan percobaan gagal untuk IP ini
+    resetRateLimit(req, 'login-asisten')
 
     return NextResponse.json({
       ok: true,

@@ -1,105 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { NextResponse } from 'next/server'
 
 /**
- * Login khusus Praktikan memakai NIM + Password (bukan email).
+ * Login praktikan via NIM + password tidak lagi tersedia.
+ * Autentikasi praktikan kini dilakukan via OAuth SSO kampus (Microsoft Azure AD)
+ * langsung dari sisi client tanpa melalui endpoint ini.
  *
- * Alur:
- * 1. Cari profil dengan role='praktikan' yang nim-nya cocok.
- * 2. Ambil email milik profil tersebut.
- * 3. Login ke Supabase Auth pakai email + password yang diinput (di server).
- * 4. Kembalikan session (access_token, refresh_token) supaya browser bisa setSession().
+ * Endpoint ini dinonaktifkan untuk mencegah akses langsung yang melewati
+ * alur SSO resmi. Kembalikan 403 secara eksplisit agar client lama yang
+ * masih memanggil endpoint ini menerima pesan yang jelas.
  */
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json()
-    const nim = String(body.nim || '').trim()
-    const password = String(body.password || '')
-
-    if (!nim || !password) {
-      return NextResponse.json({ error: 'NIM dan password wajib diisi.' }, { status: 400 })
-    }
-
-    const admin = getSupabaseAdmin()
-
-    // Cari profil praktikan berdasarkan NIM
-    const { data: profileRaw, error: eFind } = await admin
-      .from('profiles')
-      .select('id, email, nama_lengkap, role, nim')
-      .eq('role', 'praktikan')
-      .eq('nim', nim)
-      .maybeSingle()
-
-    if (eFind || !profileRaw) {
-      return NextResponse.json({ error: 'NIM atau password salah.' }, { status: 400 })
-    }
-
-    const profile = profileRaw as {
-      id: string
-      email: string | null
-      nama_lengkap: string
-      role: string
-      nim: string | null
-    }
-
-    if (!profile.email) {
-      return NextResponse.json(
-        { error: 'Akun ini belum memiliki email terdaftar. Hubungi asisten.' },
-        { status: 400 }
-      )
-    }
-
-    // Sinkronisasi otomatis: Jika akun sebelumnya terdaftar dengan nama panggilan,
-    // koreksi ke nama resmi yang ada di tabel anggota_kelompok
-    let currentNama = profile.nama_lengkap
-    const { data: anggotaCheck } = await admin
-      .from('anggota_kelompok')
-      .select('nama_praktikan')
-      .eq('nim', nim)
-      .limit(1)
-
-    if (anggotaCheck && anggotaCheck.length > 0) {
-      const officialNama = (anggotaCheck[0].nama_praktikan || '').trim()
-      if (officialNama && officialNama !== profile.nama_lengkap) {
-        await admin.from('profiles').update({ nama_lengkap: officialNama }).eq('id', profile.id)
-        currentNama = officialNama
-      }
-    }
-
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    if (!url || !anonKey) {
-      return NextResponse.json({ error: 'Supabase belum dikonfigurasi.' }, { status: 500 })
-    }
-
-    const authClient = createClient(url, anonKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
-
-    const { data: signInData, error: eSignIn } = await authClient.auth.signInWithPassword({
-      email: profile.email,
-      password,
-    })
-
-    if (eSignIn || !signInData.session) {
-      return NextResponse.json({ error: 'NIM atau password salah.' }, { status: 400 })
-    }
-
-    return NextResponse.json({
-      ok: true,
-      session: {
-        access_token: signInData.session.access_token,
-        refresh_token: signInData.session.refresh_token,
-      },
-      profile: {
-        id: profile.id,
-        role: profile.role,
-        nama_lengkap: currentNama,
-        nim: profile.nim,
-      },
-    })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Terjadi kesalahan saat login.' }, { status: 500 })
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error:
+        'Login via NIM/password tidak tersedia. Silakan gunakan tombol "Login dengan Akun Kampus" (OAuth SSO) untuk masuk.',
+    },
+    { status: 403 }
+  )
 }

@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { checkRateLimit } from '../../../../lib/rateLimit'
 
 // GET /api/auth/check-nim?nim=202411001
 export async function GET(req: NextRequest) {
+  // Rate limiting: maksimal 10 request per menit per IP untuk mencegah enumerasi NIM
+  const limit = checkRateLimit(req, { key: 'check-nim', max: 10, windowMs: 60 * 1000 })
+  if (!limit.success) {
+    return NextResponse.json(
+      { ok: false, error: 'Terlalu banyak permintaan verifikasi NIM. Coba lagi dalam satu menit.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const nim = String(req.nextUrl.searchParams.get('nim') || '').trim()
 

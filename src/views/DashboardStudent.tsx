@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
 import { Icon } from '../components/Icon'
+import { apiFetch } from '../lib/apiClient'
 
 interface DashboardStudentProps {
   user: { role: string; name: string; nim?: string }
@@ -432,7 +433,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
       return
     }
     setLoadingInfo(true)
-    fetch(`/api/student/info?nim=${encodeURIComponent(user.nim)}`)
+    apiFetch(`/api/student/info?nim=${encodeURIComponent(user.nim)}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.registered && json.primaryInfo) {
@@ -465,7 +466,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
     async function refresh() {
       try {
-        const res = await fetch(`/api/absensi/qr-token?nim=${encodeURIComponent(nimVal)}`)
+        const res = await apiFetch(`/api/absensi/qr-token?nim=${encodeURIComponent(nimVal)}`)
         const json = await res.json()
         if (cancelled) return
         if (!res.ok || !json.payload) throw new Error(json.error || 'Gagal membuat QR')
@@ -511,7 +512,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   useEffect(() => {
     if (activeSection !== 'grades' || !user.nim) return
     setNilaiLoading(true)
-    fetch(`/api/nilai/mine?nim=${encodeURIComponent(user.nim)}`)
+    apiFetch(`/api/nilai/mine?nim=${encodeURIComponent(user.nim)}`)
       .then((r) => r.json())
       .then((json) => {
         if (!json.error) {

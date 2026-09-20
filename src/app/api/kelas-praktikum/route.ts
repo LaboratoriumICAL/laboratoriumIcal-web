@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireRole } from '../../../lib/apiAuth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -63,3 +64,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })
   }
 }
+
+// POST /api/kelas-praktikum
+export async function POST(req: NextRequest) {
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+  return NextResponse.json({ error: 'Operasi POST kelas praktikum dilakukan via alur import.' }, { status: 405 })
+}
+
+// PATCH /api/kelas-praktikum
+export async function PATCH(req: NextRequest) {
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+  return NextResponse.json({ error: 'Operasi PATCH kelas praktikum belum tersedia.' }, { status: 405 })
+}
+
+// DELETE /api/kelas-praktikum
+export async function DELETE(req: NextRequest) {
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+  return NextResponse.json({ error: 'Operasi DELETE kelas praktikum dilakukan via reset kelas.' }, { status: 405 })
+}
+

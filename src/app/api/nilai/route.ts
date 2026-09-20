@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
+import { requireRole } from '../../../lib/apiAuth'
 
 export async function GET(req: NextRequest) {
+  // Hanya role asisten yang boleh melihat rekap nilai praktikum
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const praktikumKode = req.nextUrl.searchParams.get('praktikum')
     const kelasNama = req.nextUrl.searchParams.get('kelas')
@@ -107,6 +114,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Hanya role asisten yang boleh menginput/memperbarui nilai praktikum
+  const auth = await requireRole(req, 'asisten')
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const updates: { anggota_kelompok_id: string; pertemuan_id: string; kode_komponen: string; nilai: number | null }[] = body.updates
