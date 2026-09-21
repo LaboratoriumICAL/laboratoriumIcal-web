@@ -34,6 +34,18 @@ export async function GET(req: NextRequest) {
     }
     const praktikumIds = praktikumRows.map((p) => p.id)
 
+    // Hitung jumlah modul per praktikum (data master, sama untuk semua kelompok/kelas
+    // dalam praktikum yang sama). Dipakai frontend untuk menentukan jumlah kolom TR/TA/M/Video.
+    // Pakai Math.max antar praktikum_id sebagai jaga-jaga jika jumlahnya berbeda antar jurusan
+    // untuk kode_singkat yang sama (kondisi saat ini harusnya sama persis).
+    const { data: modulRows } = await sb
+      .from('modul')
+      .select('praktikum_id')
+      .in('praktikum_id', praktikumIds)
+    const jumlahModul = (modulRows || []).length > 0
+      ? Math.max(...praktikumIds.map((pid) => (modulRows || []).filter((m) => m.praktikum_id === pid).length))
+      : 0
+
     let kelasQuery = sb.from('kelas_praktikum').select('id, nama_kelas, dosen_pengampu, id_dosen, jumlah_peserta').in('praktikum_id', praktikumIds)
     if (kelasNama) kelasQuery = kelasQuery.eq('nama_kelas', kelasNama)
     const { data: kelas } = await kelasQuery
@@ -107,6 +119,7 @@ export async function GET(req: NextRequest) {
       nilai,
       absensi,
       kelas: kelas || [],
+      jumlahModul, // jumlah baris modul per praktikum (untuk kolom TR/TA/M/Video di frontend)
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })

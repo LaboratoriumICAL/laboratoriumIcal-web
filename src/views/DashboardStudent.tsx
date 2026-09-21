@@ -1112,168 +1112,182 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                 {/* Grade Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* Card 1: Tugas Awal */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
-                            <Icon name="clipboard-list" size={17} color="#ffffff" strokeWidth={2} />
-                          </div>
-                          <h3
-                            className="font-bold text-[#00142F] text-base"
-                            style={{ fontFamily: 'var(--font-heading)' }}
-                          >
-                            Tugas Awal
-                          </h3>
-                        </div>
-                        <button
-                          onClick={() => toggleCollapse('ta')}
-                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
-                        >
-                          <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
-                        </button>
-                      </div>
+                  {/* Card 1: Tugas Awal (TA) — iterasi dari sesi jenis='pertemuan' (modul 1..n) */}
+                  {(() => {
+                    // Sesi reguler per-modul: TR & TA disimpan di baris 'pertemuan', urutan_ke 1..n
+                    const sesiModul = nilaiPertemuan
+                      .filter((p) => p.jenis === 'pertemuan')
+                      .sort((a, b) => (a.urutan_ke ?? 0) - (b.urutan_ke ?? 0))
+                    // Sesi reguler untuk Keaktifan: pengarahan + pertemuan (semua sesi non-UAP/presentasi)
+                    const sesiKeaktifan = nilaiPertemuan
+                      .filter((p) => p.jenis === 'pengarahan' || p.jenis === 'pertemuan')
+                      .sort((a, b) => (a.urutan_ke ?? 0) - (b.urutan_ke ?? 0))
 
-                      {!collapsed.ta && (
-                        <div className="space-y-3">
-                          {[1, 2, 3, 4].map((num) => {
-                            const pertemuanItem = nilaiPertemuan.find((p) => p.urutan_ke === num)
-                            const row = nilaiRows.find(
-                              (r) => r.pertemuan_id === pertemuanItem?.id && r.kode_komponen === 'TA'
-                            )
-                            const score = row?.nilai
+                    const getNilai = (pertemuanId: string, kode: string) =>
+                      nilaiRows.find((r) => r.pertemuan_id === pertemuanId && r.kode_komponen === kode)?.nilai ?? null
 
-                            return (
-                              <div
-                                key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
-                                  <span className="text-sm font-medium text-slate-700">
-                                    Pertemuan {num}
-                                  </span>
+                    return (
+                      <>
+                        {/* Card 1: Tugas Awal */}
+                        <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
+                                  <Icon name="clipboard-list" size={17} color="#ffffff" strokeWidth={2} />
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
-                                  {score != null ? score : 'Belum dinilai'}
-                                </span>
+                                <h3
+                                  className="font-bold text-[#00142F] text-base"
+                                  style={{ fontFamily: 'var(--font-heading)' }}
+                                >
+                                  Tugas Awal
+                                </h3>
                               </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Card 2: Tugas Rumah */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
-                            <Icon name="home" size={17} color="#ffffff" strokeWidth={2} />
-                          </div>
-                          <h3
-                            className="font-bold text-[#00142F] text-base"
-                            style={{ fontFamily: 'var(--font-heading)' }}
-                          >
-                            Tugas Rumah
-                          </h3>
-                        </div>
-                        <button
-                          onClick={() => toggleCollapse('tr')}
-                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
-                        >
-                          <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
-                        </button>
-                      </div>
-
-                      {!collapsed.tr && (
-                        <div className="space-y-3">
-                          {[1, 2, 3, 4].map((num) => {
-                            const pertemuanItem = nilaiPertemuan.find((p) => p.urutan_ke === num)
-                            const row = nilaiRows.find(
-                              (r) => r.pertemuan_id === pertemuanItem?.id && r.kode_komponen === 'TR'
-                            )
-                            const score = row?.nilai
-
-                            return (
-                              <div
-                                key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
+                              <button
+                                onClick={() => toggleCollapse('ta')}
+                                className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
                               >
-                                <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
-                                  <span className="text-sm font-medium text-slate-700">
-                                    Pertemuan {num}
-                                  </span>
-                                </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
-                                  {score != null ? score : 'Belum dinilai'}
-                                </span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                                <Icon name={collapsed.ta ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
+                              </button>
+                            </div>
 
-                  {/* Card 3: Keaktifan */}
-                  <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
-                            <Icon name="star" size={17} color="#ffffff" strokeWidth={2} />
+                            {!collapsed.ta && (
+                              <div className="space-y-3">
+                                {sesiModul.length === 0 && (
+                                  <p className="text-xs text-slate-400 text-center py-2">Belum ada data nilai.</p>
+                                )}
+                                {sesiModul.map((p) => {
+                                  const score = getNilai(p.id, 'TA')
+                                  return (
+                                    <div
+                                      key={p.id}
+                                      className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
+                                    >
+                                      <div className="flex items-center gap-2.5">
+                                        <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
+                                        <span className="text-sm font-medium text-slate-700">
+                                          {p.label}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
+                                        {score != null ? score : 'Belum dinilai'}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
                           </div>
-                          <h3
-                            className="font-bold text-[#00142F] text-base"
-                            style={{ fontFamily: 'var(--font-heading)' }}
-                          >
-                            Keaktifan
-                          </h3>
                         </div>
-                        <button
-                          onClick={() => toggleCollapse('p')}
-                          className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
-                        >
-                          <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
-                        </button>
-                      </div>
 
-                      {!collapsed.p && (
-                        <div className="space-y-3">
-                          {[1, 2, 3, 4].map((num) => {
-                            const pertemuanItem = nilaiPertemuan.find((p) => p.urutan_ke === num)
-                            const row = nilaiRows.find(
-                              (r) => r.pertemuan_id === pertemuanItem?.id && r.kode_komponen === 'P'
-                            )
-                            const score = row?.nilai
-
-                            return (
-                              <div
-                                key={num}
-                                className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
-                                  <span className="text-sm font-medium text-slate-700">
-                                    Pertemuan {num}
-                                  </span>
+                        {/* Card 2: Tugas Rumah */}
+                        <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
+                                  <Icon name="home" size={17} color="#ffffff" strokeWidth={2} />
                                 </div>
-                                <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
-                                  {score != null ? score : 'Belum dinilai'}
-                                </span>
+                                <h3
+                                  className="font-bold text-[#00142F] text-base"
+                                  style={{ fontFamily: 'var(--font-heading)' }}
+                                >
+                                  Tugas Rumah
+                                </h3>
                               </div>
-                            )
-                          })}
+                              <button
+                                onClick={() => toggleCollapse('tr')}
+                                className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
+                              >
+                                <Icon name={collapsed.tr ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
+                              </button>
+                            </div>
+
+                            {!collapsed.tr && (
+                              <div className="space-y-3">
+                                {sesiModul.length === 0 && (
+                                  <p className="text-xs text-slate-400 text-center py-2">Belum ada data nilai.</p>
+                                )}
+                                {sesiModul.map((p) => {
+                                  const score = getNilai(p.id, 'TR')
+                                  return (
+                                    <div
+                                      key={p.id}
+                                      className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
+                                    >
+                                      <div className="flex items-center gap-2.5">
+                                        <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
+                                        <span className="text-sm font-medium text-slate-700">
+                                          {p.label}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
+                                        {score != null ? score : 'Belum dinilai'}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
+
+                        {/* Card 3: Keaktifan — iterasi dari pengarahan + pertemuan reguler */}
+                        <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between md:col-span-2">
+                          <div>
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-[#002466] text-white flex items-center justify-center shadow-2xs">
+                                  <Icon name="star" size={17} color="#ffffff" strokeWidth={2} />
+                                </div>
+                                <h3
+                                  className="font-bold text-[#00142F] text-base"
+                                  style={{ fontFamily: 'var(--font-heading)' }}
+                                >
+                                  Keaktifan
+                                </h3>
+                              </div>
+                              <button
+                                onClick={() => toggleCollapse('p')}
+                                className="w-7 h-7 rounded-full bg-[#F0F7FF] border border-[#D6E4F0] flex items-center justify-center text-[#002466] hover:bg-[#D6E4F0] transition cursor-pointer"
+                              >
+                                <Icon name={collapsed.p ? 'plus' : 'minus'} size={14} color="#002466" strokeWidth={2} />
+                              </button>
+                            </div>
+
+                            {!collapsed.p && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+                                {sesiKeaktifan.length === 0 && (
+                                  <p className="text-xs text-slate-400 text-center py-2 col-span-2">Belum ada data nilai.</p>
+                                )}
+                                {sesiKeaktifan.map((p) => {
+                                  const score = getNilai(p.id, 'P')
+                                  return (
+                                    <div
+                                      key={p.id}
+                                      className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
+                                    >
+                                      <div className="flex items-center gap-2.5">
+                                        <span className={`w-2 h-2 rounded-full ${p.jenis === 'pengarahan' ? 'bg-amber-400' : 'bg-[#0284C7]'}`} />
+                                        <span className="text-sm font-medium text-slate-700">
+                                          {p.label}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">
+                                        {score != null ? score : 'Belum dinilai'}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
+
               </>
             )}
 

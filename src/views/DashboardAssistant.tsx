@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import * as XLSX from 'xlsx'
 import XLSXStyle from 'xlsx-js-style'
 import { Icon } from '../components/Icon'
@@ -69,6 +69,45 @@ const KOMPONEN_SKEMA: Record<string, {
 // Praktikum lain (mis. SKI) yang belum punya skema sendiri jatuh ke default DSK.
 const DEFAULT_SKEMA = KOMPONEN_SKEMA.DSK
 const getSkema = (praktikumKode: string) => KOMPONEN_SKEMA[praktikumKode] || DEFAULT_SKEMA
+
+// Skema nilai baru — dipakai HANYA untuk filter tampilan tabel di layar (fitur Filter Jenis Nilai).
+// KOMPONEN_SKEMA / getSkema di atas TIDAK diubah dan tetap dipakai untuk export Excel.
+// sumberN: 'modul'     → kolom dirender sebanyak jumlahModul (mis. TR1..TR5)
+//          'pertemuan' → kolom dirender sebanyak jumlahPertemuan reguler (mis. P1..P6)
+//          null        → komponen tunggal (1 kolom, nilai disimpan di bucket pertemuan 'uap')
+type KomponenNilaiItem = { kode: string; label: string; sumberN: 'modul' | 'pertemuan' | null }
+type JenisNilaiOption = { key: string; label: string; items: KomponenNilaiItem[] }
+const SKEMA_NILAI: Record<string, JenisNilaiOption[]> = {
+  DSK: [
+    { key: 'tugas_rumah',  label: 'Tugas Rumah',         items: [{ kode: 'TR',     label: 'TR',     sumberN: 'modul' }] },
+    { key: 'tes_awal',     label: 'Tes Awal',             items: [{ kode: 'TA',     label: 'TA',     sumberN: 'modul' }] },
+    { key: 'keaktifan',   label: 'Keaktifan dan Etika',  items: [{ kode: 'P',      label: 'P',      sumberN: 'pertemuan' }] },
+    { key: 'laporan',     label: 'Laporan',               items: [{ kode: 'LP',     label: 'LP',     sumberN: 'modul' }] },
+    { key: 'presentasi',  label: 'Presentasi',            items: [
+      { kode: 'UAP',    label: 'UAP',    sumberN: null },
+      { kode: 'JURNAL', label: 'Jurnal', sumberN: null },
+    ] },
+  ],
+  PLC: [
+    { key: 'tugas_rumah',        label: 'Tugas Rumah',         items: [{ kode: 'TR',    label: 'TR',    sumberN: 'modul' }] },
+    { key: 'tugas_awal',         label: 'Tugas Awal',          items: [{ kode: 'TA',    label: 'TA',    sumberN: 'modul' }] },
+    { key: 'keaktifan',          label: 'Keaktifan',           items: [{ kode: 'P',     label: 'P',     sumberN: 'pertemuan' }] },
+    { key: 'tugas_akhir_modul',  label: 'Tugas Akhir Modul',   items: [{ kode: 'M',     label: 'M',     sumberN: 'modul' }] },
+    { key: 'video_kreasi',       label: 'Video Kreasi',        items: [
+      { kode: 'VID', label: 'Video', sumberN: 'modul' },
+      { kode: 'UAP', label: 'UAP',   sumberN: null },
+    ] },
+    { key: 'laporan_praktikum',  label: 'Laporan Praktikum',   items: [
+      { kode: 'LAPORAN',    label: 'Laporan',    sumberN: null },
+      { kode: 'POSTER',     label: 'Poster',     sumberN: null },
+      { kode: 'PRESENTASI', label: 'Presentasi', sumberN: null },
+    ] },
+    { key: 'kehadiran',          label: 'Kehadiran',           items: [{ kode: 'KEHADIRAN', label: 'Kehadiran', sumberN: null }] },
+  ],
+}
+// Praktikum yang belum punya skema nilai baru jatuh ke DSK sebagai default
+const getSkemaNilai = (praktikumKode: string): JenisNilaiOption[] =>
+  SKEMA_NILAI[praktikumKode] || SKEMA_NILAI.DSK
 
 // Logo Hexagonal 3D Isometric ICAL
 function IcalLogoIcon({ className = 'w-8 h-8' }: { className?: string }) {
@@ -1236,6 +1275,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     nilai: { anggota_kelompok_id: string; pertemuan_id: string; kode_komponen: string; nilai: number | null }[]
     absensi?: { anggota_kelompok_id: string; pertemuan_id: string; status: string }[]
     kelas: NilaiKelasInfo[]
+    jumlahModul?: number // jumlah baris modul per praktikum dari tabel `modul` (untuk kolom TR/TA/M/Video)
   }
   const [nilaiData, setNilaiData] = useState<NilaiApiData | null>(null)
   const [nilaiLoading, setNilaiLoading] = useState(false)
@@ -1243,6 +1283,10 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const [nilaiSaving, setNilaiSaving] = useState(false)
   const [nilaiSavedMsg, setNilaiSavedMsg] = useState<string | null>(null)
   const [nilaiDrafts, setNilaiDrafts] = useState<Record<string, string>>({})
+  // Filter Jenis Nilai: 'semua' = semua kolom tampil (perilaku default); atau salah satu key dari SKEMA_NILAI
+  const [jenisNilaiFilter, setJenisNilaiFilter] = useState<string>('semua')
+  // Pencarian nama/NIM: filter baris tabel secara client-side (partial match, case-insensitive)
+  const [nilaiSearchQuery, setNilaiSearchQuery] = useState('')
 
   const fetchNilai = useCallback(async (praktikumKode: string, kelasNama: string, jurusanKode: string) => {
     setNilaiLoading(true)
@@ -1276,6 +1320,12 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       fetchNilai(gradeFilter.practicum, gradeFilter.kelas, gradeFilter.jurusan)
     }
   }, [activeSection, gradeFilter.practicum, gradeFilter.kelas, gradeFilter.jurusan, gradePracticumUnavailable, fetchNilai])
+
+  // Reset filter jenis nilai & pencarian setiap kali praktikum berubah (pilihan berbeda antar DSK/PLC)
+  useEffect(() => {
+    setJenisNilaiFilter('semua')
+    setNilaiSearchQuery('')
+  }, [gradeFilter.practicum])
 
   const handleSaveNilai = async () => {
     if (!nilaiData) return
@@ -2644,6 +2694,45 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                       <Icon name="warning" size={14} /> Praktikum ini belum dibuka untuk jurusan yang dipilih.
                     </div>
                   )}
+
+                  {/* Dropdown Filter Jenis Nilai — muncul hanya setelah kelas dipilih */}
+                  {gradeFilter.kelas && gradeFilter.practicum && !gradePracticumUnavailable && (
+                    <div className="mt-4 pt-4 border-t border-[#EFF6FF]">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Icon name="filter" size={13} color="#002466" />
+                        <label className="text-xs font-semibold text-slate-700" style={{ fontFamily: 'var(--font-heading)' }}>
+                          Filter Jenis Nilai
+                        </label>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => setJenisNilaiFilter('semua')}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                            jenisNilaiFilter === 'semua'
+                              ? 'bg-[#0260D4] text-white border-[#0260D4] shadow-sm'
+                              : 'bg-white text-slate-600 border-[#D6E4F0] hover:border-[#0284C7] hover:text-[#0260D4]'
+                          }`}
+                          style={{ fontFamily: 'var(--font-heading)' }}
+                        >
+                          Semua
+                        </button>
+                        {getSkemaNilai(gradeFilter.practicum).map((opt) => (
+                          <button
+                            key={opt.key}
+                            onClick={() => setJenisNilaiFilter(opt.key)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                              jenisNilaiFilter === opt.key
+                                ? 'bg-[#0260D4] text-white border-[#0260D4] shadow-sm'
+                                : 'bg-white text-slate-600 border-[#D6E4F0] hover:border-[#0284C7] hover:text-[#0260D4]'
+                            }`}
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {!gradeFilter.practicum && (
@@ -2670,6 +2759,25 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                   const pertemuanReguler = nilaiData.pertemuan.filter((p) => p.jenis === 'pertemuan').sort((a, b) => (a.urutan_ke || 0) - (b.urutan_ke || 0))
                   const pertemuanUap = nilaiData.pertemuan.find((p) => p.jenis === 'uap')
                   const skema = getSkema(gradeFilter.practicum)
+
+                  // Jumlah modul (data master dari API) — dipakai untuk kolom TR/TA/M/Video saat filter aktif
+                  const jumlahModul = nilaiData.jumlahModul ?? 0
+                  // Jumlah pertemuan reguler (pengarahan + pertemuan) yang unik — dipakai untuk kolom P saat filter aktif
+                  const jumlahPertemuan = (() => {
+                    const seen = new Set<string>()
+                    for (const r of nilaiData.pertemuanRows) {
+                      if (r.jenis === 'pengarahan' || r.jenis === 'pertemuan') seen.add(`${r.jenis}|${r.urutan_ke}`)
+                    }
+                    return seen.size
+                  })()
+
+                  // Filter baris berdasarkan pencarian nama/NIM (client-side, partial match, case-insensitive)
+                  const anggotaFiltered = nilaiSearchQuery.trim()
+                    ? nilaiData.anggota.filter((a) => {
+                        const q = nilaiSearchQuery.toLowerCase()
+                        return a.nama_praktikan.toLowerCase().includes(q) || (a.nim || '').toLowerCase().includes(q)
+                      })
+                    : nilaiData.anggota
 
                   const findPertemuanId = (kelompokId: string, jenis: string, urutanKe: number | null) =>
                     nilaiData.pertemuanRows.find((r) => r.kelompok_id === kelompokId && r.jenis === jenis && r.urutan_ke === urutanKe)?.id
@@ -2758,89 +2866,230 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                     )
                   }
 
+                  // ---------- Render kolom sesuai jenisNilaiFilter ----------
+                  // Saat 'semua': header dan body sama persis dengan sebelumnya (semua komponen tampil).
+                  // Saat filter aktif: hanya kolom yang relevan tampil (No/Nama/NIM/Kelompok selalu ada).
+
+                  // Helper: ambil pertemuanRows yang jenis=pengarahan|pertemuan dan unik per urutan_ke
+                  const pertemuanRegulerRows = (() => {
+                    const seen = new Map<string, { jenis: string; urutan_ke: number | null }>()
+                    for (const r of nilaiData.pertemuanRows) {
+                      if (r.jenis === 'pengarahan' || r.jenis === 'pertemuan') {
+                        const k = `${r.jenis}|${r.urutan_ke}`
+                        if (!seen.has(k)) seen.set(k, { jenis: r.jenis, urutan_ke: r.urutan_ke })
+                      }
+                    }
+                    return Array.from(seen.values())
+                  })()
+
+                  // Build header labels dan cell renderer untuk mode filter aktif
+                  const buildFilteredColumns = (opt: JenisNilaiOption) => {
+                    const headers: string[] = []
+                    const cellRenderers: ((a: NilaiAnggota) => React.ReactNode)[] = []
+
+                    for (const item of opt.items) {
+                      if (item.sumberN === 'modul') {
+                        // Kolom per modul: ${label}1..${label}${jumlahModul}
+                        // Gunakan pertemuanReguler dari nilaiData (per jenis=pertemuan, urutan_ke=1..n)
+                        // sebagai proxy bucket — komponen TR/TA/M/VID disimpan di baris 'pertemuan'
+                        const n = jumlahModul || pertemuanReguler.length
+                        for (let idx = 0; idx < n; idx++) {
+                          const p = pertemuanReguler[idx]
+                          const colLabel = `${item.label}${idx + 1}`
+                          headers.push(colLabel)
+                          if (p) {
+                            const maxVal = gradeFilter.practicum === 'PLC' && item.kode === 'P' ? 5 : undefined
+                            cellRenderers.push((a: NilaiAnggota) => cell(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, item.kode, maxVal))
+                          } else {
+                            cellRenderers.push((a: NilaiAnggota) => <td key={`empty-${item.kode}-${idx}`} className="p-1.5 text-center text-slate-300">—</td>)
+                          }
+                        }
+                      } else if (item.sumberN === 'pertemuan') {
+                        // Kolom per sesi (pengarahan + pertemuan reguler): ${label}1..${label}${jumlahPertemuan}
+                        const n = jumlahPertemuan || pertemuanReguler.length
+                        for (let idx = 0; idx < n; idx++) {
+                          const r = pertemuanRegulerRows[idx]
+                          const colLabel = `${item.label}${idx + 1}`
+                          headers.push(colLabel)
+                          if (r) {
+                            const maxVal = gradeFilter.practicum === 'PLC' && item.kode === 'P' ? 5 : undefined
+                            cellRenderers.push((a: NilaiAnggota) => cell(a.id, a.kelompok_id, r.jenis, r.urutan_ke, item.kode, maxVal))
+                          } else {
+                            cellRenderers.push((a: NilaiAnggota) => <td key={`empty-${item.kode}-${idx}`} className="p-1.5 text-center text-slate-300">—</td>)
+                          }
+                        }
+                      } else {
+                        // sumberN === null: komponen tunggal disimpan di bucket pertemuan 'uap'
+                        headers.push(item.kode === 'KEHADIRAN' ? `${item.label} (auto)` : item.label)
+                        if (item.kode === 'KEHADIRAN') {
+                          // Read-only (dihitung otomatis dari trigger trg_recalc_kehadiran)
+                          cellRenderers.push((a: NilaiAnggota) =>
+                            pertemuanUap
+                              ? cellReadonly(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, item.kode)
+                              : <td key={`no-uap-${item.kode}`} className="p-2 text-center text-slate-300">—</td>
+                          )
+                        } else {
+                          cellRenderers.push((a: NilaiAnggota) =>
+                            pertemuanUap
+                              ? cell(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, item.kode)
+                              : <td key={`no-uap-${item.kode}`} className="p-2 text-center text-slate-300">—</td>
+                          )
+                        }
+                      }
+                    }
+                    return { headers, cellRenderers }
+                  }
+
+                  const isFiltered = jenisNilaiFilter !== 'semua'
+                  const filteredOpt = isFiltered ? getSkemaNilai(gradeFilter.practicum).find((o) => o.key === jenisNilaiFilter) : undefined
+                  const { headers: filteredHeaders, cellRenderers: filteredCellRenderers } = filteredOpt
+                    ? buildFilteredColumns(filteredOpt)
+                    : { headers: [], cellRenderers: [] }
+
+                  // Hitung jumlah kolom total untuk colSpan pesan kosong
+                  const totalColsFiltered = 4 + filteredHeaders.length
+                  const totalColsDefault = 4 + pertemuanReguler.length * skema.perPertemuan.length + skema.finalTunggal.length
+
                   return (
-                    <div className="bg-white rounded-3xl border border-[#D6E4F0] shadow-xs overflow-hidden">
-                      <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="bg-[#0260D4]  ">
-                              {[
-                                'No', 'Nama', 'NIM', 'Kelompok',
-                                ...skema.perPertemuan.flatMap((k) => pertemuanReguler.map((p) => `${k.label} ${p.urutan_ke}`)),
-                                ...skema.finalTunggal.map((k) => (k.kode === 'KEHADIRAN' ? `${k.label} (auto)` : k.label)),
-                              ].map((h, idx) => (
-                                <th
-                                  key={`${h}-${idx}`}
-                                  className="p-3 text-center text-xs font-bold text-[#00142F] uppercase tracking-wider border-b border-[#D6E4F0]"
-                                  style={{ fontFamily: 'var(--font-heading)' }}
-                                >
-                                  {h}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {nilaiData.anggota.map((a, i) => (
-                              <tr key={a.id} className="hover:bg-[#F4F8FC] transition border-b border-slate-100 last:border-0">
-                                <td className="p-2.5 text-center text-xs text-slate-400">{i + 1}</td>
-                                <td className="p-2.5 font-bold text-xs sm:text-sm text-[#00142F] whitespace-nowrap">
-                                  {a.nama_praktikan}
-                                </td>
-                                <td className="p-2.5 text-xs text-slate-500 whitespace-nowrap">{a.nim}</td>
-                                <td className="p-2.5 text-center text-xs whitespace-nowrap">
-                                  <span className="px-2.5 py-1 rounded-full text-white text-xs font-bold bg-[#002466]">
-                                    {a.nama_kelompok || '—'}
-                                  </span>
-                                </td>
-                                {skema.perPertemuan.map((k) =>
-                                  pertemuanReguler.map((p) => cell(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, k.kode, gradeFilter.practicum === 'PLC' && k.kode === 'P' ? 5 : undefined))
-                                )}
-                                {skema.finalTunggal.map((k) => (
-                                  pertemuanUap
-                                    ? (k.kode === 'KEHADIRAN'
-                                      ? cellReadonly(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, k.kode)
-                                      : cell(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, k.kode))
-                                    : <td key={k.kode} className="p-2 text-center text-slate-300">—</td>
-                                ))}
-                              </tr>
-                            ))}
-                            {nilaiData.anggota.length === 0 && (
-                              <tr>
-                                <td colSpan={4 + pertemuanReguler.length * skema.perPertemuan.length + skema.finalTunggal.length} className="p-8 text-center text-sm text-slate-400">
-                                  Belum ada praktikan terdaftar pada praktikum ini.
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                    <>
+                      {/* Input pencarian nama/NIM */}
+                      <div className="flex items-center gap-2.5 px-1">
+                        <div className="relative flex-1 max-w-sm">
+                          <Icon name="search" size={14} color="#94a3b8" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            id="nilai-search-input"
+                            type="text"
+                            placeholder="Cari nama atau NIM..."
+                            value={nilaiSearchQuery}
+                            onChange={(e) => setNilaiSearchQuery(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 text-xs border border-[#D6E4F0] rounded-xl focus:border-[#0284C7] focus:ring-1 focus:ring-[#0284C7] outline-hidden transition bg-white"
+                          />
+                          {nilaiSearchQuery && (
+                            <button
+                              onClick={() => setNilaiSearchQuery('')}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                            >
+                              <Icon name="x" size={12} />
+                            </button>
+                          )}
+                        </div>
+                        {nilaiSearchQuery && (
+                          <span className="text-xs text-slate-500 whitespace-nowrap">
+                            {anggotaFiltered.length} dari {nilaiData.anggota.length} praktikan
+                          </span>
+                        )}
                       </div>
 
-                      {/* Bottom action buttons */}
-                      <div className="p-4 bg-slate-50/50 border-t border-[#D6E4F0] flex items-center justify-end gap-3 flex-wrap">
-                        {nilaiSavedMsg && <span className="text-xs font-semibold text-emerald-700">{nilaiSavedMsg}</span>}
-                        <button
-                          onClick={handleExportExcel}
-                          className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                          style={{ fontFamily: 'var(--font-heading)' }}
-                        >
-                          <Icon name="download" size={15} /> Export Excel
-                        </button>
-                        <button
-                          onClick={handleSaveNilai}
-                          disabled={nilaiSaving}
-                          className="py-2.5 px-5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-[#0260D4]    hover:shadow-md transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          style={{ fontFamily: 'var(--font-heading)' }}
-                        >
-                          {nilaiSaving ? (
-                            <><Icon name="loader" size={15} className="animate-spin" /> Menyimpan...</>
-                          ) : (
-                            <><Icon name="save" size={15} /> Simpan Nilai</>
-                          )}
-                        </button>
+                      <div className="bg-white rounded-3xl border border-[#D6E4F0] shadow-xs overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="bg-[#0260D4]  ">
+                                {isFiltered ? (
+                                  // Header mode filter: No/Nama/NIM/Kelompok + kolom dari filteredOpt
+                                  ['No', 'Nama', 'NIM', 'Kelompok', ...filteredHeaders].map((h, idx) => (
+                                    <th
+                                      key={`fh-${h}-${idx}`}
+                                      className="p-3 text-center text-xs font-bold text-[#00142F] uppercase tracking-wider border-b border-[#D6E4F0]"
+                                      style={{ fontFamily: 'var(--font-heading)' }}
+                                    >
+                                      {h}
+                                    </th>
+                                  ))
+                                ) : (
+                                  // Header mode semua (identik dengan sebelumnya)
+                                  [
+                                    'No', 'Nama', 'NIM', 'Kelompok',
+                                    ...skema.perPertemuan.flatMap((k) => pertemuanReguler.map((p) => `${k.label} ${p.urutan_ke}`)),
+                                    ...skema.finalTunggal.map((k) => (k.kode === 'KEHADIRAN' ? `${k.label} (auto)` : k.label)),
+                                  ].map((h, idx) => (
+                                    <th
+                                      key={`${h}-${idx}`}
+                                      className="p-3 text-center text-xs font-bold text-[#00142F] uppercase tracking-wider border-b border-[#D6E4F0]"
+                                      style={{ fontFamily: 'var(--font-heading)' }}
+                                    >
+                                      {h}
+                                    </th>
+                                  ))
+                                )}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {anggotaFiltered.map((a, i) => (
+                                <tr key={a.id} className="hover:bg-[#F4F8FC] transition border-b border-slate-100 last:border-0">
+                                  <td className="p-2.5 text-center text-xs text-slate-400">{i + 1}</td>
+                                  <td className="p-2.5 font-bold text-xs sm:text-sm text-[#00142F] whitespace-nowrap">
+                                    {a.nama_praktikan}
+                                  </td>
+                                  <td className="p-2.5 text-xs text-slate-500 whitespace-nowrap">{a.nim}</td>
+                                  <td className="p-2.5 text-center text-xs whitespace-nowrap">
+                                    <span className="px-2.5 py-1 rounded-full text-white text-xs font-bold bg-[#002466]">
+                                      {a.nama_kelompok || '—'}
+                                    </span>
+                                  </td>
+                                  {isFiltered ? (
+                                    // Body mode filter: render kolom sesuai filteredCellRenderers
+                                    filteredCellRenderers.map((renderer, rIdx) => (
+                                      <React.Fragment key={`fcell-${a.id}-${rIdx}`}>{renderer(a)}</React.Fragment>
+                                    ))
+                                  ) : (
+                                    // Body mode semua (identik dengan sebelumnya)
+                                    <>
+                                      {skema.perPertemuan.map((k) =>
+                                        pertemuanReguler.map((p) => cell(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, k.kode, gradeFilter.practicum === 'PLC' && k.kode === 'P' ? 5 : undefined))
+                                      )}
+                                      {skema.finalTunggal.map((k) => (
+                                        pertemuanUap
+                                          ? (k.kode === 'KEHADIRAN'
+                                            ? cellReadonly(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, k.kode)
+                                            : cell(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, k.kode))
+                                          : <td key={k.kode} className="p-2 text-center text-slate-300">—</td>
+                                      ))}
+                                    </>
+                                  )}
+                                </tr>
+                              ))}
+                              {anggotaFiltered.length === 0 && (
+                                <tr>
+                                  <td colSpan={isFiltered ? totalColsFiltered : totalColsDefault} className="p-8 text-center text-sm text-slate-400">
+                                    {nilaiSearchQuery
+                                      ? 'Tidak ada praktikan yang cocok dengan pencarian.'
+                                      : 'Belum ada praktikan terdaftar pada praktikum ini.'}
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Bottom action buttons */}
+                        <div className="p-4 bg-slate-50/50 border-t border-[#D6E4F0] flex items-center justify-end gap-3 flex-wrap">
+                          {nilaiSavedMsg && <span className="text-xs font-semibold text-emerald-700">{nilaiSavedMsg}</span>}
+                          <button
+                            onClick={handleExportExcel}
+                            className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
+                            <Icon name="download" size={15} /> Export Excel
+                          </button>
+                          <button
+                            onClick={handleSaveNilai}
+                            disabled={nilaiSaving}
+                            className="py-2.5 px-5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-[#0260D4]    hover:shadow-md transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
+                            {nilaiSaving ? (
+                              <><Icon name="loader" size={15} className="animate-spin" /> Menyimpan...</>
+                            ) : (
+                              <><Icon name="save" size={15} /> Simpan Nilai</>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    </>
                   )
                 })()}
+
               </div>
             )}
 
@@ -3006,7 +3255,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
 
                   {!scanFilter.practicum && (
                     <p className="p-8 text-center text-xs sm:text-sm text-slate-400">
-                      Pilih jurusan & praktikum untuk menampilkan rekap absensi.
+                      Pilih jurusan &amp; praktikum untuk menampilkan rekap absensi.
                     </p>
                   )}
 
@@ -3020,81 +3269,152 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                     </div>
                   )}
 
-                  {scanFilter.practicum && !attendanceLoading && (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="bg-[#0260D4]  ">
-                            {['No', 'Nama', 'NIM', 'Kelompok', 'Kelas', 'Kehadiran'].map((h) => (
-                              <th
-                                key={h}
-                                className="p-3 text-left text-xs font-bold text-[#00142F] uppercase tracking-wider border-b border-[#D6E4F0]"
-                                style={{ fontFamily: 'var(--font-heading)' }}
-                              >
-                                {h}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {attendanceRoster.map((row, i) => (
-                            <tr key={row.anggota_kelompok_id} className="hover:bg-[#F4F8FC] transition border-b border-slate-100 last:border-0">
-                              <td className="p-3 text-xs text-slate-400">{i + 1}</td>
-                              <td className="p-3 font-bold text-xs sm:text-sm text-[#00142F]">
-                                {row.nama}
-                              </td>
-                              <td className="p-3 text-xs text-slate-500">{row.nim}</td>
-                              <td className="p-3">
-                                <span className="px-2.5 py-1 rounded-full text-white text-xs font-bold bg-[#002466]">
-                                  {row.nama_kelompok}
-                                </span>
-                              </td>
-                              <td className="p-3 text-xs text-slate-600">{row.nama_kelas}</td>
-                              <td className="p-3">
-                                {row.pertemuan_id ? (
-                                  <div className="flex items-center gap-1.5">
-                                    {savingAttendanceIds.has(row.anggota_kelompok_id) && (
-                                      <Icon name="loader" size={14} className="animate-spin text-[#0284C7] mr-0.5" />
-                                    )}
-                                    {(['H', 'I', 'S', 'A'] as const).map((status) => (
-                                      <button
-                                        key={status}
-                                        onClick={() => handleManualAttendance(row, status)}
-                                        disabled={savingAttendanceIds.has(row.anggota_kelompok_id)}
-                                        title={status === 'H' ? 'Hadir' : status === 'I' ? 'Izin' : status === 'S' ? 'Sakit' : 'Alfa'}
-                                        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-wait ${
-                                          row.status === status
-                                            ? status === 'H'
-                                              ? 'bg-emerald-600 text-white'
-                                              : status === 'I'
-                                              ? 'bg-amber-500 text-white'
-                                              : status === 'S'
-                                              ? 'bg-[#002466] text-white'
-                                              : 'bg-red-600 text-white'
-                                            : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
-                                        }`}
-                                      >
-                                        {status}
-                                      </button>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-xs text-slate-300">Jadwal belum tersedia</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                          {attendanceRoster.length === 0 && (
-                            <tr>
-                              <td colSpan={6} className="p-8 text-center text-xs sm:text-sm text-slate-400">
-                                Belum ada praktikan terdaftar pada filter ini.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  {scanFilter.practicum && !attendanceLoading && (() => {
+                    // Sort by NIM numeric ascending (2022... < 2023... < 2024... dst.)
+                    const sortedRoster = [...attendanceRoster].sort((a, b) =>
+                      (a.nim || '').localeCompare(b.nim || '', undefined, { numeric: true, sensitivity: 'base' })
+                    )
+
+                    // Palet warna alternating per kelompok unik
+                    // Urutan kelompok diambil dari roster yang sudah disort NIM agar deterministik
+                    const kelompokOrder: string[] = []
+                    for (const row of sortedRoster) {
+                      if (!kelompokOrder.includes(row.nama_kelompok)) kelompokOrder.push(row.nama_kelompok)
+                    }
+                    // Dua warna alternating: putih (#FFFFFF) dan biru sangat muda (#F0F7FF)
+                    const groupBgMap = new Map<string, string>()
+                    kelompokOrder.forEach((k, idx) => {
+                      groupBgMap.set(k, idx % 2 === 0 ? '#FFFFFF' : '#F0F7FF')
+                    })
+
+                    // Hitung ringkasan kehadiran dari roster yang terfilter (sudah sesuai kelas & pertemuan aktif)
+                    const summary = { H: 0, A: 0, S: 0, I: 0, '-': 0 }
+                    for (const row of sortedRoster) {
+                      if (!row.pertemuan_id) continue // jadwal belum tersedia, skip
+                      const s = row.status as string | null
+                      if (s === 'H') summary.H++
+                      else if (s === 'A') summary.A++
+                      else if (s === 'S') summary.S++
+                      else if (s === 'I') summary.I++
+                      else summary['-']++ // belum ada keterangan
+                    }
+                    const totalWithJadwal = sortedRoster.filter((r) => !!r.pertemuan_id).length
+
+                    return (
+                      <>
+                        {/* Summary badges */}
+                        {totalWithJadwal > 0 && (
+                          <div className="px-6 py-3 border-b border-[#EFF6FF] flex flex-wrap items-center gap-2.5">
+                            <span className="text-xs font-semibold text-slate-500 mr-1">Rekap:</span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                              Hadir: {summary.H}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-slate-50 text-slate-500 border border-slate-200">
+                              <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />
+                              Belum ada ket.: {summary['-']}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-blue-50 text-[#002466] border border-blue-200">
+                              <span className="w-2 h-2 rounded-full bg-[#002466] inline-block" />
+                              Sakit: {summary.S}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                              <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                              Izin: {summary.I}
+                            </span>
+                            {summary.A > 0 && (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-red-50 text-red-600 border border-red-200">
+                                <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                                Alfa: {summary.A}
+                              </span>
+                            )}
+                            <span className="text-xs text-slate-400 ml-1">dari {totalWithJadwal} praktikan</span>
+                          </div>
+                        )}
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="bg-[#0260D4]  ">
+                                {['No', 'Nama', 'NIM', 'Kelompok', 'Kelas', 'Kehadiran'].map((h) => (
+                                  <th
+                                    key={h}
+                                    className="p-3 text-left text-xs font-bold text-[#00142F] uppercase tracking-wider border-b border-[#D6E4F0]"
+                                    style={{ fontFamily: 'var(--font-heading)' }}
+                                  >
+                                    {h}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sortedRoster.map((row, i) => {
+                                const bg = groupBgMap.get(row.nama_kelompok) || '#FFFFFF'
+                                return (
+                                  <tr
+                                    key={row.anggota_kelompok_id}
+                                    className="hover:brightness-95 transition border-b border-slate-100 last:border-0"
+                                    style={{ backgroundColor: bg }}
+                                  >
+                                    <td className="p-3 text-xs text-slate-400">{i + 1}</td>
+                                    <td className="p-3 font-bold text-xs sm:text-sm text-[#00142F]">
+                                      {row.nama}
+                                    </td>
+                                    <td className="p-3 text-xs text-slate-500">{row.nim}</td>
+                                    <td className="p-3">
+                                      <span className="px-2.5 py-1 rounded-full text-white text-xs font-bold bg-[#002466]">
+                                        {row.nama_kelompok}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-xs text-slate-600">{row.nama_kelas}</td>
+                                    <td className="p-3">
+                                      {row.pertemuan_id ? (
+                                        <div className="flex items-center gap-1.5">
+                                          {savingAttendanceIds.has(row.anggota_kelompok_id) && (
+                                            <Icon name="loader" size={14} className="animate-spin text-[#0284C7] mr-0.5" />
+                                          )}
+                                          {(['H', 'I', 'S', 'A'] as const).map((status) => (
+                                            <button
+                                              key={status}
+                                              onClick={() => handleManualAttendance(row, status)}
+                                              disabled={savingAttendanceIds.has(row.anggota_kelompok_id)}
+                                              title={status === 'H' ? 'Hadir' : status === 'I' ? 'Izin' : status === 'S' ? 'Sakit' : 'Alfa'}
+                                              className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-wait ${
+                                                row.status === status
+                                                  ? status === 'H'
+                                                    ? 'bg-emerald-600 text-white'
+                                                    : status === 'I'
+                                                    ? 'bg-amber-500 text-white'
+                                                    : status === 'S'
+                                                    ? 'bg-[#002466] text-white'
+                                                    : 'bg-red-600 text-white'
+                                                  : 'bg-slate-100 text-slate-400 border border-slate-200 hover:bg-slate-200'
+                                              }`}
+                                            >
+                                              {status}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <span className="text-xs text-slate-300">Jadwal belum tersedia</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                              {sortedRoster.length === 0 && (
+                                <tr>
+                                  <td colSpan={6} className="p-8 text-center text-xs sm:text-sm text-slate-400">
+                                    Belum ada praktikan terdaftar pada filter ini.
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
               </div>
             )}
