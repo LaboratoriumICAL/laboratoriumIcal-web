@@ -10,13 +10,27 @@ const nextConfig = {
       {
         source: '/modul/:path*',
         has: [{ type: 'query', key: 'download' }],
-        headers: [{ key: 'Content-Disposition', value: 'attachment' }],
+        headers: [
+          { key: 'Content-Disposition', value: 'attachment' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+      {
+        source: '/modul/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, must-revalidate' },
+        ],
       },
       {
         // Template (docx/pptx) SELALU dipaksa download -- format ini tidak bisa
         // di-preview di browser, jadi tidak perlu mode inline seperti modul PDF.
         source: '/template/:path*',
-        headers: [{ key: 'Content-Disposition', value: 'attachment' }],
+        headers: [
+          { key: 'Content-Disposition', value: 'attachment' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        ],
       },
     ]
   },
