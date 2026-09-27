@@ -12,7 +12,7 @@ interface TemplateItem {
   urutan: number
 }
 
-const KATEGORI_ORDER = ['Laporan', 'Power Point Presentasi', 'Cover Tugas Rumah', 'Lembar Kerja', 'Jurnal']
+const KATEGORI_ORDER = ['Laporan', 'Power Point Presentasi', 'Cover Tugas Rumah', 'Lembar Kerja', 'Jurnal', 'Jurnal Perminggu']
 
 const ICON_BY_KATEGORI: Record<string, string> = {
   Laporan: 'file-text',
@@ -20,6 +20,7 @@ const ICON_BY_KATEGORI: Record<string, string> = {
   'Cover Tugas Rumah': 'file-text',
   'Lembar Kerja': 'clipboard-list',
   Jurnal: 'notebook',
+  'Jurnal Perminggu': 'notebook',
 }
 
 const BADGE_ICON_BY_KATEGORI: Record<string, string> = {
@@ -28,6 +29,7 @@ const BADGE_ICON_BY_KATEGORI: Record<string, string> = {
   'Cover Tugas Rumah': 'home',
   'Lembar Kerja': 'clipboard-list',
   Jurnal: 'notebook',
+  'Jurnal Perminggu': 'notebook',
 }
 
 // Data spesifik Pedoman Laporan per Bidang Praktikum
