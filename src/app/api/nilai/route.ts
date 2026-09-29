@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
     if (anggotaIds.length > 0) {
       const { data } = await sb
         .from('nilai_komponen')
-        .select('anggota_kelompok_id, pertemuan_id, kode_komponen, nilai')
+        .select('anggota_kelompok_id, pertemuan_id, kode_komponen, nilai, nomor_modul')
         .in('anggota_kelompok_id', anggotaIds)
       nilai = data || []
 
@@ -135,7 +135,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const updates: { anggota_kelompok_id: string; pertemuan_id: string; kode_komponen: string; nilai: number | null }[] = body.updates
+    const updates: {
+      anggota_kelompok_id: string
+      pertemuan_id: string
+      kode_komponen: string
+      nilai: number | null
+      nomor_modul?: number
+    }[] = body.updates
     if (!Array.isArray(updates) || updates.length === 0) {
       return NextResponse.json({ error: 'updates wajib berupa array dan tidak boleh kosong' }, { status: 400 })
     }
@@ -144,8 +150,12 @@ export async function POST(req: NextRequest) {
     const { error } = await sb
       .from('nilai_komponen')
       .upsert(
-        updates.map((u) => ({ ...u, updated_at: new Date().toISOString() })),
-        { onConflict: 'anggota_kelompok_id,pertemuan_id,kode_komponen' }
+        updates.map((u) => ({
+          ...u,
+          nomor_modul: u.nomor_modul ?? 0,
+          updated_at: new Date().toISOString(),
+        })),
+        { onConflict: 'anggota_kelompok_id,pertemuan_id,kode_komponen,nomor_modul' }
       )
     if (error) throw error
 

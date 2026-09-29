@@ -4,6 +4,7 @@ import XLSXStyle from 'xlsx-js-style'
 import { Icon } from '../components/Icon'
 import QRScannerOverlay, { ScanResultData } from '../components/QRScannerOverlay'
 import { apiFetch } from '../lib/apiClient'
+import { sesiUntukModul } from '../lib/sesiModul'
 
 interface DashboardAssistantProps {
   user: { role: string; name: string; id?: string; nim?: string }
@@ -73,14 +74,15 @@ const getSkema = (praktikumKode: string) => KOMPONEN_SKEMA[praktikumKode] || DEF
 // Skema nilai baru — dipakai HANYA untuk filter tampilan tabel di layar (fitur Filter Jenis Nilai).
 // KOMPONEN_SKEMA / getSkema di atas TIDAK diubah dan tetap dipakai untuk export Excel.
 // sumberN: 'modul'     → kolom dirender sebanyak jumlahModul (mis. TR1..TR5)
+//          'sesi'      → kolom dirender sebanyak jumlah sesi jenis 'pertemuan' saja (pertemuanReguler.length), pengarahan tidak dihitung (mis. TA1..TA4)
 //          'pertemuan' → kolom dirender sebanyak jumlahPertemuan reguler (mis. P1..P6)
 //          null        → komponen tunggal (1 kolom, nilai disimpan di bucket pertemuan 'uap')
-type KomponenNilaiItem = { kode: string; label: string; sumberN: 'modul' | 'pertemuan' | null }
+type KomponenNilaiItem = { kode: string; label: string; sumberN: 'modul' | 'sesi' | 'pertemuan' | null }
 type JenisNilaiOption = { key: string; label: string; items: KomponenNilaiItem[] }
 const SKEMA_NILAI: Record<string, JenisNilaiOption[]> = {
   DSK: [
     { key: 'tugas_rumah',  label: 'Tugas Rumah',         items: [{ kode: 'TR',     label: 'TR',     sumberN: 'modul' }] },
-    { key: 'tes_awal',     label: 'Tes Awal',             items: [{ kode: 'TA',     label: 'TA',     sumberN: 'pertemuan' }] },
+    { key: 'tes_awal',     label: 'Tes Awal',             items: [{ kode: 'TA',     label: 'TA',     sumberN: 'sesi' }] },
     { key: 'keaktifan',   label: 'Keaktifan dan Etika',  items: [{ kode: 'P',      label: 'P',      sumberN: 'pertemuan' }] },
     { key: 'laporan',     label: 'Laporan',               items: [{ kode: 'LP',     label: 'LP',     sumberN: 'modul' }] },
     { key: 'presentasi',  label: 'Presentasi',            items: [
@@ -90,7 +92,7 @@ const SKEMA_NILAI: Record<string, JenisNilaiOption[]> = {
   ],
   PLC: [
     { key: 'tugas_rumah',        label: 'Tugas Rumah',         items: [{ kode: 'TR',    label: 'TR',    sumberN: 'modul' }] },
-    { key: 'tugas_awal',         label: 'Tugas Awal',          items: [{ kode: 'TA',    label: 'TA',    sumberN: 'pertemuan' }] },
+    { key: 'tugas_awal',         label: 'Tugas Awal',          items: [{ kode: 'TA',    label: 'TA',    sumberN: 'sesi' }] },
     { key: 'keaktifan',          label: 'Keaktifan',           items: [{ kode: 'P',     label: 'P',     sumberN: 'pertemuan' }] },
     { key: 'tugas_akhir_modul',  label: 'Tugas Akhir Modul',   items: [{ kode: 'M',     label: 'M',     sumberN: 'modul' }] },
     { key: 'video_kreasi',       label: 'Video Kreasi',        items: [
@@ -1305,7 +1307,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       setNilaiData(json)
       const drafts: Record<string, string> = {}
       for (const row of json.nilai || []) {
-        drafts[`${row.anggota_kelompok_id}::${row.pertemuan_id}::${row.kode_komponen}`] = row.nilai ?? ''
+        drafts[`${row.anggota_kelompok_id}::${row.pertemuan_id}::${row.kode_komponen}::${row.nomor_modul ?? 0}`] = row.nilai ?? ''
       }
       setNilaiDrafts(drafts)
     } catch (err: any) {
@@ -1333,10 +1335,16 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     setNilaiSavedMsg(null)
     try {
       const updates = Object.entries(nilaiDrafts)
-        .filter(([key, v]) => v !== '' && !key.endsWith('::KEHADIRAN'))
+        .filter(([key, v]) => v !== '' && key.split('::')[2] !== 'KEHADIRAN')
         .map(([key, v]) => {
-          const [anggota_kelompok_id, pertemuan_id, kode_komponen] = key.split('::')
-          return { anggota_kelompok_id, pertemuan_id, kode_komponen, nilai: Number(v) }
+          const [anggota_kelompok_id, pertemuan_id, kode_komponen, nomorModulStr] = key.split('::')
+          return {
+            anggota_kelompok_id,
+            pertemuan_id,
+            kode_komponen,
+            nomor_modul: nomorModulStr !== undefined && nomorModulStr !== '' ? Number(nomorModulStr) : 0,
+            nilai: Number(v),
+          }
         })
       if (updates.length === 0) {
         setNilaiSaving(false)
@@ -1364,16 +1372,24 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const pertemuanReguler = nilaiData.pertemuan.filter((p) => p.jenis === 'pertemuan').sort((a, b) => (a.urutan_ke || 0) - (b.urutan_ke || 0))
     const pertemuanUap = nilaiData.pertemuan.find((p) => p.jenis === 'uap')
     const n = pertemuanReguler.length
+    const jumlahModul = nilaiData.jumlahModul || 5
     const skema = getSkema(gradeFilter.practicum)
 
     const findPertemuanId = (kelompokId: string, jenis: string, urutanKe: number | null) =>
       nilaiData.pertemuanRows.find((r) => r.kelompok_id === kelompokId && r.jenis === jenis && r.urutan_ke === urutanKe)?.id
 
-    const getNilai = (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string): number | '' => {
+    const getNilai = (
+      anggotaId: string,
+      kelompokId: string,
+      jenis: string,
+      urutanKe: number | null,
+      kode: string,
+      nomorModul: number = 0
+    ): number | '' => {
       const pertemuanId = findPertemuanId(kelompokId, jenis, urutanKe)
       if (!pertemuanId) return ''
-      const key = `${anggotaId}::${pertemuanId}::${kode}`
-      const v = nilaiDrafts[key]
+      const key = `${anggotaId}::${pertemuanId}::${kode}::${nomorModul}`
+      const v = nilaiDrafts[key] ?? (nomorModul === 1 ? nilaiDrafts[`${anggotaId}::${pertemuanId}::${kode}::0`] : undefined)
       return v === undefined || v === '' ? '' : Number(v)
     }
 
@@ -1397,11 +1413,11 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     // Praktikum lain (mis. PLC) belum ada bobot resmi yang diketahui sistem, jadi export-nya
     // berisi nilai mentah per komponen dulu (siap diisi bobotnya manual oleh koordinator).
     if (gradeFilter.practicum === 'DSK') {
-      handleExportExcelDSK({ pertemuanReguler, pertemuanUap, n, nP, sesiKeaktifanRows, getNilai, praktikumLabel, colLetter })
+      handleExportExcelDSK({ pertemuanReguler, pertemuanUap, jumlahModul, nP, sesiKeaktifanRows, getNilai, praktikumLabel, colLetter })
       return
     }
     if (gradeFilter.practicum === 'PLC') {
-      handleExportExcelPLC({ pertemuanReguler, pertemuanUap, nP, sesiKeaktifanRows, getNilai })
+      handleExportExcelPLC({ pertemuanReguler, pertemuanUap, jumlahModul, nP, sesiKeaktifanRows, getNilai })
       return
     }
 
@@ -1469,23 +1485,25 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
 
   // --- Export khusus DSK: pakai rumus rata-rata + bobot resmi (10/10/20/20/25/15%) + Nilai Akhir + Huruf ---
   const handleExportExcelDSK = ({
-    pertemuanReguler, pertemuanUap, n, nP, sesiKeaktifanRows, getNilai, praktikumLabel, colLetter,
+    pertemuanReguler, pertemuanUap, jumlahModul, nP, sesiKeaktifanRows, getNilai, praktikumLabel, colLetter,
   }: {
     pertemuanReguler: { urutan_ke: number | null; jenis: string; label: string }[]
     pertemuanUap?: { urutan_ke: number | null; jenis: string; label: string }
-    n: number
+    jumlahModul: number
     nP: number
     sesiKeaktifanRows: { jenis: string; urutan_ke: number | null }[]
-    getNilai: (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string) => number | ''
+    getNilai: (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string, nomorModul?: number) => number | ''
     praktikumLabel: string
     colLetter: (i: number) => string
   }) => {
     if (!nilaiData) return
+    const nModul = jumlahModul || 5
+    const nTA = pertemuanReguler.length || 4
     const cTRStart = 4 // kolom E (index 4) = mulai TR
-    const cTAStart = cTRStart + n
-    const cPStart = cTAStart + n
+    const cTAStart = cTRStart + nModul
+    const cPStart = cTAStart + nTA
     const cLPStart = cPStart + nP
-    const cUAP = cLPStart + n
+    const cUAP = cLPStart + nModul
     const cJurnal = cUAP + 1
     const cLulusTA = cJurnal + 1
     const cTRavg = cLulusTA + 1
@@ -1517,10 +1535,12 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     groupHeader[cHuruf] = 'Huruf Nilai Akhir'
 
     const subHeader: string[] = new Array(totalCols).fill('')
-    for (let i = 0; i < n; i++) subHeader[cTRStart + i] = `TR${i + 1}`
-    for (let i = 0; i < n; i++) subHeader[cTAStart + i] = `TA${i + 1}`
-    for (let i = 0; i < nP; i++) subHeader[cPStart + i] = `P${i + 1}`
-    for (let i = 0; i < n; i++) subHeader[cLPStart + i] = `LP${i + 1}`
+    for (let i = 0; i < nModul; i++) subHeader[cTRStart + i] = `TR${i + 1}`
+    for (let i = 0; i < nTA; i++) subHeader[cTAStart + i] = `TA${i + 1}`
+    sesiKeaktifanRows.forEach((s, idx) => {
+      subHeader[cPStart + idx] = s.jenis === 'pengarahan' ? 'Pendahuluan' : `P${s.urutan_ke ?? (idx + 1)}`
+    })
+    for (let i = 0; i < nModul; i++) subHeader[cLPStart + i] = `LP${i + 1}`
     subHeader[cLulusTA] = 'Lulus Tes Awal'
     subHeader[cTRavg] = 'Tugas Rumah'
     subHeader[cTRw] = 'Tugas Rumah (10%)'
@@ -1554,21 +1574,27 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       row[1] = a.nim
       row[2] = a.nama_praktikan
       row[3] = ''
-      pertemuanReguler.forEach((p, idx) => { row[cTRStart + idx] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'TR') })
-      pertemuanReguler.forEach((p, idx) => { row[cTAStart + idx] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'TA') })
-      sesiKeaktifanRows.forEach((s, idx) => { row[cPStart + idx] = getNilai(a.id, a.kelompok_id, s.jenis, s.urutan_ke, 'P') })
-      pertemuanReguler.forEach((p, idx) => { row[cLPStart + idx] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'LP') })
-      row[cUAP] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'UAP') : ''
-      row[cJurnal] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'JURNAL') : ''
+      for (let m = 1; m <= nModul; m++) {
+        const sesi = sesiUntukModul('DSK', m)
+        row[cTRStart + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'TR', m) : ''
+      }
+      pertemuanReguler.forEach((p, idx) => { row[cTAStart + idx] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'TA', 0) })
+      sesiKeaktifanRows.forEach((s, idx) => { row[cPStart + idx] = getNilai(a.id, a.kelompok_id, s.jenis, s.urutan_ke, 'P', 0) })
+      for (let m = 1; m <= nModul; m++) {
+        const sesi = sesiUntukModul('DSK', m)
+        row[cLPStart + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'LP', m) : ''
+      }
+      row[cUAP] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'UAP', 0) : ''
+      row[cJurnal] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'JURNAL', 0) : ''
       aoa.push(row)
     })
 
     const ws = XLSX.utils.aoa_to_sheet(aoa)
 
-    const trRange = () => `${colLetter(cTRStart)}R:${colLetter(cTRStart + n - 1)}R`
-    const taRange = () => `${colLetter(cTAStart)}R:${colLetter(cTAStart + n - 1)}R`
+    const trRange = () => `${colLetter(cTRStart)}R:${colLetter(cTRStart + nModul - 1)}R`
+    const taRange = () => `${colLetter(cTAStart)}R:${colLetter(cTAStart + nTA - 1)}R`
     const pRange = () => `${colLetter(cPStart)}R:${colLetter(cPStart + nP - 1)}R`
-    const lpRange = () => `${colLetter(cLPStart)}R:${colLetter(cLPStart + n - 1)}R`
+    const lpRange = () => `${colLetter(cLPStart)}R:${colLetter(cLPStart + nModul - 1)}R`
 
     for (let i = 0; i < nilaiData.anggota.length; i++) {
       const r = dataStartRow + i + 1
@@ -1604,7 +1630,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const mergeGroup = (startCol: number, span: number) => {
       if (span > 1) merges.push({ s: { r: headerRow0, c: startCol }, e: { r: headerRow0, c: startCol + span - 1 } })
     }
-    mergeGroup(cTRStart, n); mergeGroup(cTAStart, n); mergeGroup(cPStart, nP); mergeGroup(cLPStart, n)
+    mergeGroup(cTRStart, nModul); mergeGroup(cTAStart, nTA); mergeGroup(cPStart, nP); mergeGroup(cLPStart, nModul)
     mergeGroup(cLulusTA, cJurnalw - cLulusTA + 1)
       ;[0, 1, 2, 3, cUAP, cJurnal, cNilaiAkhir, cHuruf].forEach((c) => {
         merges.push({ s: { r: headerRow0, c }, e: { r: headerRow1, c } })
@@ -1618,23 +1644,20 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     XLSX.writeFile(wb, `Nilai_${gradeFilter.practicum}_${gradeFilter.kelas || 'semua'}.xlsx`)
   }
 
-  // --- Export khusus PLC: replika presisi format resmi TEMPLATE_PENILAIAN PLC (lihat contoh
-  // NILAI_PLC_TE_A.xlsx) — tabel ID Dosen, warna kelompok kolom, border, dan rumus Nilai
-  // Kumulatif persis seperti file aslinya, tapi jumlah kolom TR/TA/P/M/Video MENGIKUTI JUMLAH
-  // PERTEMUAN SEBENARNYA (n = pertemuanReguler.length, otomatis menyesuaikan jadwal kelompok
-  // masing-masing) — bukan slot tetap 5/4/6/5/4. (pakai xlsx-js-style karena SheetJS versi
-  // gratis tidak bisa menulis fill/border/font).
+  // --- Export khusus PLC: replika presisi format resmi TEMPLATE_PENILAIAN PLC ---
   const handleExportExcelPLC = ({
-    pertemuanReguler, pertemuanUap, nP, sesiKeaktifanRows, getNilai,
+    pertemuanReguler, pertemuanUap, jumlahModul, nP, sesiKeaktifanRows, getNilai,
   }: {
     pertemuanReguler: { urutan_ke: number | null; jenis: string; label: string }[]
     pertemuanUap?: { urutan_ke: number | null; jenis: string; label: string }
+    jumlahModul: number
     nP: number
     sesiKeaktifanRows: { jenis: string; urutan_ke: number | null }[]
-    getNilai: (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string) => number | ''
+    getNilai: (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string, nomorModul?: number) => number | ''
   }) => {
     if (!nilaiData) return
-    const n = pertemuanReguler.length || 1
+    const nModul = jumlahModul || 5
+    const nTA = pertemuanReguler.length || 4
     const L = (i: number) => XLSXStyle.utils.encode_col(i)
     const THIN = { style: 'thin', color: { rgb: '000000' } }
     const BORDER = { top: THIN, bottom: THIN, left: THIN, right: THIN }
@@ -1644,14 +1667,13 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const sData = (fill?: string, align: 'center' | 'left' = 'center') => ({ font: font(false), border: BORDER, alignment: { horizontal: align, vertical: 'center' }, ...(fill ? { fill: { patternType: 'solid', fgColor: { rgb: fill } } } : {}) })
     const sPlain = (bold = false) => ({ font: font(bold), alignment: { wrapText: true, vertical: 'center' } })
 
-    // Kolom (0-based), TR/TA/M/Video berukuran n (jumlah pertemuan reguler),
-    // sedangkan P (Keaktifan) berukuran nP (pengarahan + pertemuan):
+    // Kolom (0-based)
     const cTR = 4
-    const cTA = cTR + n
-    const cKA = cTA + n // Keaktifan / Praktikum (Aktif & Etika), P1..PnP
+    const cTA = cTR + nModul
+    const cKA = cTA + nTA // Keaktifan / Praktikum (Aktif & Etika), P1..PnP
     const cM = cKA + nP
-    const cVID = cM + n
-    const cUAPraw = cVID + n
+    const cVID = cM + nModul
+    const cUAPraw = cVID + nModul
     const cLap = cUAPraw + 1
     const cPos = cLap + 1
     const cPre = cPos + 1
@@ -1685,11 +1707,13 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     groupHeader[cHuruf] = 'Huruf Nilai Akhir'
 
     const subHeader: string[] = new Array(totalCols).fill('')
-    for (let i = 0; i < n; i++) subHeader[cTR + i] = `TR${i + 1}`
-    for (let i = 0; i < n; i++) subHeader[cTA + i] = `TA${i + 1}`
-    for (let i = 0; i < nP; i++) subHeader[cKA + i] = `P${i + 1}`
-    for (let i = 0; i < n; i++) subHeader[cM + i] = `M${i + 1}`
-    for (let i = 0; i < n; i++) subHeader[cVID + i] = `Minggu ${i + 1}`
+    for (let i = 0; i < nModul; i++) subHeader[cTR + i] = `TR${i + 1}`
+    for (let i = 0; i < nTA; i++) subHeader[cTA + i] = `TA${i + 1}`
+    sesiKeaktifanRows.forEach((s, idx) => {
+      subHeader[cKA + idx] = s.jenis === 'pengarahan' ? 'Pendahuluan' : `P${s.urutan_ke ?? (idx + 1)}`
+    })
+    for (let i = 0; i < nModul; i++) subHeader[cM + i] = `M${i + 1}`
+    for (let i = 0; i < nModul; i++) subHeader[cVID + i] = `Minggu ${i + 1}`
       ;['Laporan', 'Poster', 'Presentasi'].forEach((v, i) => { subHeader[cLap + i] = v })
       ;['Lulus Tes Awal', 'Tugas Rumah', 'Tes Awal', 'Keaktifan', 'TA Modul', 'Vid Kreasi', 'UAP', 'Lap Kelompok'].forEach((v, i) => { subHeader[cLulusTA + i] = v })
     subHeader[cUAPraw] = 'UAP'
@@ -1708,23 +1732,30 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     ]
 
     const dataStartRow0 = aoa.length // index baris data pertama (0-based, dalam aoa)
-    const getVals = (a: NilaiAnggota, kode: string) =>
-      pertemuanReguler.map((p) => getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, kode))
 
     nilaiData.anggota.forEach((a) => {
       const row: (string | number)[] = new Array(totalCols).fill('')
       row[1] = a.nim
       row[2] = a.nama_praktikan
-      getVals(a, 'TR').forEach((v, i) => { row[cTR + i] = v })
-      getVals(a, 'TA').forEach((v, i) => { row[cTA + i] = v })
-      sesiKeaktifanRows.forEach((s, i) => { row[cKA + i] = getNilai(a.id, a.kelompok_id, s.jenis, s.urutan_ke, 'P') })
-      getVals(a, 'M').forEach((v, i) => { row[cM + i] = v })
-      getVals(a, 'VID').forEach((v, i) => { row[cVID + i] = v })
-      row[cUAPraw] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'UAP') : ''
-      row[cLap] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'LAPORAN') : ''
-      row[cPos] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'POSTER') : ''
-      row[cPre] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'PRESENTASI') : ''
-      row[cHadir] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'KEHADIRAN') : ''
+      for (let m = 1; m <= nModul; m++) {
+        const sesi = sesiUntukModul('PLC', m)
+        row[cTR + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'TR', m) : ''
+      }
+      pertemuanReguler.forEach((p, i) => { row[cTA + i] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'TA', 0) })
+      sesiKeaktifanRows.forEach((s, i) => { row[cKA + i] = getNilai(a.id, a.kelompok_id, s.jenis, s.urutan_ke, 'P', 0) })
+      for (let m = 1; m <= nModul; m++) {
+        const sesi = sesiUntukModul('PLC', m)
+        row[cM + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'M', m) : ''
+      }
+      for (let m = 1; m <= nModul; m++) {
+        const sesi = sesiUntukModul('PLC', m)
+        row[cVID + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'VID', m) : ''
+      }
+      row[cUAPraw] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'UAP', 0) : ''
+      row[cLap] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'LAPORAN', 0) : ''
+      row[cPos] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'POSTER', 0) : ''
+      row[cPre] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'PRESENTASI', 0) : ''
+      row[cHadir] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'KEHADIRAN', 0) : ''
       aoa.push(row)
     })
 
@@ -1735,22 +1766,22 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       ws[`${L(0)}${r}`] = { t: 'n', v: idx + 1, s: sData() }
 
       const set = (c: number, formula: string, style: any) => { ws[`${L(c)}${r}`] = { t: 'n', f: formula, s: style } }
-      const rng = (start: number, count = n) => `${L(start)}${r}:${L(start + count - 1)}${r}`
+      const rng = (start: number, count: number) => `${L(start)}${r}:${L(start + count - 1)}${r}`
 
-      const taVals = getVals(a, 'TA')
+      const taVals = pertemuanReguler.map((p) => getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'TA', 0))
       const lulusCount = taVals.filter((v) => typeof v === 'number' && v >= 65).length
       const lulusFill = lulusCount > 2 ? PASS : lulusCount < 2 ? FAIL : GRAY
 
-      // Rumus (n = jumlah pertemuan aktual, otomatis menyesuaikan jadwal kelompok).
+      // Rumus (nModul untuk TR/M/VID, nTA untuk TA, nP untuk Keaktifan).
       // IFERROR/N() dipakai supaya nilai yang BELUM diisi asisten (kosong) tidak bikin
       // #VALUE! menjalar ke Nilai Akhir & Huruf — sel kosong dihitung sebagai 0.
-      set(cLulusTA, `COUNTIF(${rng(cTA)},">=65")`, sData(lulusFill))
-      set(cKumTR, `IFERROR(AVERAGE(${rng(cTR)}),0)`, sData(GRAY))
-      set(cKumTA, `IFERROR(AVERAGE(${rng(cTA)}),0)`, sData(GRAY))
+      set(cLulusTA, `COUNTIF(${rng(cTA, nTA)},">=65")`, sData(lulusFill))
+      set(cKumTR, `IFERROR(AVERAGE(${rng(cTR, nModul)}),0)`, sData(GRAY))
+      set(cKumTA, `IFERROR(AVERAGE(${rng(cTA, nTA)}),0)`, sData(GRAY))
       // Keaktifan = ((70*5) + SUM(P1..PnP)*6) / nP  (P berskala 0-5, sesi pengarahan + pertemuan)
       set(cKumKA, `((70*5)+SUM(${rng(cKA, nP)})*6)/${nP}`, sData(GRAY))
-      set(cKumM, `IFERROR(AVERAGE(${rng(cM)}),0)`, sData(GRAY))
-      set(cKumVID, `IFERROR(AVERAGE(${rng(cVID)}),0)`, sData(GRAY))
+      set(cKumM, `IFERROR(AVERAGE(${rng(cM, nModul)}),0)`, sData(GRAY))
+      set(cKumVID, `IFERROR(AVERAGE(${rng(cVID, nModul)}),0)`, sData(GRAY))
       set(cKumUAP, `N(${L(cUAPraw)}${r})`, sData(GRAY))
       set(cKumLap, `(N(${L(cLap)}${r})*(10/35))+(N(${L(cPos)}${r})*(10/35))+(N(${L(cPre)}${r})*(15/35))`, sData(GRAY))
       set(
@@ -1765,11 +1796,11 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       }
 
       // Style kolom nilai mentah sesuai warna kelompok (kuning/hijau berselang-seling)
-      for (let i = 0; i < n; i++) ws[`${L(cTR + i)}${r}`] = { ...(ws[`${L(cTR + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
-      for (let i = 0; i < n; i++) ws[`${L(cTA + i)}${r}`] = { ...(ws[`${L(cTA + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
+      for (let i = 0; i < nModul; i++) ws[`${L(cTR + i)}${r}`] = { ...(ws[`${L(cTR + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
+      for (let i = 0; i < nTA; i++) ws[`${L(cTA + i)}${r}`] = { ...(ws[`${L(cTA + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
       for (let i = 0; i < nP; i++) ws[`${L(cKA + i)}${r}`] = { ...(ws[`${L(cKA + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
-      for (let i = 0; i < n; i++) ws[`${L(cM + i)}${r}`] = { ...(ws[`${L(cM + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
-      for (let i = 0; i < n; i++) ws[`${L(cVID + i)}${r}`] = { ...(ws[`${L(cVID + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
+      for (let i = 0; i < nModul; i++) ws[`${L(cM + i)}${r}`] = { ...(ws[`${L(cM + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
+      for (let i = 0; i < nModul; i++) ws[`${L(cVID + i)}${r}`] = { ...(ws[`${L(cVID + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
       ws[`${L(cUAPraw)}${r}`] = { ...(ws[`${L(cUAPraw)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
       for (let i = 0; i < 3; i++) ws[`${L(cLap + i)}${r}`] = { ...(ws[`${L(cLap + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
       ws[`${L(cHadir)}${r}`] = { ...(ws[`${L(cHadir)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
@@ -1793,9 +1824,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     for (let c = 0; c < totalCols; c++) {
       const addr0 = `${L(c)}${headerRow0 + 1}`
       const addr1 = `${L(c)}${headerRow1 + 1}`
-      const fill = inGroup(c, cTR, n) || inGroup(c, cKA, nP) || inGroup(c, cVID, n + 1) || c === cHadir
+      const fill = inGroup(c, cTR, nModul) || inGroup(c, cKA, nP) || inGroup(c, cVID, nModul + 1) || c === cHadir
         ? YELLOW
-        : inGroup(c, cTA, n) || inGroup(c, cM, n) || inGroup(c, cLap, 3)
+        : inGroup(c, cTA, nTA) || inGroup(c, cM, nModul) || inGroup(c, cLap, 3)
           ? GREEN_GROUP
           : undefined
       ws[addr0] = { ...(ws[addr0] || { t: 's', v: '' }), s: sHeader(fill) }
@@ -1809,7 +1840,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const mergeGroup = (start: number, span: number) => {
       if (span > 1) merges.push({ s: { r: headerRow0, c: start }, e: { r: headerRow0, c: start + span - 1 } })
     }
-    mergeGroup(cTR, n); mergeGroup(cTA, n); mergeGroup(cKA, nP); mergeGroup(cM, n); mergeGroup(cVID, n + 1); mergeGroup(cLap, 3)
+    mergeGroup(cTR, nModul); mergeGroup(cTA, nTA); mergeGroup(cKA, nP); mergeGroup(cM, nModul); mergeGroup(cVID, nModul + 1); mergeGroup(cLap, 3)
     mergeGroup(cLulusTA, cKumLap - cLulusTA + 1)
       ;[0, 1, 2, 3, cHadir, cAkhir, cHuruf].forEach((c) => {
         merges.push({ s: { r: headerRow0, c }, e: { r: headerRow1, c } })
@@ -2796,15 +2827,24 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                   const findPertemuanId = (kelompokId: string, jenis: string, urutanKe: number | null) =>
                     nilaiData.pertemuanRows.find((r) => r.kelompok_id === kelompokId && r.jenis === jenis && r.urutan_ke === urutanKe)?.id
 
-                  const cell = (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string, maxOverride?: number) => {
+                  const cell = (
+                    anggotaId: string,
+                    kelompokId: string,
+                    jenis: string,
+                    urutanKe: number | null,
+                    kode: string,
+                    maxOverride?: number,
+                    nomorModul: number = 0
+                  ) => {
                     const pertemuanId = findPertemuanId(kelompokId, jenis, urutanKe)
-                    if (!pertemuanId) return <td key={`${jenis}${urutanKe}${kode}`} className="p-1.5 text-center text-slate-300">—</td>
-                    const key = `${anggotaId}::${pertemuanId}::${kode}`
+                    if (!pertemuanId) return <td key={`${jenis}${urutanKe}${kode}${nomorModul}`} className="p-1.5 text-center text-slate-300">—</td>
+                    const key = `${anggotaId}::${pertemuanId}::${kode}::${nomorModul}`
+                    const val = nilaiDrafts[key] ?? (nomorModul === 1 ? nilaiDrafts[`${anggotaId}::${pertemuanId}::${kode}::0`] : undefined) ?? ''
                     return (
                       <td key={key} className="p-1.5 text-center">
                         <input
                           type="number"
-                          value={nilaiDrafts[key] ?? ''}
+                          value={val}
                           min={0}
                           max={maxOverride ?? 100}
                           onChange={(e) => setNilaiDrafts((prev) => ({ ...prev, [key]: e.target.value }))}
@@ -2814,11 +2854,11 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                     )
                   }
 
-                  const cellReadonly = (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string) => {
+                  const cellReadonly = (anggotaId: string, kelompokId: string, jenis: string, urutanKe: number | null, kode: string, nomorModul: number = 0) => {
                     const pertemuanId = findPertemuanId(kelompokId, jenis, urutanKe)
-                    if (!pertemuanId) return <td key={`ro-${jenis}${urutanKe}${kode}`} className="p-1.5 text-center text-slate-300">—</td>
-                    const key = `${anggotaId}::${pertemuanId}::${kode}`
-                    const val = nilaiDrafts[key]
+                    if (!pertemuanId) return <td key={`ro-${jenis}${urutanKe}${kode}${nomorModul}`} className="p-1.5 text-center text-slate-300">—</td>
+                    const key = `${anggotaId}::${pertemuanId}::${kode}::${nomorModul}`
+                    const val = nilaiDrafts[key] ?? (nomorModul === 1 ? nilaiDrafts[`${anggotaId}::${pertemuanId}::${kode}::0`] : undefined)
 
                     if (kode === 'KEHADIRAN') {
                       // Seluruh total sesi yang seharusnya hadir: Pengarahan, Pertemuan 1..n, dan UAP
@@ -2893,7 +2933,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                         if (!seen.has(k)) seen.set(k, { jenis: r.jenis, urutan_ke: r.urutan_ke })
                       }
                     }
-                    return Array.from(seen.values())
+                    return Array.from(seen.values()).sort((a, b) => (a.urutan_ke ?? 0) - (b.urutan_ke ?? 0))
                   })()
 
                   // Build header labels dan cell renderer untuk mode filter aktif
@@ -2904,9 +2944,23 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                     for (const item of opt.items) {
                       if (item.sumberN === 'modul') {
                         // Kolom per modul: ${label}1..${label}${jumlahModul}
-                        // Gunakan pertemuanReguler dari nilaiData (per jenis=pertemuan, urutan_ke=1..n)
-                        // sebagai proxy bucket — komponen TR/TA/M/VID disimpan di baris 'pertemuan'
-                        const n = jumlahModul || pertemuanReguler.length
+                        // Disimpan di sesi Pertemuan hasil sesiUntukModul(praktikum, m), dengan nomor_modul = m
+                        const n = jumlahModul || 5
+                        for (let idx = 0; idx < n; idx++) {
+                          const m = idx + 1
+                          const colLabel = `${item.label}${m}`
+                          headers.push(colLabel)
+                          const sesiUrutanKe = sesiUntukModul(gradeFilter.practicum, m)
+                          if (sesiUrutanKe !== undefined) {
+                            const maxVal = gradeFilter.practicum === 'PLC' && item.kode === 'P' ? 5 : undefined
+                            cellRenderers.push((a: NilaiAnggota) => cell(a.id, a.kelompok_id, 'pertemuan', sesiUrutanKe, item.kode, maxVal, m))
+                          } else {
+                            cellRenderers.push((a: NilaiAnggota) => <td key={`empty-${item.kode}-${idx}`} className="p-1.5 text-center text-slate-300">—</td>)
+                          }
+                        }
+                      } else if (item.sumberN === 'sesi') {
+                        // Kolom per sesi jenis 'pertemuan' saja (pertemuanReguler.length), pengarahan tidak dihitung
+                        const n = pertemuanReguler.length
                         for (let idx = 0; idx < n; idx++) {
                           const p = pertemuanReguler[idx]
                           const colLabel = `${item.label}${idx + 1}`
@@ -2923,7 +2977,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                         const n = jumlahPertemuan || pertemuanReguler.length
                         for (let idx = 0; idx < n; idx++) {
                           const r = pertemuanRegulerRows[idx]
-                          const colLabel = `${item.label}${idx + 1}`
+                          const colLabel = item.kode === 'P'
+                            ? (r?.jenis === 'pengarahan' ? 'Pendahuluan' : `P${r?.urutan_ke ?? (idx + 1)}`)
+                            : `${item.label}${idx + 1}`
                           headers.push(colLabel)
                           if (r) {
                             const maxVal = gradeFilter.practicum === 'PLC' && item.kode === 'P' ? 5 : undefined

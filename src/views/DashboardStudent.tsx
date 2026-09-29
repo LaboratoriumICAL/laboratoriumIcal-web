@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import QRCode from 'qrcode'
 import { Icon } from '../components/Icon'
 import { apiFetch } from '../lib/apiClient'
+import { sesiUntukModul } from '../lib/sesiModul'
 
 interface DashboardStudentProps {
   user: { role: string; name: string; nim?: string }
@@ -506,7 +507,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
   }, [user.nim])
 
   const [nilaiPertemuan, setNilaiPertemuan] = useState<{ id: string; urutan_ke: number | null; jenis: string; label: string }[]>([])
-  const [nilaiRows, setNilaiRows] = useState<{ pertemuan_id: string; kode_komponen: string; nilai: number | null }[]>([])
+  const [nilaiRows, setNilaiRows] = useState<{ pertemuan_id: string; kode_komponen: string; nilai: number | null; nomor_modul?: number }[]>([])
   const [nilaiLoading, setNilaiLoading] = useState(false)
 
   useEffect(() => {
@@ -1112,7 +1113,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                 {/* Grade Categories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* Card 1: Tugas Awal (TA) — iterasi dari sesi jenis='pertemuan' (modul 1..n) */}
+                  {/* Card 1: Tes Awal (TA) — iterasi dari sesi jenis='pertemuan' (modul 1..n) */}
                   {(() => {
                     // Sesi reguler per-modul: TR & TA disimpan di baris 'pertemuan', urutan_ke 1..n
                     const sesiModul = nilaiPertemuan
@@ -1128,7 +1129,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                     return (
                       <>
-                        {/* Card 1: Tugas Awal */}
+                        {/* Card 1: Tes Awal */}
                         <div className="bg-white rounded-3xl p-6 border border-[#D6E4F0] shadow-xs flex flex-col justify-between">
                           <div>
                             <div className="flex items-center justify-between mb-5">
@@ -1140,7 +1141,7 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
                                   className="font-bold text-[#00142F] text-base"
                                   style={{ fontFamily: 'var(--font-heading)' }}
                                 >
-                                  Tugas Awal
+                                  Tes Awal
                                 </h3>
                               </div>
                               <button
@@ -1205,20 +1206,21 @@ export default function DashboardStudent({ user, setCurrentPage, onLogout }: Das
 
                             {!collapsed.tr && (
                               <div className="space-y-3">
-                                {sesiModul.length === 0 && (
-                                  <p className="text-xs text-slate-400 text-center py-2">Belum ada data nilai.</p>
-                                )}
-                                {sesiModul.map((p) => {
-                                  const score = getNilai(p.id, 'TR')
+                                {[1, 2, 3, 4, 5].map((m) => {
+                                  const sesiUrutanKe = sesiUntukModul(currentPraktikumKode, m)
+                                  const p = nilaiPertemuan.find((pr) => pr.jenis === 'pertemuan' && pr.urutan_ke === sesiUrutanKe)
+                                  const score = p
+                                    ? (nilaiRows.find((r) => r.pertemuan_id === p.id && r.kode_komponen === 'TR' && (r.nomor_modul === m || (m === 1 && (r.nomor_modul === 0 || r.nomor_modul == null))))?.nilai ?? null)
+                                    : null
                                   return (
                                     <div
-                                      key={p.id}
+                                      key={`modul-${m}`}
                                       className="flex items-center justify-between py-1.5 border-b border-[#F4F8FC] last:border-0"
                                     >
                                       <div className="flex items-center gap-2.5">
                                         <span className="w-2 h-2 rounded-full bg-[#0284C7]" />
                                         <span className="text-sm font-medium text-slate-700">
-                                          {p.label}
+                                          Modul {m}
                                         </span>
                                       </div>
                                       <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-[#F0F7FF] text-[#002466] border border-[#D6E4F0]">

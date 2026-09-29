@@ -62,13 +62,20 @@ export async function GET(req: NextRequest) {
 
     const { data: nilaiRows } = await sb
       .from('nilai_komponen')
-      .select('pertemuan_id, kode_komponen, nilai')
+      .select('pertemuan_id, kode_komponen, nilai, nomor_modul')
       .eq('anggota_kelompok_id', anggota.id)
       .in('kode_komponen', VISIBLE_KOMPONEN)
 
     return NextResponse.json({
       pertemuan: (pertemuanRows || []).map((p) => {
-        const fallbackLabel = p.jenis === 'pertemuan' && p.urutan_ke != null ? `Pertemuan ${p.urutan_ke}` : p.jenis === 'uap' ? 'UAP' : p.jenis
+        const fallbackLabel =
+          p.jenis === 'pertemuan' && p.urutan_ke != null
+            ? `Pertemuan ${p.urutan_ke}`
+            : p.jenis === 'pengarahan'
+              ? 'Pendahuluan'
+              : p.jenis === 'uap'
+                ? 'UAP'
+                : p.jenis
         return { id: p.id, urutan_ke: p.urutan_ke, jenis: p.jenis, label: p.keterangan || fallbackLabel }
       }),
       nilai: nilaiRows || [],
