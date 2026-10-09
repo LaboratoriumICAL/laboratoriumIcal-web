@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '../../../lib/supabaseAdmin'
 import { requireRole } from '../../../lib/apiAuth'
+import { petakanKeSheet, kirimKeSheet } from '../../../lib/sheetSync'
 
 export async function GET(req: NextRequest) {
   // Hanya role asisten yang boleh melihat rekap nilai praktikum
@@ -159,7 +160,29 @@ export async function POST(req: NextRequest) {
       )
     if (error) throw error
 
-    return NextResponse.json({ success: true, updated: updates.length })
+    // Sinkronisasi ke Google Sheet (Task 2)
+    let sheetResult: { terkirim: number; gagal: number; tidakPasti?: boolean } | undefined = undefined
+    try {
+      const sheetUpdates = await petakanKeSheet(updates)
+      if (sheetUpdates.length > 0) {
+        const syncRes = await kirimKeSheet(sheetUpdates)
+        if (!syncRes.dilewati) {
+          sheetResult = {
+            terkirim: syncRes.terkirim,
+            gagal: syncRes.gagal.length,
+            tidakPasti: syncRes.tidakPasti,
+          }
+        }
+      }
+    } catch (sheetErr: any) {
+      console.error('Sinkronisasi sheet error (diabaikan):', sheetErr?.message || sheetErr)
+    }
+
+    return NextResponse.json({
+      success: true,
+      updated: updates.length,
+      ...(sheetResult ? { sheet: sheetResult } : {}),
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })
   }

@@ -96,7 +96,7 @@ const SKEMA_NILAI: Record<string, JenisNilaiOption[]> = {
     { key: 'keaktifan',          label: 'Keaktifan',           items: [{ kode: 'P',     label: 'P',     sumberN: 'pertemuan' }] },
     { key: 'tugas_akhir_modul',  label: 'Tugas Akhir Modul',   items: [{ kode: 'M',     label: 'M',     sumberN: 'modul' }] },
     { key: 'video_kreasi',       label: 'Video Kreasi',        items: [
-      { kode: 'VID', label: 'Video', sumberN: 'modul' },
+      { kode: 'VID', label: 'Video', sumberN: 'sesi' },
       { kode: 'UAP', label: 'UAP',   sumberN: null },
     ] },
     { key: 'laporan_praktikum',  label: 'Laporan Praktikum',   items: [
@@ -1274,7 +1274,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     anggota: NilaiAnggota[]
     pertemuan: NilaiPertemuanInfo[]
     pertemuanRows: { id: string; kelompok_id: string; jenis: string; urutan_ke: number | null }[]
-    nilai: { anggota_kelompok_id: string; pertemuan_id: string; kode_komponen: string; nilai: number | null }[]
+    nilai: { anggota_kelompok_id: string; pertemuan_id: string; kode_komponen: string; nilai: number | null; nomor_modul?: number }[]
     absensi?: { anggota_kelompok_id: string; pertemuan_id: string; status: string }[]
     kelas: NilaiKelasInfo[]
     jumlahModul?: number // jumlah baris modul per praktikum dari tabel `modul` (untuk kolom TR/TA/M/Video)
@@ -1289,6 +1289,12 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   const [jenisNilaiFilter, setJenisNilaiFilter] = useState<string>('semua')
   // Pencarian nama/NIM: filter baris tabel secara client-side (partial match, case-insensitive)
   const [nilaiSearchQuery, setNilaiSearchQuery] = useState('')
+
+  // State sinkronisasi Google Sheet (Task 4)
+  const [syncSheetConfirmOpen, setSyncSheetConfirmOpen] = useState(false)
+  const [syncSheetRunning, setSyncSheetRunning] = useState(false)
+  const [syncSheetProgress, setSyncSheetProgress] = useState<{ current: number; total: number } | null>(null)
+  const [syncSheetSummary, setSyncSheetSummary] = useState<{ total: number; gagalCount: number } | null>(null)
 
   const fetchNilai = useCallback(async (praktikumKode: string, kelasNama: string, jurusanKode: string) => {
     setNilaiLoading(true)
@@ -1327,15 +1333,23 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
   useEffect(() => {
     setJenisNilaiFilter('semua')
     setNilaiSearchQuery('')
-  }, [gradeFilter.practicum])
+    setSyncSheetProgress(null)
+    setSyncSheetSummary(null)
+  }, [gradeFilter.practicum, gradeFilter.kelas])
 
   const handleSaveNilai = async () => {
     if (!nilaiData) return
     setNilaiSaving(true)
     setNilaiSavedMsg(null)
     try {
+      const originalKeysWithValues = new Set(
+        (nilaiData.nilai || [])
+          .filter((r) => r.nilai !== null && r.nilai !== undefined)
+          .map((r) => `${r.anggota_kelompok_id}::${r.pertemuan_id}::${r.kode_komponen}::${r.nomor_modul ?? 0}`)
+      )
+
       const updates = Object.entries(nilaiDrafts)
-        .filter(([key, v]) => v !== '' && key.split('::')[2] !== 'KEHADIRAN')
+        .filter(([key, v]) => key.split('::')[2] !== 'KEHADIRAN' && (v !== '' || originalKeysWithValues.has(key)))
         .map(([key, v]) => {
           const [anggota_kelompok_id, pertemuan_id, kode_komponen, nomorModulStr] = key.split('::')
           return {
@@ -1343,7 +1357,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
             pertemuan_id,
             kode_komponen,
             nomor_modul: nomorModulStr !== undefined && nomorModulStr !== '' ? Number(nomorModulStr) : 0,
-            nilai: Number(v),
+            nilai: v === '' ? null : Number(v),
           }
         })
       if (updates.length === 0) {
@@ -1357,12 +1371,78 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Gagal menyimpan nilai')
-      setNilaiSavedMsg(`${updates.length} nilai berhasil disimpan.`)
+      let msg = `${updates.length} nilai berhasil disimpan.`
+      if (json.sheet) {
+        if (json.sheet.gagal > 0) {
+          msg += ` (Sheet: ${json.sheet.terkirim} terkirim, ${json.sheet.gagal} gagal)`
+        } else if (json.sheet.terkirim > 0) {
+          msg += ` (Sheet: sinkron)`
+        }
+      }
+      setNilaiSavedMsg(msg)
       await fetchNilai(gradeFilter.practicum, gradeFilter.kelas, gradeFilter.jurusan)
     } catch (err: any) {
       setNilaiError(err.message)
     } finally {
       setNilaiSaving(false)
+    }
+  }
+
+  const handleExecuteSyncSheet = async () => {
+    setSyncSheetConfirmOpen(false)
+    setSyncSheetRunning(true)
+    setSyncSheetSummary(null)
+    setSyncSheetProgress({ current: 0, total: 0 })
+
+    const selectedKelasObj = nilaiData?.kelas.find((k) => k.nama_kelas === gradeFilter.kelas)
+    const kelasPraktikumId = selectedKelasObj?.id
+
+    let offset = 0
+    const limit = 25
+    let totalProcessed = 0
+    let totalRows = 0
+    let totalGagalCount = 0
+    let isDone = false
+
+    try {
+      while (!isDone) {
+        const res = await apiFetch('/api/nilai/sync-sheet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            praktikum: gradeFilter.practicum,
+            jurusan: gradeFilter.jurusan,
+            kelas_praktikum_id: kelasPraktikumId,
+            kelas: gradeFilter.kelas,
+            offset,
+            limit,
+          }),
+        })
+        const json = await res.json()
+        if (!res.ok) {
+          throw new Error(json.error || 'Gagal melakukan sinkronisasi ke Google Sheet')
+        }
+
+        totalRows = json.total || 0
+        totalProcessed += json.diproses || 0
+        if (Array.isArray(json.gagal)) {
+          totalGagalCount += json.gagal.length
+        }
+
+        setSyncSheetProgress({ current: totalProcessed, total: totalRows })
+
+        if (json.selesai || json.diproses === 0) {
+          isDone = true
+        } else {
+          offset += limit
+        }
+      }
+
+      setSyncSheetSummary({ total: totalProcessed, gagalCount: totalGagalCount })
+    } catch (err: any) {
+      alert(err.message || 'Terjadi kesalahan saat sinkronisasi ke Google Sheet')
+    } finally {
+      setSyncSheetRunning(false)
     }
   }
   // --- Export tabel nilai ke format Excel resmi (mengikuti struktur TEMPLATE_PENILAIAN_PRAKTIKAN) ---
@@ -1658,6 +1738,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     if (!nilaiData) return
     const nModul = jumlahModul || 5
     const nTA = pertemuanReguler.length || 4
+    const nVID = pertemuanReguler.length || 4
     const L = (i: number) => XLSXStyle.utils.encode_col(i)
     const THIN = { style: 'thin', color: { rgb: '000000' } }
     const BORDER = { top: THIN, bottom: THIN, left: THIN, right: THIN }
@@ -1673,7 +1754,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const cKA = cTA + nTA // Keaktifan / Praktikum (Aktif & Etika), P1..PnP
     const cM = cKA + nP
     const cVID = cM + nModul
-    const cUAPraw = cVID + nModul
+    const cUAPraw = cVID + nVID
     const cLap = cUAPraw + 1
     const cPos = cLap + 1
     const cPre = cPos + 1
@@ -1713,7 +1794,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       subHeader[cKA + idx] = s.jenis === 'pengarahan' ? 'Pendahuluan' : `P${s.urutan_ke ?? (idx + 1)}`
     })
     for (let i = 0; i < nModul; i++) subHeader[cM + i] = `M${i + 1}`
-    for (let i = 0; i < nModul; i++) subHeader[cVID + i] = `Minggu ${i + 1}`
+    for (let i = 0; i < nVID; i++) subHeader[cVID + i] = `Minggu ${i + 1}`
       ;['Laporan', 'Poster', 'Presentasi'].forEach((v, i) => { subHeader[cLap + i] = v })
       ;['Lulus Tes Awal', 'Tugas Rumah', 'Tes Awal', 'Keaktifan', 'TA Modul', 'Vid Kreasi', 'UAP', 'Lap Kelompok'].forEach((v, i) => { subHeader[cLulusTA + i] = v })
     subHeader[cUAPraw] = 'UAP'
@@ -1747,10 +1828,9 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
         const sesi = sesiUntukModul('PLC', m)
         row[cM + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'M', m) : ''
       }
-      for (let m = 1; m <= nModul; m++) {
-        const sesi = sesiUntukModul('PLC', m)
-        row[cVID + m - 1] = sesi !== undefined ? getNilai(a.id, a.kelompok_id, 'pertemuan', sesi, 'VID', m) : ''
-      }
+      pertemuanReguler.forEach((p, i) => {
+        row[cVID + i] = getNilai(a.id, a.kelompok_id, 'pertemuan', p.urutan_ke, 'VID', 0)
+      })
       row[cUAPraw] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'UAP', 0) : ''
       row[cLap] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'LAPORAN', 0) : ''
       row[cPos] = pertemuanUap ? getNilai(a.id, a.kelompok_id, 'uap', pertemuanUap.urutan_ke, 'POSTER', 0) : ''
@@ -1772,7 +1852,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       const lulusCount = taVals.filter((v) => typeof v === 'number' && v >= 65).length
       const lulusFill = lulusCount > 2 ? PASS : lulusCount < 2 ? FAIL : GRAY
 
-      // Rumus (nModul untuk TR/M/VID, nTA untuk TA, nP untuk Keaktifan).
+      // Rumus (nModul untuk TR/M, nTA untuk TA, nVID untuk VID, nP untuk Keaktifan).
       // IFERROR/N() dipakai supaya nilai yang BELUM diisi asisten (kosong) tidak bikin
       // #VALUE! menjalar ke Nilai Akhir & Huruf — sel kosong dihitung sebagai 0.
       set(cLulusTA, `COUNTIF(${rng(cTA, nTA)},">=65")`, sData(lulusFill))
@@ -1781,7 +1861,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       // Keaktifan = ((70*5) + SUM(P1..PnP)*6) / nP  (P berskala 0-5, sesi pengarahan + pertemuan)
       set(cKumKA, `((70*5)+SUM(${rng(cKA, nP)})*6)/${nP}`, sData(GRAY))
       set(cKumM, `IFERROR(AVERAGE(${rng(cM, nModul)}),0)`, sData(GRAY))
-      set(cKumVID, `IFERROR(AVERAGE(${rng(cVID, nModul)}),0)`, sData(GRAY))
+      set(cKumVID, `IFERROR(AVERAGE(${rng(cVID, nVID)}),0)`, sData(GRAY))
       set(cKumUAP, `N(${L(cUAPraw)}${r})`, sData(GRAY))
       set(cKumLap, `(N(${L(cLap)}${r})*(10/35))+(N(${L(cPos)}${r})*(10/35))+(N(${L(cPre)}${r})*(15/35))`, sData(GRAY))
       set(
@@ -1800,7 +1880,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
       for (let i = 0; i < nTA; i++) ws[`${L(cTA + i)}${r}`] = { ...(ws[`${L(cTA + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
       for (let i = 0; i < nP; i++) ws[`${L(cKA + i)}${r}`] = { ...(ws[`${L(cKA + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
       for (let i = 0; i < nModul; i++) ws[`${L(cM + i)}${r}`] = { ...(ws[`${L(cM + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
-      for (let i = 0; i < nModul; i++) ws[`${L(cVID + i)}${r}`] = { ...(ws[`${L(cVID + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
+      for (let i = 0; i < nVID; i++) ws[`${L(cVID + i)}${r}`] = { ...(ws[`${L(cVID + i)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
       ws[`${L(cUAPraw)}${r}`] = { ...(ws[`${L(cUAPraw)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
       for (let i = 0; i < 3; i++) ws[`${L(cLap + i)}${r}`] = { ...(ws[`${L(cLap + i)}${r}`] || { t: 'n', v: '' }), s: sData(GREEN_GROUP) }
       ws[`${L(cHadir)}${r}`] = { ...(ws[`${L(cHadir)}${r}`] || { t: 'n', v: '' }), s: sData(YELLOW) }
@@ -1824,7 +1904,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     for (let c = 0; c < totalCols; c++) {
       const addr0 = `${L(c)}${headerRow0 + 1}`
       const addr1 = `${L(c)}${headerRow1 + 1}`
-      const fill = inGroup(c, cTR, nModul) || inGroup(c, cKA, nP) || inGroup(c, cVID, nModul + 1) || c === cHadir
+      const fill = inGroup(c, cTR, nModul) || inGroup(c, cKA, nP) || inGroup(c, cVID, nVID + 1) || c === cHadir
         ? YELLOW
         : inGroup(c, cTA, nTA) || inGroup(c, cM, nModul) || inGroup(c, cLap, 3)
           ? GREEN_GROUP
@@ -1840,7 +1920,7 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
     const mergeGroup = (start: number, span: number) => {
       if (span > 1) merges.push({ s: { r: headerRow0, c: start }, e: { r: headerRow0, c: start + span - 1 } })
     }
-    mergeGroup(cTR, nModul); mergeGroup(cTA, nTA); mergeGroup(cKA, nP); mergeGroup(cM, nModul); mergeGroup(cVID, nModul + 1); mergeGroup(cLap, 3)
+    mergeGroup(cTR, nModul); mergeGroup(cTA, nTA); mergeGroup(cKA, nP); mergeGroup(cM, nModul); mergeGroup(cVID, nVID + 1); mergeGroup(cLap, 3)
     mergeGroup(cLulusTA, cKumLap - cLulusTA + 1)
       ;[0, 1, 2, 3, cHadir, cAkhir, cHuruf].forEach((c) => {
         merges.push({ s: { r: headerRow0, c }, e: { r: headerRow1, c } })
@@ -3135,6 +3215,30 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                         {/* Bottom action buttons */}
                         <div className="p-4 bg-slate-50/50 border-t border-[#D6E4F0] flex items-center justify-end gap-3 flex-wrap">
                           {nilaiSavedMsg && <span className="text-xs font-semibold text-emerald-700">{nilaiSavedMsg}</span>}
+                          {syncSheetProgress && syncSheetRunning && (
+                            <span className="text-xs font-semibold text-[#0284C7] flex items-center gap-1.5">
+                              <Icon name="loader" size={13} className="animate-spin" />
+                              Sinkronisasi sheet: {syncSheetProgress.current}/{syncSheetProgress.total}
+                            </span>
+                          )}
+                          {syncSheetSummary && !syncSheetRunning && (
+                            <span className={`text-xs font-semibold ${syncSheetSummary.gagalCount > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                              Sinkronisasi selesai ({syncSheetSummary.total} nilai). {syncSheetSummary.gagalCount > 0 ? `${syncSheetSummary.gagalCount} gagal.` : 'Semua berhasil.'}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setSyncSheetConfirmOpen(true)}
+                            disabled={syncSheetRunning || !nilaiData || nilaiData.anggota.length === 0}
+                            className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                          >
+                            {syncSheetRunning ? (
+                              <><Icon name="loader" size={15} className="animate-spin" /> Sinkronisasi ({syncSheetProgress?.current || 0}/{syncSheetProgress?.total || 0})...</>
+                            ) : (
+                              <><Icon name="refresh" size={15} /> Sinkronkan ke Sheet</>
+                            )}
+                          </button>
                           <button
                             onClick={handleExportExcel}
                             className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-2xs flex items-center gap-1.5 cursor-pointer"
@@ -3156,6 +3260,46 @@ export default function DashboardAssistant({ user, setCurrentPage, onLogout }: D
                           </button>
                         </div>
                       </div>
+
+                      {/* Modal Konfirmasi Sinkronisasi Google Sheet */}
+                      {syncSheetConfirmOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
+                          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-sky-100 animate-scaleUp">
+                            <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4 mx-auto">
+                              <Icon name="upload" size={24} />
+                            </div>
+                            <h4 className="font-bold text-[#00142F] text-center text-lg mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+                              Sinkronkan ke Google Sheet
+                            </h4>
+                            <p className="text-xs text-slate-600 text-center leading-relaxed mb-5">
+                              Kirim semua nilai kelas ini ke Google Sheet? Sel yang sama di sheet akan ditimpa, sel kosong tidak dihapus.
+                            </p>
+
+                            <div className="flex gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setSyncSheetConfirmOpen(false)}
+                                disabled={syncSheetRunning}
+                                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs cursor-pointer"
+                              >
+                                Batal
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleExecuteSyncSheet}
+                                disabled={syncSheetRunning}
+                                className="flex-1 py-2.5 px-4 rounded-xl bg-[#0260D4] hover:bg-[#024bb0] text-white font-bold text-xs cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+                              >
+                                {syncSheetRunning ? (
+                                  <><Icon name="loader" size={14} className="animate-spin" /> Memproses...</>
+                                ) : (
+                                  'Ya, Sinkronkan'
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </>
                   )
                 })()}
