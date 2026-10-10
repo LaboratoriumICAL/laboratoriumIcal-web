@@ -160,28 +160,72 @@ export async function POST(req: NextRequest) {
       )
     if (error) throw error
 
-    // Sinkronisasi ke Google Sheet (Task 2)
-    let sheetResult: { terkirim: number; gagal: number; tidakPasti?: boolean } | undefined = undefined
+    // Sinkronisasi ke Google Sheet
+    type ContohGagal = { nim: string; komponen: string; nomor: number; alasan: string }
+    type SheetField = {
+      status: 'terkirim' | 'gagal' | 'tidak_pasti' | 'dilewati_env_kosong' | 'tidak_ada_yang_dipetakan' | 'error'
+      dipetakan: number
+      terkirim: number
+      gagal: number
+      contoh_gagal?: ContohGagal[]
+    }
+
+    let sheet: SheetField
     try {
       const sheetUpdates = await petakanKeSheet(updates)
-      if (sheetUpdates.length > 0) {
+
+      if (sheetUpdates.length === 0) {
+        sheet = { status: 'tidak_ada_yang_dipetakan', dipetakan: 0, terkirim: 0, gagal: 0 }
+      } else {
         const syncRes = await kirimKeSheet(sheetUpdates)
-        if (!syncRes.dilewati) {
-          sheetResult = {
+
+        if (syncRes.dilewati) {
+          sheet = { status: 'dilewati_env_kosong', dipetakan: sheetUpdates.length, terkirim: 0, gagal: 0 }
+        } else if (syncRes.tidakPasti) {
+          sheet = {
+            status: 'tidak_pasti',
+            dipetakan: sheetUpdates.length,
             terkirim: syncRes.terkirim,
             gagal: syncRes.gagal.length,
-            tidakPasti: syncRes.tidakPasti,
+          }
+        } else if (syncRes.gagal.length > 0) {
+          const contoh_gagal: ContohGagal[] = syncRes.gagal.slice(0, 3).map((g: any) => ({
+            nim: g.nim ?? '',
+            komponen: g.kode_komponen ?? g.komponen ?? '',
+            nomor: g.nomor_modul ?? g.nomor ?? 0,
+            alasan: g.alasan ?? g.message ?? 'tidak diketahui',
+          }))
+          sheet = {
+            status: 'gagal',
+            dipetakan: sheetUpdates.length,
+            terkirim: syncRes.terkirim,
+            gagal: syncRes.gagal.length,
+            contoh_gagal,
+          }
+        } else {
+          sheet = {
+            status: 'terkirim',
+            dipetakan: sheetUpdates.length,
+            terkirim: syncRes.terkirim,
+            gagal: 0,
           }
         }
       }
     } catch (sheetErr: any) {
+      // Log detail untuk debugging server-side; respons hanya pesan generik tanpa URL/token/stack
       console.error('Sinkronisasi sheet error (diabaikan):', sheetErr?.message || sheetErr)
+      const pesanAman = (sheetErr?.message as string | undefined)
+        ?.replace(/https?:\/\/\S+/g, '[url]')
+        ?.replace(/Bearer\s+\S+/gi, '[token]')
+        ?.split('\n')[0]
+        ?.slice(0, 200) ?? 'terjadi kesalahan saat sinkronisasi'
+      sheet = { status: 'error', dipetakan: 0, terkirim: 0, gagal: 0, contoh_gagal: [{ nim: '', komponen: '', nomor: 0, alasan: pesanAman }] }
     }
 
     return NextResponse.json({
       success: true,
       updated: updates.length,
-      ...(sheetResult ? { sheet: sheetResult } : {}),
+      sheet,
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Terjadi kesalahan' }, { status: 500 })
