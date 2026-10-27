@@ -12,17 +12,15 @@ interface DashboardAssistantProps {
   onLogout: () => void
 }
 
-// Filter "Jadwal Praktikum" untuk Absensi & Scan QR — mengikuti enum jenis_pertemuan di
-// database (pengarahan/pertemuan/presentasi/uap). 'urutan_ke' null dipakai untuk jenis yang
-// tidak berjenjang per angka (mis. Presentasi), selebihnya cocok dengan pertemuan.urutan_ke.
+// Filter "Jadwal Praktikum" untuk Absensi & Scan QR — mengikuti jenis_pertemuan di
+// database (pengarahan/pertemuan/uap). Pertemuan UAP memiliki urutan_ke 999 mengikuti import-praktikan.
 const JADWAL_OPTIONS = [
   { jenis: 'pengarahan', urutan_ke: 0, label: 'Pengarahan' },
   { jenis: 'pertemuan', urutan_ke: 1, label: 'Pertemuan 1' },
   { jenis: 'pertemuan', urutan_ke: 2, label: 'Pertemuan 2' },
   { jenis: 'pertemuan', urutan_ke: 3, label: 'Pertemuan 3' },
   { jenis: 'pertemuan', urutan_ke: 4, label: 'Pertemuan 4' },
-  { jenis: 'presentasi', urutan_ke: null as number | null, label: 'Presentasi' },
-  { jenis: 'uap', urutan_ke: 5, label: 'UAP' },
+  { jenis: 'uap', urutan_ke: 999, label: 'UAP' },
 ] as const
 const jadwalKey = (o: { jenis: string; urutan_ke: number | null }) => `${o.jenis}|${o.urutan_ke}`
 

@@ -146,12 +146,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ columns, roster })
     }
 
-    const { data: pertemuanRows, error: ePt } = await sb
+    let pertemuanQuery = sb
       .from('pertemuan')
       .select('id, kelompok_id, jenis, urutan_ke')
       .in('kelompok_id', kelompokIds)
       .eq('jenis', jenis)
-      .eq('urutan_ke', urutanKe as any)
+
+    if (jenis !== 'uap') {
+      if (urutanKe === null) {
+        pertemuanQuery = pertemuanQuery.is('urutan_ke', null)
+      } else {
+        pertemuanQuery = pertemuanQuery.eq('urutan_ke', urutanKe)
+      }
+    }
+
+    const { data: pertemuanRows, error: ePt } = await pertemuanQuery
     if (ePt) throw ePt
     const pertemuanByKelompok = new Map((pertemuanRows || []).map((p) => [p.kelompok_id, p.id]))
     const pertemuanIds = (pertemuanRows || []).map((p) => p.id)
@@ -266,13 +275,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `NIM ${nim} tidak terdaftar pada kelas/kelompok yang dipilih.` }, { status: 404 })
     }
 
-    const { data: pertemuanRow, error: ePt } = await sb
+    let singlePertemuanQuery = sb
       .from('pertemuan')
       .select('id')
       .eq('kelompok_id', anggotaRow.kelompok_id)
       .eq('jenis', jenis)
-      .eq('urutan_ke', urutanKe as any)
-      .maybeSingle()
+
+    if (jenis !== 'uap') {
+      if (urutanKe === null) {
+        singlePertemuanQuery = singlePertemuanQuery.is('urutan_ke', null)
+      } else {
+        singlePertemuanQuery = singlePertemuanQuery.eq('urutan_ke', urutanKe)
+      }
+    }
+
+    const { data: pertemuanRow, error: ePt } = await singlePertemuanQuery.maybeSingle()
     if (ePt) throw ePt
     if (!pertemuanRow) {
       return NextResponse.json({ error: 'Jadwal praktikum yang dipilih belum ada untuk kelompok praktikan ini.' }, { status: 404 })
